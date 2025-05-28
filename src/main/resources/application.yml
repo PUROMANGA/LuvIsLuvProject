@@ -6,26 +6,31 @@ spring:
   application:
     name: LuvIsLuvProject
 
-    datasource:
-      driver-class-name: com.mysql.cj.jdbc.Driver
-      url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}
-      username: ${MYSQL_USERNAME}
-      password: ${MYSQL_PASSWORD}
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}
+    username: ${MYSQL_USERNAME}
+    password: ${MYSQL_PASSWORD}
 
-    jpa:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
       hibernate:
-        ddl-auto: create-drop
-      properties:
-        hibernate:
-          dialect: org.hibernate.dialect.MySQL8Dialect
-          show_sql: true
-          format_sql: true
-          use_sql_comments: true
-      open-in-view: false
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+    open-in-view: false
 
-    data:
-      redis:
-        host: localhost
-        port: 6379
-        timeout: 3000
-        password: 1234
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 3000
+      password: 1234
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql: TRACE
