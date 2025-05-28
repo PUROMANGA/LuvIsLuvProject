@@ -8,7 +8,6 @@ import lombok.Getter;
 
 /**
  * 가게 등록 요청 DTO
- * 프론트에서 전달한 가게 정보를 기반으로 새로운 Store 엔티티 생성을 지원
  * 위도/경도는 추후 OpenAPI로 변환되므로 이 요청에서는 받지 않음
  */
 @Getter
