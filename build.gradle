@@ -29,6 +29,8 @@ dependencies {
 
     // oauth
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+
+    //spring Security
     implementation 'org.springframework.boot:spring-boot-starter-security'
 
     // Spring Boot Starter
@@ -49,6 +51,9 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    //Websocket
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
 tasks.named('test') {
