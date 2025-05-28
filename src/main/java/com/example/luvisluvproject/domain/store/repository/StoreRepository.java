@@ -11,4 +11,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface StoreRepository extends JpaRepository<Store, Long> {
 	// 추후 GPS 기반 필터링 또는 커스텀 쿼리는 여기에 추가
+	// pr 템플릿테스트 푸쉬
 }
