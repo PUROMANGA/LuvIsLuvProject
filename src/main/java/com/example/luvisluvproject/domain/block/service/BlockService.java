@@ -7,7 +7,8 @@ import com.example.luvisluvproject.domain.block.repository.BlockRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
-import com.example.luvisluvproject.global.error.BlockErrorCode;
+import com.example.luvisluvproject.global.error.ExceptionCode;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,17 @@ public class BlockService {
 	@Transactional
 	public BlockResponseDto blockUser(Long blockerId, BlockRequestDto requestDto) {
 		Member blocker = memberRepository.findById(blockerId)
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Member blocked = memberRepository.findById(requestDto.getBlockedId())
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		if (blocker.equals(blocked)) {
+			throw new CustomRuntimeException(ExceptionCode.CANNOT_BLOCK_SELF);
+		}
 
 		if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
-			throw new CustomRuntimeException(BlockErrorCode.ALREADY_BLOCKED);
+			throw new CustomRuntimeException(ExceptionCode.ALREADY_BLOCKED);
 		}
 
 		Block block = Block.builder()
@@ -46,13 +51,13 @@ public class BlockService {
 	@Transactional
 	public BlockResponseDto unblockUser(Long blockerId, Long blockedId) {
 		Member blocker = memberRepository.findById(blockerId)
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Member blocked = memberRepository.findById(blockedId)
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Block block = blockRepository.findByBlockerAndBlocked(blocker, blocked)
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.BLOCK_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.BLOCK_NOT_FOUND));
 
 		blockRepository.delete(block);
 
@@ -61,7 +66,7 @@ public class BlockService {
 
 	public List<BlockResponseDto> getBlockedUsers(Long blockerId) {
 		Member blocker = memberRepository.findById(blockerId)
-			.orElseThrow(() -> new CustomRuntimeException(BlockErrorCode.MEMBER_NOT_FOUND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		return blockRepository.findAllByBlocker(blocker).stream()
 			.map(block -> new BlockResponseDto(block.getBlocked().getUsername() + "을(를) 차단 중입니다."))
