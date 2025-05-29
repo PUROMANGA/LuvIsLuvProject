@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
@@ -32,14 +33,16 @@ public class MatchService {
 	 * @param email
 	 * @return
 	 */
-	@SuppressWarnings("checkstyle:RegexpMultiline")
+	@Transactional
 	public MatchResponseDto createMatchService(MatchRequestDto matchRequestDto, String email) {
 		//senderId(로그인된 유저)
 		Member senderMember = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
+
 			ExceptionCode.USER_CANT_FIND));
 		//receiverId(좋아요 받은 유저)
-		Member receiverMember = memberRepository.findById(matchRequestDto.getReceiverId()).orElseThrow(() -> new CustomRuntimeException(
-			ExceptionCode.USER_CANT_FIND));
+		Member receiverMember = memberRepository.findById(matchRequestDto.getReceiverId())
+			.orElseThrow(() -> new CustomRuntimeException(
+				ExceptionCode.USER_CANT_FIND));
 		//match(수락 안 된 상태) 객체 생성
 		Match match = new Match(senderMember.getId(), receiverMember.getId());
 		//match를 저장합니다.
@@ -54,19 +57,26 @@ public class MatchService {
 	 * @param email
 	 * @retunr
 	 */
+	@Transactional
 	public MatchResponseDto patchMatchService(Long senderId, AcceptMatchDto acceptMatchDto, String email) {
 		Member member = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
 			ExceptionCode.USER_CANT_FIND));
-		Set<Object> match = redisTemplate.opsForSet().members(senderId + ":" + member.getId());
-		//매칭 찾고, 매핑하면서 상태변경
-		Match savedMatch = matchRepository.save(match.stream().map(obj -> {Match m = (Match) obj;
-			m.updateMatchStatus(acceptMatchDto);
-			return m;})
+		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + member.getId());
+		Match match = matchCache.stream().map(obj -> {
+				Match m = (Match)obj;
+				m.updateMatchStatus(acceptMatchDto);
+				return m;})
 			.findFirst()
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND)));
-		//캐싱 삭제
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+
 		redisTemplate.delete(senderId + ":" + member.getId());
-		//매칭 저장
-		return new MatchResponseDto(savedMatch);
+
+		if (!acceptMatchDto.isLike()) {
+			match.setRejectedMatching();
+		} else {
+			match.setAcceptedMatching();
+		}
+
+		return new MatchResponseDto(matchRepository.save(match));
 	}
 }
