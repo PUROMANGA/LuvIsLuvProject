@@ -25,7 +25,10 @@ public enum ExceptionCode implements ErrorCode {
 	MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 사용자입니다."),
 	LOGIN_REQUIRED(HttpStatus.UNAUTHORIZED, "로그인이 필요합니다."),
 	SAME_PASSWORD(HttpStatus.BAD_REQUEST, "이전과 동일한 비밀번호는 사용이 불가합니다."),
-	PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "입력한 비밀번호가 일치하지 않습니다.");
+	PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "입력한 비밀번호가 일치하지 않습니다."),
+
+	//매치
+	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

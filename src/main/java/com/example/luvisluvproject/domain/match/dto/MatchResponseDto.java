@@ -18,4 +18,11 @@ public class MatchResponseDto {
 		this.receiverId = match.getReceiverId();
 		this.isLike = match.isLike();
 	}
+
+	public MatchResponseDto(Long id, Long senderId, Long receiverId, boolean isLike) {
+		this.id = id;
+		this.senderId = senderId;
+		this.receiverId = receiverId;
+		this.isLike = isLike;
+	}
 }
