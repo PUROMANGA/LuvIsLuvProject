@@ -1,0 +1,40 @@
+version : '3.8'
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    volumes:
+      - db:/var/lib/mysql
+    environment:
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+    ports:
+      - '3306:3306'
+  app:
+    build: .
+    image: our-app:latest
+    depends_on:
+      - db
+      - nbc-15-redis
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/${MYSQL_DATABASE}
+      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_DATA_REDIS_HOST=nbc-15-redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - SPRING_DATA_REDIS_PASSWORD=${REDIS_PASSWORD}
+    ports:
+      - '8080:8080'
+
+  nbc-15-redis:
+    image: redis:7.2
+    volumes:
+      - nbc-15_redis_volume:/data
+    command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+    ports:
+      - '6379:6379'
+
+volumes:
+  db: {}
+  nbc-15-redis: {}

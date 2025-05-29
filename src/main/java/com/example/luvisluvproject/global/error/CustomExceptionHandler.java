@@ -36,4 +36,24 @@ public class CustomExceptionHandler {
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
 	}
+
+	/**
+	 * Custom 예외처리
+	 */
+
+	@ExceptionHandler(CustomRuntimeException.class)
+	public ResponseEntity<CustomErrorResponse> handleStoreRuntimeException(CustomRuntimeException customRuntimeException) {
+		log.error("[customRuntimeException 발생] cause:{}, message: {}",
+			NestedExceptionUtils.getMostSpecificCause(customRuntimeException),
+			customRuntimeException.getMessage());
+
+		ExceptionCode code = customRuntimeException.getExceptionCode();
+
+		CustomErrorResponse response = CustomErrorResponse.builder()
+			.message(code.getMessage())
+			.timeStamp(LocalDateTime.now())
+			.build();
+
+		return ResponseEntity.status(code.getHttpStatus()).body(response);
+	}
 }
