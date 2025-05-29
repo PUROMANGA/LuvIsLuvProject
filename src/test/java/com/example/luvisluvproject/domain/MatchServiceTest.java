@@ -8,6 +8,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.SetOperations;
 
 import com.example.luvisluvproject.domain.match.Service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
@@ -17,12 +19,17 @@ import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.global.error.CustomRuntimeException;
+import com.example.luvisluvproject.global.error.ExceptionCode;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
 
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,6 +41,8 @@ public class MatchServiceTest {
 	private MatchRepository matchRepository;
 	@Mock
 	private MemberRepository memberRepository;
+	@Mock
+	private RedisTemplate<String, Object> redisTemplate;
 	@InjectMocks
 	private MatchService matchService;
 
@@ -64,18 +73,21 @@ public class MatchServiceTest {
 		false
 	);
 
-	MatchRequestDto matchRequestDto = new MatchRequestDto(senderMember);
+	SetOperations<String, Object> setOps;
 
 	@BeforeEach
-	void setUp() {
-		given(matchRepository.save(match)).willReturn(match);
+	public void setUp() {
+		setOps = mock(SetOperations.class);
+		given(redisTemplate.opsForSet()).willReturn(setOps);
 	}
+
+	MatchRequestDto matchRequestDto = new MatchRequestDto(senderMember);
 
 	@Test
 	@DisplayName("송진영이 이유리에게 매칭을 걸었습니다")
 	public void createMatchSongToLee() {
 		//given
-		given(memberRepository.findByEmail(anyString())).willReturn(senderMember);
+		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(senderMember));
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(receiverMember));
 
 		//when
@@ -83,23 +95,34 @@ public class MatchServiceTest {
 
 		//then
 		assertThat(result).isNotNull();
+		String expectedKey = senderMember.getId() + ":" + receiverMember.getId();
+		verify(setOps, times(1)).add(eq(expectedKey), any(Match.class));
 	}
 
 	@Test
 	@DisplayName("이유리가 송진영의 매칭을 수락하였습니다.")
 	public void patchMatchServiceTest() {
 
+		Set<Object> matchSet = new HashSet<>();
+
 		//given
-		given(matchRepository.findById(anyLong())).willReturn(Optional.of(match));
-		match.updateMatchStatus();
+		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
+		given(setOps.members(anyString())).willReturn(matchSet);
+		matchSet.add(match);
+		Match newMatch = matchSet.stream().map(obj -> {Match m = (Match) obj;
+		m.updateMatchStatus();
+		return m;})
+			.findFirst()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+
+		given(matchRepository.save(newMatch)).willReturn(newMatch);
 
 		//when
 		MatchResponseDto result = matchService.patchMatchService(match.getId(), receiverMember.getEmail());
 
 		//then
 		assertThat(result.isLike()).isTrue();
+		String expectedKey = senderMember.getId() + ":" + receiverMember.getId();
+		verify(redisTemplate, times(1)).delete(eq(expectedKey));
 	}
-
-
-
 }
