@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "members")
 @NoArgsConstructor
 public class Member extends BaseEntity {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
