@@ -2,11 +2,14 @@ package com.example.luvisluvproject.domain.match.dto;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
 
+import lombok.Getter;
+
+@Getter
 public class MatchRequestDto {
 
-	private Long senderId;
+	private Long receiverId;
 
 	MatchRequestDto(Member member) {
-		this.senderId = member.getId();
+		this.receiverId = member.getId();
 	}
 }

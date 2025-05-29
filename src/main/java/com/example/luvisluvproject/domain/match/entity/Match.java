@@ -2,7 +2,6 @@ package com.example.luvisluvproject.domain.match.entity;
 
 import com.example.luvisluvproject.global.common.BaseEntity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +18,12 @@ public class Match extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private Long senderId;
-	private Long isRead;
+	private Long receiverId;
 	private boolean isLike;
+
+	public Match(Long senderId, Long receiverId, boolean isLike) {
+		this.senderId = senderId;
+		this.receiverId = receiverId;
+		this.isLike = isLike;
+	}
 }

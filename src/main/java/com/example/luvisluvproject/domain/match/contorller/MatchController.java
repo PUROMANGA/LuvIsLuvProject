@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.luvisluvproject.domain.match.Service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
-import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 
 import lombok.RequiredArgsConstructor;
@@ -27,6 +26,6 @@ public class MatchController {
 	public ResponseEntity<MatchResponseDto> createMatch(
 		@RequestBody @Validated MatchRequestDto matchRequestDto,
 		@AuthenticationPrincipal Member member) {
-		matchService.createMatchService(member.getEmail());
+		return ResponseEntity.ok(matchService.createMatchService(matchRequestDto, member.getEmail()));
 	}
 }
