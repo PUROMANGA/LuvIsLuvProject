@@ -19,4 +19,5 @@ public enum ExceptionCode implements ErrorCode {
 	public HttpStatus getHttpStatus() {
 		return httpStatus;
 	}
-}
+
+	}
