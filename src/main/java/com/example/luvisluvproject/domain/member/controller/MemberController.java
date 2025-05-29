@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.luvisluvproject.domain.member.dto.ApiResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.service.MemberService;
+import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
 
 import lombok.RequiredArgsConstructor;
@@ -20,7 +20,7 @@ public class MemberController {
 
 	private final MemberService memberService;
 
-	@GetMapping("/{id}")
+	@GetMapping("/{memberId}")
 	public ResponseEntity<ApiResponse<MemberFindResponse>> findById(@PathVariable Long id) {
 		MemberFindResponse memberResponse = memberService.findById(id);
 
