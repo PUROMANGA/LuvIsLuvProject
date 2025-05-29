@@ -45,7 +45,6 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 			String userAgent = servletServerHttpRequest.getServletRequest().getHeader("User-Agent");
 
 			log.info("WebSocket 연결됨 - IP: {}, UA: {}", ip, userAgent);
-
 		}
 	}
 }
