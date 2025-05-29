@@ -19,7 +19,6 @@ import lombok.NoArgsConstructor;
 @Table(name = "members")
 @NoArgsConstructor
 public class Member extends BaseEntity {
-
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -43,4 +42,11 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	public Member(String name, String email, String password, String birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
 }
