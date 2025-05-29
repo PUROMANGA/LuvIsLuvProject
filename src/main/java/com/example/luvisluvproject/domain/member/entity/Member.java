@@ -43,4 +43,11 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	public Member(String name, String email, String password, String birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
 }
