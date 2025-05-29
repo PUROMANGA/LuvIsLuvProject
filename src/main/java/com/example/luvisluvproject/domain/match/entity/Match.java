@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.match.entity;
 
+import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Entity;
@@ -23,8 +24,8 @@ public class Match extends BaseEntity {
 	private Long receiverId;
 	private boolean isLike;
 
-	public void updateMatchStatus() {
-		this.isLike = true;
+	public void updateMatchStatus(AcceptMatchDto acceptMatchDto) {
+		this.isLike = acceptMatchDto.isLike();
 	}
 
 	public Match(Long senderId, Long receiverId) {

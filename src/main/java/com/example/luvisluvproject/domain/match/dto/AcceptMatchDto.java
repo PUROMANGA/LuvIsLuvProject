@@ -1,9 +1,13 @@
 package com.example.luvisluvproject.domain.match.dto;
 
+import lombok.Getter;
+
+@Getter
+
 public class AcceptMatchDto {
 	private boolean isLike;
 
-	public AcceptMatchDto() {
-		this.isLike = true;
+	public AcceptMatchDto(boolean isLike) {
+		this.isLike = isLike;
 	}
 }

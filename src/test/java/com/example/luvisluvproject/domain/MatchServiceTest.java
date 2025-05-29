@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 
 import com.example.luvisluvproject.domain.match.Service.MatchService;
+import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
 import com.example.luvisluvproject.domain.match.entity.Match;
@@ -82,6 +83,7 @@ public class MatchServiceTest {
 	}
 
 	MatchRequestDto matchRequestDto = new MatchRequestDto(senderMember);
+	AcceptMatchDto acceptMatchDto = new AcceptMatchDto(true);
 
 	@Test
 	@DisplayName("송진영이 이유리에게 매칭을 걸었습니다")
@@ -110,7 +112,7 @@ public class MatchServiceTest {
 		given(setOps.members(anyString())).willReturn(matchSet);
 		matchSet.add(match);
 		Match newMatch = matchSet.stream().map(obj -> {Match m = (Match) obj;
-		m.updateMatchStatus();
+		m.updateMatchStatus(acceptMatchDto);
 		return m;})
 			.findFirst()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
@@ -118,7 +120,7 @@ public class MatchServiceTest {
 		given(matchRepository.save(newMatch)).willReturn(newMatch);
 
 		//when
-		MatchResponseDto result = matchService.patchMatchService(match.getId(), receiverMember.getEmail());
+		MatchResponseDto result = matchService.patchMatchService(match.getId(), acceptMatchDto, receiverMember.getEmail());
 
 		//then
 		assertThat(result.isLike()).isTrue();

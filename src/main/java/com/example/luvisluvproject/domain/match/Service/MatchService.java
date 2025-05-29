@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.match.Service;
 
+import java.util.Set;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -30,7 +32,7 @@ public class MatchService {
 	 * @param email
 	 * @return
 	 */
-
+	@SuppressWarnings("checkstyle:RegexpMultiline")
 	public MatchResponseDto createMatchService(MatchRequestDto matchRequestDto, String email) {
 		//senderId(로그인된 유저)
 		Member senderMember = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
@@ -41,25 +43,30 @@ public class MatchService {
 		//match(수락 안 된 상태) 객체 생성
 		Match match = new Match(senderMember.getId(), receiverMember.getId());
 		//match를 저장합니다.
-		String redisKey = senderMember.getId().toString() + " : " + receiverMember.getId().toString();
+		String redisKey = senderMember.getId() + ":" + receiverMember.getId();
 		redisTemplate.opsForSet().add(redisKey, match);
 		return new MatchResponseDto(match);
 	}
 
-
 	/**
 	 * 해당 매칭이 오고, 매칭의 상태를 '받음'으로 변경합니다.
-	 * @param matchId
+	 * @param senderId
 	 * @param email
-	 * @return
+	 * @retunr
 	 */
-	public MatchResponseDto patchMatchService(Long matchId, String email) {
-		redisTemplate.opsForSet().members()
-		//매칭 찾고
-		Match match = matchRepository.findById(matchId).orElseThrow(() -> new CustomRuntimeException(ExceptionCode.CANT_FIND_INTERFACE));
-		//매칭 상태를 변경
-		match.updateMatchStatus();
+	public MatchResponseDto patchMatchService(Long senderId, AcceptMatchDto acceptMatchDto, String email) {
+		Member member = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
+			ExceptionCode.USER_CANT_FIND));
+		Set<Object> match = redisTemplate.opsForSet().members(senderId + ":" + member.getId());
+		//매칭 찾고, 매핑하면서 상태변경
+		Match savedMatch = matchRepository.save(match.stream().map(obj -> {Match m = (Match) obj;
+			m.updateMatchStatus(acceptMatchDto);
+			return m;})
+			.findFirst()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND)));
+		//캐싱 삭제
+		redisTemplate.delete(senderId + ":" + member.getId());
 		//매칭 저장
-		return new MatchResponseDto(matchRepository.save(match));
+		return new MatchResponseDto(savedMatch);
 	}
 }

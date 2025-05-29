@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.match.Service.MatchService;
+import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -40,15 +41,18 @@ public class MatchController {
 
 	/**
 	 * 해당 매칭이 오고, 매칭의 상태를 '받음'으로 변경합니다.
-	 * @param matchId
+	 * @param receiverId
 	 * @param member
 	 * @return
 	 */
 
-	@PatchMapping("/{matchId}")
+	@PatchMapping("/{senderId}")
 	public ResponseEntity<MatchResponseDto> patchMatch(
-		@PathVariable Long matchId,
+		@PathVariable Long senderId,
+		@RequestBody @Validated AcceptMatchDto acceptMatchDto,
 		@AuthenticationPrincipal Member member) {
-		return ResponseEntity.ok(matchService.patchMatchService(matchId, member.getEmail()));
+		return ResponseEntity.ok(matchService.patchMatchService(senderId,acceptMatchDto, member.getEmail()));
 	}
+
+
 }
