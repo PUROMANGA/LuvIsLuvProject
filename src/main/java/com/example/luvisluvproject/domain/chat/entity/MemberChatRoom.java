@@ -1,11 +1,7 @@
 package com.example.luvisluvproject.domain.chat.entity;
 
-import java.util.List;
-
-import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,26 +18,22 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ChatRooms")
-
-public class ChatRoom extends BaseEntity {
+@Table(name = "MemberChatRooms")
+public class MemberChatRoom extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<MemberChatRoom> memberChatRoomRList;
+	private Long memberId;
+	private String chatName;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_a_id")
-	private Member memberA;
+	@JoinColumn(name = "chat_room_id")
+	private ChatRoom chatRoom;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_b_id")
-	private Member memberB;
-
-	public ChatRoom(Member memberA, Member memberB) {
-		this.memberA = memberA;
-		this.memberB = memberB;
+	public MemberChatRoom(Long memberId, String chatName, ChatRoom chatRoom) {
+		this.memberId = memberId;
+		this.chatName = chatName;
+		this.chatRoom = chatRoom;
 	}
 }

@@ -1,11 +1,13 @@
-package com.example.luvisluvproject.domain.match.Service;
+package com.example.luvisluvproject.domain.match.service;
 
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.chat.event.ChatCreateEvent;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
@@ -26,6 +28,7 @@ public class MatchService {
 	private final MatchRepository matchRepository;
 	private final MemberRepository memberRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 매칭을 걸면 해당 사람에게 요청이 갑니다.
@@ -37,7 +40,6 @@ public class MatchService {
 	public MatchResponseDto createMatchService(MatchRequestDto matchRequestDto, String email) {
 		//senderId(로그인된 유저)
 		Member senderMember = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
-
 			ExceptionCode.USER_CANT_FIND));
 		//receiverId(좋아요 받은 유저)
 		Member receiverMember = memberRepository.findById(matchRequestDto.getReceiverId())
@@ -52,16 +54,16 @@ public class MatchService {
 	}
 
 	/**
-	 * 해당 매칭이 오고, 매칭의 상태를 '받음'으로 변경합니다.
+	 * 해당 매칭이 오고, 매칭의 상태를 '받음' 혹은 거절로 결정합니다.
 	 * @param senderId
 	 * @param email
 	 * @retunr
 	 */
 	@Transactional
 	public MatchResponseDto patchMatchService(Long senderId, AcceptMatchDto acceptMatchDto, String email) {
-		Member member = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
+		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
 			ExceptionCode.USER_CANT_FIND));
-		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + member.getId());
+		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + me.getId());
 		Match match = matchCache.stream().map(obj -> {
 				Match m = (Match)obj;
 				m.updateMatchStatus(acceptMatchDto);
@@ -69,12 +71,13 @@ public class MatchService {
 			.findFirst()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 
-		redisTemplate.delete(senderId + ":" + member.getId());
+		redisTemplate.delete(senderId + ":" + me.getId());
 
 		if (!acceptMatchDto.isLike()) {
 			match.setRejectedMatching();
 		} else {
 			match.setAcceptedMatching();
+			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, senderId, me.getId()));
 		}
 
 		return new MatchResponseDto(matchRepository.save(match));

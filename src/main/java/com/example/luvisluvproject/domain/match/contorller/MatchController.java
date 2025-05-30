@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.luvisluvproject.domain.match.Service.MatchService;
+import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
@@ -40,12 +40,12 @@ public class MatchController {
 	}
 
 	/**
-	 * 해당 매칭이 오고, 매칭의 상태를 '받음'으로 변경합니다.
-	 * @param receiverId
+	 * 해당 매칭이 오고, 매칭의 상태를 '받음' 혹은 거절로 결정합니다.
+	 * @param senderId
+	 * @param acceptMatchDto
 	 * @param member
 	 * @return
 	 */
-
 	@PatchMapping("/{senderId}")
 	public ResponseEntity<MatchResponseDto> patchMatch(
 		@PathVariable Long senderId,

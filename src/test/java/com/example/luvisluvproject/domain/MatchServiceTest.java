@@ -10,7 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.SetOperations;
 
-import com.example.luvisluvproject.domain.match.Service.MatchService;
+import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
