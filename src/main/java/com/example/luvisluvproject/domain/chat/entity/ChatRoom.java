@@ -15,14 +15,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "ChatRooms")
 
 public class ChatRoom extends BaseEntity {
@@ -54,5 +52,12 @@ public class ChatRoom extends BaseEntity {
 			opponent = memberA;
 		}
 		return opponent;
+	}
+
+	public ChatRoom(Long id, List<MemberChatRoom> memberChatRoomRList, Member memberA, Member memberB) {
+		this.id = id;
+		this.memberChatRoomRList = memberChatRoomRList;
+		this.memberA = memberA;
+		this.memberB = memberB;
 	}
 }

@@ -30,7 +30,7 @@ public class StompHandler implements ChannelInterceptor {
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
-		if(StompCommand.CONNECT == accessor.getCommand()) {
+		if (StompCommand.CONNECT == accessor.getCommand()) {
 			String authToken = accessor.getFirstNativeHeader("Authorization");
 			String token = authToken.substring(7);
 
@@ -41,7 +41,7 @@ public class StompHandler implements ChannelInterceptor {
 			// String username = jwtTokenProvider.getUserNameFromToken(token);
 			// accessor.setUser(() -> username);
 
-		} else if(StompCommand.SUBSCRIBE == accessor.getCommand()) {
+		} else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
 
 			String destination = accessor.getDestination();
 
@@ -50,7 +50,8 @@ public class StompHandler implements ChannelInterceptor {
 
 			//방 아이디
 			Long roomId = chatService.submitRoomId(destination);
-			ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(() -> new RuntimeException("채팅방이 존재하지 않습니다."));
+			ChatRoom chatRoom = chatRoomRepository.findById(roomId)
+				.orElseThrow(() -> new RuntimeException("채팅방이 존재하지 않습니다."));
 
 			//Redis-key
 			String key = "entryChatRoom : " + sessionId + ":" + roomId;

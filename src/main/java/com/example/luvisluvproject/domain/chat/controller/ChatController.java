@@ -29,7 +29,7 @@ public class ChatController {
 	private final ChatService chatService;
 
 	/**
-	 * 메세지를 보내면 chatId로 올라오게 되고, 같은 chatId를 가진 사람에게도 보여지게 된다. 그 후 메세지 객체를 만들어 메세지를 저장
+	 * /pub/chats/chatID로 메세지가 보내지면 /sub/chats/chatId로 convertAndSend를 사용해서 메세지를 전달하게 됩니다.
 	 * @param requestMessageDto
 	 * @param chatId
 	 * @param member
@@ -41,6 +41,14 @@ public class ChatController {
 		@AuthenticationPrincipal Member member) {
 		chatService.sendChatMessage(requestMessageDto, chatId, member.getEmail());
 	}
+
+	/**
+	 * 채팅방에 들어있는 메세지를 전부 들고오고, 내가 아닌 사람이 보낸 메세지를 읽음으로 표시합니다.
+	 * @param member
+	 * @param chatId
+	 * @param pageable
+	 * @return
+	 */
 
 	@GetMapping("/chats/{chatId}")
 	public ResponseEntity<Slice<ResponseMessageDto>> checkMessage(
