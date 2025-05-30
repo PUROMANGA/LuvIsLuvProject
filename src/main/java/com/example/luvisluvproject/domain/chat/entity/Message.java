@@ -14,7 +14,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +24,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "messages")
 
 public class Message extends BaseEntity {
 
@@ -51,4 +54,12 @@ public class Message extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private MessageType messageType;
+
+	@Builder
+	public Message(MessageType messageType, String content, ChatRoom chatRoom, Long senderId) {
+		this.messageType = messageType;
+		this.content = content;
+		this.chatRoom = chatRoom;
+		this.senderId = senderId;
+	}
 }

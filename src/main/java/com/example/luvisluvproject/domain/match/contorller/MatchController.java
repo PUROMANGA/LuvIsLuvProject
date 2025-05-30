@@ -53,6 +53,4 @@ public class MatchController {
 		@AuthenticationPrincipal Member member) {
 		return ResponseEntity.ok(matchService.patchMatchService(senderId,acceptMatchDto, member.getEmail()));
 	}
-
-
 }

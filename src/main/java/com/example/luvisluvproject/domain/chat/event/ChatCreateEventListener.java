@@ -41,7 +41,7 @@ public class ChatCreateEventListener {
 
 		Member opponent;
 
-		if(me.getId() == chatRoom.getMemberA().getId()) {
+		if(me.getId().equals(chatRoom.getMemberA().getId())) {
 			opponent = chatRoom.getMemberB();
 
 		} else {
