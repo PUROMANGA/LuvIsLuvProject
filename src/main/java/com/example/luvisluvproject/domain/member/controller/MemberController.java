@@ -43,7 +43,7 @@ public class MemberController {
 		@RequestBody @Valid MemberUpdateRequest memberUpdateRequest
 	) {
 		memberService.updateMember(id, memberUpdateRequest);
-		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_MEMBER_SUCCESS));
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_MEMBER_SUCCESS, null));
 	}
 
 	@DeleteMapping("/{memberId}")
@@ -52,7 +52,7 @@ public class MemberController {
 		@RequestBody @Valid MemberDeleteRequest memberDeleteRequest
 	) {
 		memberService.deleteMember(id, memberDeleteRequest);
-		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_MEMBER_SUCCESS));
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_MEMBER_SUCCESS, null));
 	}
 
 }
