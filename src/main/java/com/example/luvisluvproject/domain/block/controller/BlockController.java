@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/blocks")
+@RequestMapping("/blocks") // 수정완료
 @RequiredArgsConstructor
 public class BlockController {
 
