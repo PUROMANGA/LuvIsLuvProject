@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.member.entity;
 
+import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
@@ -42,6 +43,10 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	//호감도
+	@Column(nullable = false)
+	private Long likeCount;
+
 	public Member(String name, String email, String password, String birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
@@ -49,8 +54,10 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 	}
+
 	public Member(Long id, String name, String email, String password, String birthday, UserRole userRole,
-		boolean status) {
+		boolean status,
+		Long likeCount) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
@@ -58,5 +65,14 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 		this.status = status;
+		this.likeCount = likeCount;
+	}
+
+	/**
+	 * 호감도 업!
+	 */
+
+	public void plusIsLike() {
+		this.likeCount++;
 	}
 }
