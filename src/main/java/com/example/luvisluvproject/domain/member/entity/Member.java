@@ -42,4 +42,21 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	public Member(String name, String email, String password, String birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
+	public Member(Long id, String name, String email, String password, String birthday, UserRole userRole,
+		boolean status) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = status;
+	}
 }
