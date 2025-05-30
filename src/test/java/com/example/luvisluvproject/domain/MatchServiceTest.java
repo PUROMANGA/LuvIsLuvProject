@@ -1,6 +1,5 @@
 package com.example.luvisluvproject.domain;
 
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -111,16 +110,20 @@ public class MatchServiceTest {
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
 		given(setOps.members(anyString())).willReturn(matchSet);
 		matchSet.add(match);
-		Match newMatch = matchSet.stream().map(obj -> {Match m = (Match) obj;
-		m.updateMatchStatus(acceptMatchDto);
-		return m;})
+		Match newMatch = matchSet.stream().map(obj -> {
+				Match m = (Match)obj;
+				m.updateMatchStatus(acceptMatchDto);
+				return m;
+			})
 			.findFirst()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+		newMatch.setAcceptedMatching();
 
 		given(matchRepository.save(newMatch)).willReturn(newMatch);
 
 		//when
-		MatchResponseDto result = matchService.patchMatchService(match.getId(), acceptMatchDto, receiverMember.getEmail());
+		MatchResponseDto result = matchService.patchMatchService(match.getId(), acceptMatchDto,
+			receiverMember.getEmail());
 
 		//then
 		assertThat(result.isLike()).isTrue();
