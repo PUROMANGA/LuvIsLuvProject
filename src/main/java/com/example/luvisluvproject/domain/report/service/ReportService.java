@@ -39,7 +39,8 @@ public class ReportService {
 			.description(dto.getDescription())
 			.build();
 
-		reportRepository.save(report);
-		return new ReportResponseDto("신고가 정상적으로 접수되었습니다.");
+		Report savedReport = reportRepository.save(report);
+
+		return new ReportResponseDto("신고가 정상적으로 접수되었습니다.", savedReport.getCreatedAt());
 	}
 }

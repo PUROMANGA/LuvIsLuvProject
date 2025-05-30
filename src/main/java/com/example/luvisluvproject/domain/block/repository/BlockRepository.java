@@ -1,7 +1,8 @@
 package com.example.luvisluvproject.domain.block.repository;
 
-import com.example.luvisluvproject.domain.block.entity.Block;
 import com.example.luvisluvproject.domain.member.entity.Member;
+
+import org.springframework.cglib.core.Block;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 import java.util.Optional;

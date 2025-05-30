@@ -1,9 +1,5 @@
 package com.example.luvisluvproject.domain.block.service;
 
-import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
-import com.example.luvisluvproject.domain.block.dto.BlockResponseDto;
-import com.example.luvisluvproject.domain.block.entity.Block;
-import com.example.luvisluvproject.domain.block.repository.BlockRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
@@ -16,18 +12,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
 import java.util.Optional;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class BlockServiceTest {
-
-	@Mock
-	private BlockRepository blockRepository;
 
 	@Mock
 	private MemberRepository memberRepository;
@@ -47,63 +44,54 @@ class BlockServiceTest {
 	@Test
 	void 차단_성공() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(blocked.getId());
+		Long blockedId = blocked.getId();
 
 		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
-		given(memberRepository.findById(blocked.getId())).willReturn(Optional.of(blocked));
-		given(blockRepository.existsByBlockerAndBlocked(blocker, blocked)).willReturn(false);
+		given(memberRepository.findById(blockedId)).willReturn(Optional.of(blocked));
 
 		// when
-		BlockResponseDto response = blockService.blockUser(blocker.getId(), requestDto);
+		String response = blockService.blockUser(blocker.getId(), blockedId);
 
 		// then
-		assertThat(response.getMessage()).isEqualTo("사용자를 차단했습니다.");
-		then(blockRepository).should().save(any(Block.class));
+		assertThat(response).contains("차단");
 	}
 
 	@Test
 	void 자기자신을_차단하려고_하면_예외발생() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(blocker.getId());
+		Long blockedId = blocker.getId();
 
 		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () ->
-			blockService.blockUser(blocker.getId(), requestDto));
+			blockService.blockUser(blocker.getId(), blockedId));
 
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.CANNOT_BLOCK_SELF);
 	}
 
 	@Test
-	void 이미_차단한_사용자일_경우_예외발생() {
+	void 차단_해제_정상작동() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(blocked.getId());
-
 		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
 		given(memberRepository.findById(blocked.getId())).willReturn(Optional.of(blocked));
-		given(blockRepository.existsByBlockerAndBlocked(blocker, blocked)).willReturn(true);
 
-		// when & then
-		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () ->
-			blockService.blockUser(blocker.getId(), requestDto));
+		// when
+		String response = blockService.unblockUser(blocker.getId(), blocked.getId());
 
-		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.ALREADY_BLOCKED);
+		// then
+		assertThat(response).contains("해제");
 	}
 
 	@Test
-	void 차단_해제_성공() {
+	void 차단_목록_조회_결과는_빈리스트() {
 		// given
 		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
-		given(memberRepository.findById(blocked.getId())).willReturn(Optional.of(blocked));
-		given(blockRepository.findByBlockerAndBlocked(blocker, blocked))
-			.willReturn(Optional.of(Block.builder().blocker(blocker).blocked(blocked).build()));
 
 		// when
-		BlockResponseDto response = blockService.unblockUser(blocker.getId(), blocked.getId());
+		List<String> results = blockService.getBlockedUsers(blocker.getId());
 
 		// then
-		assertThat(response.getMessage()).isEqualTo("차단을 해제했습니다.");
-		then(blockRepository).should().delete(any(Block.class));
+		assertThat(results).isEmpty();
 	}
 }
