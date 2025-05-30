@@ -1,0 +1,31 @@
+package com.example.luvisluvproject.domain.member.controller;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
+import com.example.luvisluvproject.domain.member.service.MemberService;
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
+
+import lombok.RequiredArgsConstructor;
+
+@RestController
+@RequestMapping("/members")
+@RequiredArgsConstructor
+public class MemberController {
+
+	private final MemberService memberService;
+
+	@GetMapping("/{memberId}")
+	public ResponseEntity<ApiResponse<MemberFindResponse>> findById(@PathVariable Long id) {
+		MemberFindResponse memberResponse = memberService.findById(id);
+
+		ApiResponse<MemberFindResponse> response = ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, memberResponse);
+
+		return ResponseEntity.ok(response);
+	}
+}
