@@ -45,4 +45,14 @@ public class ChatRoom extends BaseEntity {
 		this.memberA = memberA;
 		this.memberB = memberB;
 	}
+
+	public Member checkMember(Member me) {
+		Member opponent;
+		if (me.getId().equals(memberA.getId())) {
+			opponent = memberB;
+		} else {
+			opponent = memberA;
+		}
+		return opponent;
+	}
 }
