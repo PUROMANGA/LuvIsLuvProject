@@ -49,6 +49,7 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 	}
+
 	public Member(Long id, String name, String email, String password, String birthday, UserRole userRole,
 		boolean status) {
 		this.id = id;
@@ -58,5 +59,9 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 		this.status = status;
+	}
+
+	public void update(String password) {
+		this.password = password;
 	}
 }
