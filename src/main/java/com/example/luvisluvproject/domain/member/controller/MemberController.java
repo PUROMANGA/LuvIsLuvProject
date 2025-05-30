@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.member.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
 import com.example.luvisluvproject.domain.member.service.MemberService;
@@ -42,6 +44,15 @@ public class MemberController {
 	) {
 		memberService.updateMember(id, memberUpdateRequest);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_MEMBER_SUCCESS));
+	}
+
+	@DeleteMapping("/{memberId}")
+	public ResponseEntity<ApiResponse<Void>> deleteMember(
+		@PathVariable("memberId") Long id,
+		@RequestBody @Valid MemberDeleteRequest memberDeleteRequest
+	) {
+		memberService.deleteMember(id, memberDeleteRequest);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_MEMBER_SUCCESS));
 	}
 
 }

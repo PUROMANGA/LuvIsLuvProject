@@ -4,6 +4,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -11,6 +12,7 @@ import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,4 +52,16 @@ public class MemberService {
 		member.update(passwordEncoder.encode(memberUpdateRequest.getNewPassword()));
 	}
 
+	@Transactional
+	public void deleteMember(Long id, @Valid MemberDeleteRequest memberDeleteRequest) {
+
+		Member member = memberRepository.findById(id)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+
+		if (!passwordEncoder.matches(memberDeleteRequest.getPassword(), member.getPassword())) {
+			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
+		}
+
+		memberRepository.delete(member);
+	}
 }
