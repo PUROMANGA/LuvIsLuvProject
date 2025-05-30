@@ -93,7 +93,7 @@ public class ChatCreateTest {
 		false,
 		"아아아아아아",
 		"대충 주소",
-		MessageType.TEXT
+		MessageType.IMAGE
 	);
 
 	@Test
@@ -107,8 +107,7 @@ public class ChatCreateTest {
 
 		RequestMessageDto requestMessageDto = new RequestMessageDto(
 			"대충 내용",
-			null,
-			MessageType.TEXT
+			null
 		);
 
 		//when

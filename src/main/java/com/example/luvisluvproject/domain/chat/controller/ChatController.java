@@ -11,6 +11,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -40,6 +41,21 @@ public class ChatController {
 		@DestinationVariable Long chatId,
 		@AuthenticationPrincipal Member member) {
 		chatService.sendChatMessage(requestMessageDto, chatId, member.getEmail());
+	}
+
+	/**
+	 * 내가 메세지를 봤는데 내가 보낸 게 아니라면 읽음 표시를 합니다.
+	 * @param messageId
+	 * @param member
+	 * @return
+	 */
+
+	@PatchMapping("/messages/{messageId}")
+	public ResponseEntity<String> updateIsRead(
+		@PathVariable Long messageId,
+		@AuthenticationPrincipal Member member) {
+		chatService.updateIsReadService(messageId, member);
+		return ResponseEntity.ok("읽음 처리 완료");
 	}
 
 	/**

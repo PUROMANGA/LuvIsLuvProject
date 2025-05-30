@@ -12,9 +12,14 @@ public class RequestMessageDto {
 	private String fileUrl;
 	private MessageType messageType;
 
-	public RequestMessageDto(String content, String fileUrl, MessageType messageType) {
+	public RequestMessageDto(String content, String fileUrl) {
 		this.content = content;
-		this.fileUrl = fileUrl;
-		this.messageType = messageType;
+		if(fileUrl != null) {
+			this.fileUrl = fileUrl;
+			this.messageType = MessageType.IMAGE;
+		} else {
+			this.fileUrl = null;
+			this.messageType = MessageType.TEXT;
+		}
 	}
 }

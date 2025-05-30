@@ -69,6 +69,22 @@ public class ChatService {
 	}
 
 	/**
+	 * 내가 메세지를 봤는데 내가 보낸 게 아니라면 읽음 표시를 합니다.
+	 * @param messageId
+	 * @param member
+	 */
+
+	@Transactional
+	public void updateIsReadService(Long messageId, Member member) {
+		Message message = messageRepository.findById(messageId).orElseThrow(() -> new RuntimeException("메세지가 없습니다."));
+
+		if(!message.getSenderId().equals(member.getId())) {
+			message.updateIsRead();
+			messageRepository.save(message);
+		}
+	}
+
+	/**
 	 * 세션에 방 아이디를 저장해야하기 때문에 목적지인 주소를 subString해주고 roomId를 찾아서 return해줍니다.
 	 * @param destination
 	 * @return
