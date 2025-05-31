@@ -2,8 +2,10 @@ package com.example.luvisluvproject.domain.store.dto.response;
 
 import com.example.luvisluvproject.domain.store.enums.StoreStatus;
 import com.example.luvisluvproject.domain.store.enums.StoreType;
+
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 가게 응답 DTO
@@ -23,4 +25,20 @@ public class StoreResponse {
 	private StoreType storeType;
 	private Double latitude;   // OpenAPI로 변환된 위도
 	private Double longitude;  // OpenAPI로 변환된 경도
+
+	/**
+	 * 테스트용 생성자
+	 */
+	public StoreResponse(Long id, String name, Long businessNumber, String contactNumber, String address,
+		StoreStatus status, StoreType storeType, Double latitude, Double longitude) {
+		this.id = id;
+		this.name = name;
+		this.businessNumber = businessNumber;
+		this.contactNumber = contactNumber;
+		this.address = address;
+		this.status = status;
+		this.storeType = storeType;
+		this.latitude = latitude;
+		this.longitude = longitude;
+	}
 }
