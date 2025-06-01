@@ -37,4 +37,5 @@ logging:
 
 # 카카오 API Key
 kakao:
-  rest-api-key: ${KAKAO_REST_API_KEY}
+  api:
+    key: ${KAKAO_API_KEY}
