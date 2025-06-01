@@ -25,7 +25,13 @@ public class AuthService {
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
-	// 회원가입
+	/**
+	 * 회원가입
+	 *
+	 * @param requestDto 회원 가입 요청 정보
+	 * @return 가입된 회원 정보가 담긴 응답 DTO
+	 * @throws CustomRuntimeException 이메일 중복일 경우 {@code ExceptionCode.EMAIL_ALREADY_EXIST}
+	 */
 	// todo 미성년자 체크 로직 추가해야함 !!
 	@Transactional
 	public SignupResponseDto signup(SignupRequestDto requestDto) {
@@ -60,7 +66,13 @@ public class AuthService {
 		);
 	}
 
-	// 로그인
+	/**
+	 * 로그인 및 JWT 토큰 발급
+	 *
+	 * @param requestDto 로그인 요청 정보
+	 * @return 발급된 액세스 토큰과 리프레시 토큰이 담긴 응답 DTO
+	 * @throws CustomRuntimeException 회원이 존재하지 않거나 로그인 실패 시
+	 */
 	@Transactional
 	public LoginResponseDto login(LoginRequestDto requestDto) {
 
