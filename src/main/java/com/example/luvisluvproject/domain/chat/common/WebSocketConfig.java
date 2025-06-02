@@ -6,18 +6,7 @@ import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerCo
 
 import lombok.RequiredArgsConstructor;
 
-// package com.example.luvisluvproject.domain.chat.common;
-//
-// import org.springframework.context.annotation.Configuration;
-// import org.springframework.messaging.simp.config.ChannelRegistration;
-// import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-// import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
-// import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
-// import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
-//
-// import lombok.RequiredArgsConstructor;
-//
-// @Configuration
+@Configuration
 @RequiredArgsConstructor
 @EnableWebSocketMessageBroker
 

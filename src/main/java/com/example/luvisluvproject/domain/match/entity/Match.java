@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.match.entity;
 
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
+import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -27,53 +28,22 @@ public class Match extends BaseEntity {
 	private Long senderId;
 	@Column(nullable = false)
 	private Long receiverId;
-	@Column(nullable = false)
-	private boolean isLike;
 
 	@Enumerated(EnumType.STRING)
 	private MatchStatus matchStatus;
 
-	/**
-	 * 매칭상태 거절로 변경
-	 */
-
-	public void setRejectedMatching() {
-		this.matchStatus = MatchStatus.REJECTED;
+	public void updateMatchingStatus(AcceptMatchDto acceptMatchDto) {
+		this.matchStatus = acceptMatchDto.getMatchStatus();
 	}
 
-	/**
-	 * 매칭상태 성공으로 변경
-	 */
-
-	public void setAcceptedMatching() {
-		this.matchStatus = MatchStatus.ACCEPTED;
-	}
-
-	/**
-	 *
-	 * @param acceptMatchDto
-	 */
-
-	public void updateMatchStatus(AcceptMatchDto acceptMatchDto) {
-		this.isLike = acceptMatchDto.isLike();
-	}
-
-	public Match(Long senderId, Long receiverId) {
-		this.senderId = senderId;
-		this.receiverId = receiverId;
-		this.isLike = false;
-	}
-
-	public Match(Long senderId, Long receiverId, boolean isLike) {
-		this.senderId = senderId;
-		this.receiverId = receiverId;
-		this.isLike = isLike;
-	}
-
-	public Match(Long id, Long senderId, Long receiverId, boolean isLike) {
+	public Match(Long id, Long meId, Long receiverId) {
 		this.id = id;
-		this.senderId = senderId;
+		this.senderId = meId;
 		this.receiverId = receiverId;
-		this.isLike = isLike;
+	}
+
+	public Match(Long meId, Long receiverId) {
+		this.senderId = meId;
+		this.receiverId = receiverId;
 	}
 }
