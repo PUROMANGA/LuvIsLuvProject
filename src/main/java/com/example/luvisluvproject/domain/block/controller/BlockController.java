@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.block.controller;
 
+import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
+import com.example.luvisluvproject.domain.block.dto.BlockResponseDto;
 import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 
@@ -11,19 +13,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/blocks") // 수정완료
+@RequestMapping("/blocks")
 @RequiredArgsConstructor
 public class BlockController {
 
 	private final BlockService blockService;
 
 	@PostMapping
-	public ResponseEntity<String> blockUser(
+	public ResponseEntity<BlockResponseDto> blockUser(
 		@AuthenticationPrincipal Member member,
-		@RequestParam Long blockedId
+		@RequestBody BlockRequestDto requestDto
 	) {
-		String message = blockService.blockUser(member.getId(), blockedId);
-		return ResponseEntity.status(201).body(message);
+		BlockResponseDto response = blockService.blockUser(member.getId(), requestDto);
+		return ResponseEntity.status(201).body(response);
 	}
 
 	@DeleteMapping("/{blockedId}")
