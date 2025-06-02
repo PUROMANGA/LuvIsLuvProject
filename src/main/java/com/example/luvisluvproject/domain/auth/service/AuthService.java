@@ -41,6 +41,10 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.EMAIL_ALREADY_EXIST);
 		}
 
+		if (memberRepository.existsByName(requestDto.getName())) {
+			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
+		}
+
 		// 비밀번호 암호화
 		String encodePassword = passwordEncoder.encode(requestDto.getPassword());
 
