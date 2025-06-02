@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.member.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,9 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
+import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.service.MemberService;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
@@ -27,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class MemberController {
 
 	private final MemberService memberService;
+	private final BlockService blockService;
 
 	/**
 	 * 회원 ID를 통해 회원 정보를 조회합니다.
@@ -45,6 +49,21 @@ public class MemberController {
 
 		ApiResponse<MemberFindResponse> response = ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, memberResponse);
 
+		return ResponseEntity.ok(response);
+	}
+
+	@GetMapping("/{memberId}/profile")
+	public ResponseEntity<ApiResponse<MemberFindResponse>> getProfile(
+		@AuthenticationPrincipal Member viewer, // 로그인한 사용자
+		@PathVariable Long memberId
+	) {
+		MemberFindResponse profile = memberService.findById(memberId);
+
+		if (blockService.isProfileBlocked(viewer, profile.getMember())) {
+			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
+		}
+
+		ApiResponse<MemberFindResponse> response = ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profile);
 		return ResponseEntity.ok(response);
 	}
 

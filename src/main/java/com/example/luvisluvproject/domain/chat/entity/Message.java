@@ -1,6 +1,8 @@
 package com.example.luvisluvproject.domain.chat.entity;
 
 import com.example.luvisluvproject.domain.chat.common.MessageType;
+import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
+import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -14,7 +16,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,6 +26,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(name = "messages")
 
 public class Message extends BaseEntity {
 
@@ -40,7 +45,7 @@ public class Message extends BaseEntity {
 	private Long receiverId;
 
 	@Column(nullable = false)
-	private Long isRead;
+	private Boolean isRead;
 
 	@Column(nullable = false)
 	private String content;
@@ -51,4 +56,26 @@ public class Message extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private MessageType messageType;
+
+	public Message(ChatRoom chatRoom, Member me, Member opponent, Boolean isRead, RequestMessageDto requestMessageDto) {
+		this.chatRoom = chatRoom;
+		this.senderId = opponent.getId();
+		this.receiverId = me.getId();
+		this.isRead = isRead;
+		this.content = requestMessageDto.getContent();
+		this.fileUrl = requestMessageDto.getFileUrl();
+		this.messageType = requestMessageDto.getMessageType();
+	}
+
+	@Builder
+	public Message(MessageType messageType, String content, ChatRoom chatRoom, Long senderId) {
+		this.messageType = messageType;
+		this.content = content;
+		this.chatRoom = chatRoom;
+		this.senderId = senderId;
+	}
+
+	public void updateIsRead() {
+		this.isRead = true;
+	}
 }
