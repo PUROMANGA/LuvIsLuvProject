@@ -1,15 +1,19 @@
-package com.example.luvisluvproject.domain.match.Service;
+package com.example.luvisluvproject.domain.match.service;
 
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.chat.event.ChatCreateEvent;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
-import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
 import com.example.luvisluvproject.domain.match.entity.Match;
+import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -26,57 +30,82 @@ public class MatchService {
 	private final MatchRepository matchRepository;
 	private final MemberRepository memberRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 매칭을 걸면 해당 사람에게 요청이 갑니다.
-	 * @param matchRequestDto
+	 * @param receiverId
 	 * @param email
 	 * @return
 	 */
 	@Transactional
-	public MatchResponseDto createMatchService(MatchRequestDto matchRequestDto, String email) {
+	public MatchResponseDto createMatchService(Long receiverId, String email) {
 		//senderId(로그인된 유저)
-		Member senderMember = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
-
+		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
 			ExceptionCode.USER_CANT_FIND));
 		//receiverId(좋아요 받은 유저)
-		Member receiverMember = memberRepository.findById(matchRequestDto.getReceiverId())
+		Member receiverMember = memberRepository.findById(receiverId)
 			.orElseThrow(() -> new CustomRuntimeException(
 				ExceptionCode.USER_CANT_FIND));
+
+		//매칭 요청 받은 사람 인기수치 올림
+		receiverMember.plusIsLike();
 		//match(수락 안 된 상태) 객체 생성
-		Match match = new Match(senderMember.getId(), receiverMember.getId());
+		Match match = new Match(me.getId(), receiverId);
 		//match를 저장합니다.
-		String redisKey = senderMember.getId() + ":" + receiverMember.getId();
+		String redisKey = me.getId() + ":" + receiverId;
 		redisTemplate.opsForSet().add(redisKey, match);
 		return new MatchResponseDto(match);
 	}
 
 	/**
-	 * 해당 매칭이 오고, 매칭의 상태를 '받음'으로 변경합니다.
+	 * 해당 매칭이 오고, 매칭의 상태를 '수락' 혹은 '거절'로 변경합니다. 이때 senderId는 현재 로그인된 멤버 자기 자신의 ID입니다.
 	 * @param senderId
+	 * @param acceptMatchDto
 	 * @param email
-	 * @retunr
+	 * @return
 	 */
 	@Transactional
-	public MatchResponseDto patchMatchService(Long senderId, AcceptMatchDto acceptMatchDto, String email) {
-		Member member = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
+	public MatchResponseDto patchMatchService(Long matchId, AcceptMatchDto acceptMatchDto, String email) {
+		//매치 찾고
+		Match savedmatch = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("매치가 존재하지 않습니다."));
+		//매치에서 내가 아닌 보낸사람 들고오기
+		Long senderId = savedmatch.getSenderId();
+		//나 들고오기
+		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
 			ExceptionCode.USER_CANT_FIND));
-		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + member.getId());
+		//
+		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + me.getId());
 		Match match = matchCache.stream().map(obj -> {
 				Match m = (Match)obj;
-				m.updateMatchStatus(acceptMatchDto);
+				m.updateMatchingStatus(acceptMatchDto);
 				return m;})
 			.findFirst()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 
-		redisTemplate.delete(senderId + ":" + member.getId());
+		redisTemplate.delete(senderId + ":" + me.getId());
 
-		if (!acceptMatchDto.isLike()) {
-			match.setRejectedMatching();
-		} else {
-			match.setAcceptedMatching();
+		if (acceptMatchDto.getMatchStatus().equals(MatchStatus.ACCEPTED)) {
+			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, senderId, me.getId()));
 		}
 
 		return new MatchResponseDto(matchRepository.save(match));
+	}
+
+	/**
+	 * 내가 받은 match를 전부 SLICE로 가져옵니다.
+	 * @param email
+	 * @param pageable
+	 * @return
+	 */
+
+	@Transactional(readOnly = true)
+	public Slice<MatchResponseDto> getMatchService(String email, Pageable pageable) {
+		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
+			ExceptionCode.USER_CANT_FIND));
+
+		Slice<Match> matches = matchRepository.findMatchByReceiverId(me.getId(), pageable);
+
+		return matches.map(MatchResponseDto::new);
 	}
 }

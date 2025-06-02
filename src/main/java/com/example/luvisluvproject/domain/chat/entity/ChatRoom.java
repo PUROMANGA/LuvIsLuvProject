@@ -1,21 +1,26 @@
 package com.example.luvisluvproject.domain.chat.entity;
 
+import java.util.List;
+
+import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "ChatRooms")
 
 public class ChatRoom extends BaseEntity {
@@ -23,11 +28,36 @@ public class ChatRoom extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	private String chatName;
+	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<MemberChatRoom> memberChatRoomRList;
 
-	@Column(nullable = false)
-	private Long memberAId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_a_id")
+	private Member memberA;
 
-	@Column(nullable = false)
-	private Long memberBId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "member_b_id")
+	private Member memberB;
+
+	public ChatRoom(Member memberA, Member memberB) {
+		this.memberA = memberA;
+		this.memberB = memberB;
+	}
+
+	public Member checkMember(Member me) {
+		Member opponent;
+		if (me.getId().equals(memberA.getId())) {
+			opponent = memberB;
+		} else {
+			opponent = memberA;
+		}
+		return opponent;
+	}
+
+	public ChatRoom(Long id, List<MemberChatRoom> memberChatRoomRList, Member memberA, Member memberB) {
+		this.id = id;
+		this.memberChatRoomRList = memberChatRoomRList;
+		this.memberA = memberA;
+		this.memberB = memberB;
+	}
 }
