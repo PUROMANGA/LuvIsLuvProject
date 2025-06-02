@@ -31,14 +31,9 @@ public class Block extends BaseEntity {
 	@Column(nullable = false)
 	private BlockType blockType;
 
-	// DM 차단 여부
-	@Builder.Default
-	private boolean blockDM = true;
-
 	// 프로필 접근 차단
 	@Builder.Default
-	private boolean blockProfileAccess = true;
-	// 프로필 노출 필터링 시: Profile 필요
+	private boolean blockUserAccess = true;
 
 	// 매칭 시스템 제외 여부
 	@Builder.Default

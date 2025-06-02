@@ -13,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,8 +44,7 @@ public class BlockService {
 		Block block = Block.builder()
 			.blocker(blocker)
 			.blocked(blocked)
-			.blockDM(requestDto.isBlockDM())
-			.blockProfileAccess(requestDto.isBlockProfileAccess())
+			.blockUserAccess(requestDto.isBlockUserAccess())
 			.excludeFromMatching(requestDto.isExcludeFromMatching())
 			.excludeFromRecommendation(requestDto.isExcludeFromRecommendation())
 			.blockType(Block.BlockType.valueOf(requestDto.getBlockType()))
@@ -52,7 +52,7 @@ public class BlockService {
 
 		blockRepository.save(block);
 
-		return new BlockResponseDto("사용자를 차단했습니다.", blockedId, block.getCreatTime());
+		return new BlockResponseDto("사용자를 차단했습니다.", blockedId, LocalDateTime.now());
 	}
 
 	@Transactional
@@ -91,5 +91,10 @@ public class BlockService {
 	public boolean isExcludedFromMatching(Member requester, Member target) {
 		Block block = blockRepository.findByBlockerAndBlocked(requester, target).orElse(null);
 		return block != null && !block.isUnblocked() && block.isExcludeFromMatching();
+	}
+
+	public boolean isProfileBlocked(Member viewer, Member target) {
+		Block block = blockRepository.findByBlockerAndBlocked(target, viewer).orElse(null);
+		return block != null && !block.isUnblocked() && block.isBlockUserAccess();
 	}
 }

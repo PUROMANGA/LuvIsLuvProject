@@ -36,6 +36,7 @@ public enum ExceptionCode implements ErrorCode {
 	ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "이미 차단한 사용자입니다."),
 	CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 차단할 수 없습니다."),
 	BLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "차단 정보가 존재하지 않습니다."),
+	PROFILE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "프로필 접근이 차단되었습니다."),
 
 	// 신고
 	ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "이미 신고한 사용자입니다."),

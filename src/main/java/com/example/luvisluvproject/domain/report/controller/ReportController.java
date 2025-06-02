@@ -16,11 +16,11 @@ public class ReportController {
 
 	private final ReportService reportService;
 
-	@PostMapping("/users")
-	public ResponseEntity<ReportResponseDto> reportUser(
+	@PostMapping
+	public ResponseEntity<ReportResponseDto> report(
 		@AuthenticationPrincipal Member member,
 		@RequestBody ReportRequestDto dto
 	) {
-		return ResponseEntity.status(201).body(reportService.reportUser(member.getId(), dto));
+		return ResponseEntity.status(201).body(reportService.report(member.getId(), dto));
 	}
 }

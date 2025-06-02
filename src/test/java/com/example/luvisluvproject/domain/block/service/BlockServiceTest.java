@@ -12,30 +12,28 @@ import com.example.luvisluvproject.global.error.ExceptionCode;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.*;
 
-@MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class BlockServiceTest {
 
 	@Mock
-	private MemberRepository memberRepository;
+	private BlockRepository blockRepository;
 
 	@Mock
-	private BlockRepository blockRepository;
+	private MemberRepository memberRepository;
 
 	@InjectMocks
 	private BlockService blockService;
@@ -45,52 +43,69 @@ class BlockServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		blocker = Member.builder().id(1L).name("blocker").build();
-		blocked = Member.builder().id(2L).name("blocked").build();
+		blocker = Member.builder().id(1L).name("BlockerUser").build();
+		blocked = Member.builder().id(2L).name("BlockedUser").build();
 	}
 
 	@Test
-	void 차단_성공() {
+	void 사용자를_차단한다() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(
-			blocked.getId(), true, true, true, true, true, "MANUAL"
-		);
+		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, true, "MANUAL");
 
-		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
-		given(memberRepository.findById(blocked.getId())).willReturn(Optional.of(blocked));
+		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
+		given(memberRepository.findById(2L)).willReturn(Optional.of(blocked));
 		given(blockRepository.existsByBlockerAndBlocked(blocker, blocked)).willReturn(false);
-		given(blockRepository.save(any(Block.class))).willAnswer(invocation -> {
-			Block block = invocation.getArgument(0);
-			return block;
-		});
+
+		Block block = Block.builder()
+			.blocker(blocker)
+			.blocked(blocked)
+			.blockUserAccess(true)
+			.excludeFromMatching(true)
+			.excludeFromRecommendation(true)
+			.blockType(Block.BlockType.MANUAL)
+			.build();
+
+		// createTime 필드 설정 (BaseEntity 필드)
+		LocalDateTime now = LocalDateTime.now();
+
+		given(blockRepository.save(any())).willReturn(block);
 
 		// when
-		BlockResponseDto response = blockService.blockUser(blocker.getId(), requestDto);
+		BlockResponseDto response = blockService.blockUser(1L, requestDto);
 
 		// then
-		assertThat(response.getMessage()).contains("차단");
-		assertThat(response.getBlockedId()).isEqualTo(blocked.getId());
-		assertThat(response.getBlockTime()).isNotNull();
+		assertThat(response.getBlockedId()).isEqualTo(2L);
+		assertThat(response.getMessage()).isEqualTo("사용자를 차단했습니다.");
 	}
 
 	@Test
-	void 자기자신을_차단하려고_하면_예외발생() {
+	void 자기_자신을_차단하면_예외_발생() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(
-			blocker.getId(), true, true, true, true, true, "MANUAL"
-		);
-
-		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
+		BlockRequestDto requestDto = new BlockRequestDto(1L, true, true, true, "MANUAL");
 
 		// when & then
-		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () ->
-			blockService.blockUser(blocker.getId(), requestDto));
-
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
+			() -> blockService.blockUser(1L, requestDto));
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.CANNOT_BLOCK_SELF);
 	}
 
 	@Test
-	void 차단_해제_정상작동() {
+	void 이미_차단한_사용자를_다시_차단하면_예외_발생() {
+		// given
+		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, true, "MANUAL");
+
+		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
+		given(memberRepository.findById(2L)).willReturn(Optional.of(blocked));
+		given(blockRepository.existsByBlockerAndBlocked(blocker, blocked)).willReturn(true);
+
+		// when & then
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
+			() -> blockService.blockUser(1L, requestDto));
+		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.ALREADY_BLOCKED);
+	}
+
+	@Test
+	void 차단한_사용자를_차단해제한다() {
 		// given
 		Block block = Block.builder()
 			.blocker(blocker)
@@ -98,27 +113,36 @@ class BlockServiceTest {
 			.blockType(Block.BlockType.MANUAL)
 			.build();
 
-		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
-		given(memberRepository.findById(blocked.getId())).willReturn(Optional.of(blocked));
+		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
+		given(memberRepository.findById(2L)).willReturn(Optional.of(blocked));
 		given(blockRepository.findByBlockerAndBlocked(blocker, blocked)).willReturn(Optional.of(block));
 
 		// when
-		String response = blockService.unblockUser(blocker.getId(), blocked.getId());
+		String message = blockService.unblockUser(1L, 2L);
 
 		// then
-		assertThat(response).contains("해제");
+		assertThat(message).isEqualTo("차단을 해제했습니다.");
+		assertThat(block.isUnblocked()).isTrue();
+		assertThat(block.getUnblockedAt()).isNotNull();
 	}
 
 	@Test
-	void 차단_목록_조회_결과는_빈리스트() {
+	void 차단_목록을_조회한다() {
 		// given
-		given(memberRepository.findById(blocker.getId())).willReturn(Optional.of(blocker));
-		given(blockRepository.findAllByBlocker(blocker)).willReturn(Collections.emptyList());
+		Member blocked2 = Member.builder().id(3L).name("Blocked2").build();
+		Block block1 = Block.builder().blocker(blocker).blocked(blocked).build();
+		Block block2 = Block.builder().blocker(blocker).blocked(blocked2).build();
+
+		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
+		given(blockRepository.findAllByBlocker(blocker)).willReturn(List.of(block1, block2));
 
 		// when
-		List<String> results = blockService.getBlockedUsers(blocker.getId());
+		List<String> result = blockService.getBlockedUsers(1L);
 
 		// then
-		assertThat(results).isEmpty();
+		assertThat(result).containsExactlyInAnyOrder(
+			"BlockedUser을(를) 차단 중입니다.",
+			"Blocked2을(를) 차단 중입니다."
+		);
 	}
 }

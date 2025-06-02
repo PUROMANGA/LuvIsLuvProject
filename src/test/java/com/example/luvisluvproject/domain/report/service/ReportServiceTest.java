@@ -1,11 +1,14 @@
 package com.example.luvisluvproject.domain.report.service;
 
+import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
+import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.report.dto.ReportRequestDto;
 import com.example.luvisluvproject.domain.report.dto.ReportResponseDto;
 import com.example.luvisluvproject.domain.report.entity.Report;
 import com.example.luvisluvproject.domain.report.entity.ReportReason;
+import com.example.luvisluvproject.domain.report.entity.ReportTargetType;
 import com.example.luvisluvproject.domain.report.repository.ReportRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
@@ -33,78 +36,110 @@ class ReportServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
 
+	@Mock
+	private BlockService blockService;
+
 	@InjectMocks
 	private ReportService reportService;
 
 	private Member reporter;
-	private Member reported;
+	private Member targetUser;
 
 	@BeforeEach
 	void setUp() {
 		reporter = Member.builder().id(1L).name("reporter").build();
-		reported = Member.builder().id(2L).name("reported").build();
+		targetUser = Member.builder().id(2L).name("targetUser").build();
 	}
 
 	@Test
-	void 신고_성공() {
+	void 유저신고_성공시_자동차단된다() {
 		// given
 		ReportRequestDto requestDto = new ReportRequestDto(
-			reported.getId(),
-			ReportReason.INAPPROPRIATE_BEHAVIOR,
-			"욕설을 하였습니다."
+			ReportTargetType.USER,
+			targetUser.getId(),
+			ReportReason.SPAM,
+			"욕설을 반복적으로 사용함"
 		);
 
-		given(reportRepository.existsByReporterIdAndReportedId(reporter.getId(), reported.getId()))
+		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
 			.willReturn(false);
-		given(memberRepository.findById(reporter.getId()))
-			.willReturn(Optional.of(reporter));
-		given(memberRepository.findById(reported.getId()))
-			.willReturn(Optional.of(reported));
+		given(memberRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+		given(reportRepository.save(any(Report.class)))
+			.willReturn(Report.builder().reporter(reporter).targetId(targetUser.getId()).targetType(ReportTargetType.USER).build());
 
 		// when
-		ReportResponseDto response = reportService.reportUser(reporter.getId(), requestDto);
+		ReportResponseDto response = reportService.report(reporter.getId(), requestDto);
 
 		// then
 		assertThat(response.getMessage()).isEqualTo("신고가 정상적으로 접수되었습니다.");
+		then(blockService).should().blockUser(eq(reporter.getId()), any(BlockRequestDto.class));
 		then(reportRepository).should().save(any(Report.class));
 	}
 
 	@Test
-	void 이미_신고한_사용자일_경우_예외발생() {
+	void 메시지신고_성공시_자동차단되지_않는다() {
 		// given
+		Long messageId = 99L;
+
 		ReportRequestDto requestDto = new ReportRequestDto(
-			reported.getId(),
-			ReportReason.SPAM,
-			"지속적인 광고성 메시지"
+			ReportTargetType.MESSAGE,
+			messageId,
+			ReportReason.SEXUAL_CONTENT,
+			"부적절한 이미지 전송"
 		);
 
-		given(reportRepository.existsByReporterIdAndReportedId(reporter.getId(), reported.getId()))
+		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), messageId, ReportTargetType.MESSAGE))
+			.willReturn(false);
+		given(memberRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+		given(reportRepository.save(any(Report.class)))
+			.willReturn(Report.builder().reporter(reporter).targetId(messageId).targetType(ReportTargetType.MESSAGE).build());
+
+		// when
+		ReportResponseDto response = reportService.report(reporter.getId(), requestDto);
+
+		// then
+		assertThat(response.getMessage()).isEqualTo("신고가 정상적으로 접수되었습니다.");
+		then(blockService).shouldHaveNoInteractions(); // ✅ 메시지 신고 시 차단 없음
+		then(reportRepository).should().save(any(Report.class));
+	}
+
+	@Test
+	void 이미_신고한_경우_예외_발생() {
+		// given
+		ReportRequestDto requestDto = new ReportRequestDto(
+			ReportTargetType.USER,
+			targetUser.getId(),
+			ReportReason.SPAM,
+			"이미 신고함"
+		);
+
+		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
 			.willReturn(true);
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
-			() -> reportService.reportUser(reporter.getId(), requestDto));
+			() -> reportService.report(reporter.getId(), requestDto));
 
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.ALREADY_REPORTED);
 	}
 
 	@Test
-	void 신고자_또는_피신고자_없을_경우_예외발생() {
+	void 신고자_없는_경우_예외_발생() {
 		// given
 		ReportRequestDto requestDto = new ReportRequestDto(
-			reported.getId(),
-			ReportReason.INAPPROPRIATE_BEHAVIOR,
-			"비속어 사용"
+			ReportTargetType.USER,
+			targetUser.getId(),
+			ReportReason.ABUSIVE_LANGUAGE,
+			"신고자 없음"
 		);
 
-		given(reportRepository.existsByReporterIdAndReportedId(reporter.getId(), reported.getId()))
+		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
 			.willReturn(false);
-		given(memberRepository.findById(reporter.getId()))
-			.willReturn(Optional.empty());
+		given(memberRepository.findById(reporter.getId())).willReturn(Optional.empty());
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
-			() -> reportService.reportUser(reporter.getId(), requestDto));
+			() -> reportService.report(reporter.getId(), requestDto));
 
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.USER_CANT_FIND);
 	}
