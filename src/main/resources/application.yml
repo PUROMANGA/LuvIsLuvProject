@@ -41,3 +41,8 @@ logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+
+# 카카오 API Key
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}
