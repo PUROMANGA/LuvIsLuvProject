@@ -8,7 +8,7 @@ import lombok.Getter;
 
 /**
  * 가게 등록 요청 DTO
- * 위도/경도는 추후 OpenAPI로 변환되므로 이 요청에서는 받지 않음
+ * 테스트 및 객체 생성을 위한 생성자 추가
  */
 @Getter
 public class StoreSaveRequest {
@@ -28,4 +28,17 @@ public class StoreSaveRequest {
 
 	@NotNull(message = "가게 유형은 필수입니다.")
 	private StoreType storeType;
+
+	/**
+	 * 테스트용 생성자 (편의상 넣음)
+	 */
+	public StoreSaveRequest(String name, Long businessNumber, String contactNumber,
+		String address, StoreStatus status, StoreType storeType) {
+		this.name = name;
+		this.businessNumber = businessNumber;
+		this.contactNumber = contactNumber;
+		this.address = address;
+		this.status = status;
+		this.storeType = storeType;
+	}
 }

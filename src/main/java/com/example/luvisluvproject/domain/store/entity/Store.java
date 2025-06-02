@@ -3,6 +3,7 @@ package com.example.luvisluvproject.domain.store.entity;
 import com.example.luvisluvproject.domain.store.enums.StoreStatus;
 import com.example.luvisluvproject.domain.store.enums.StoreType;
 import com.example.luvisluvproject.global.common.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -88,8 +89,8 @@ public class Store extends BaseEntity {
 	 * @param status         가게 상태
 	 * @param storeType      가게 유형
 	 */
-	public Store(String name, Long businessNumber, String contactNumber, String address,
-		Double latitude, Double longitude, StoreStatus status, StoreType storeType) {
+	public Store(String name, Long businessNumber, String contactNumber, String address, Double latitude,
+		Double longitude, StoreStatus status, StoreType storeType) {
 		this.name = name;
 		this.businessNumber = businessNumber;
 		this.contactNumber = contactNumber;
@@ -109,11 +110,13 @@ public class Store extends BaseEntity {
 	 * @param status       새로운 상태
 	 * @param storeType    새로운 업종
 	 */
-	public void update(String name, String contactNumber, String address,
+	public void update(String name, String contactNumber, String address, Double latitude, Double longitude,
 		StoreStatus status, StoreType storeType) {
 		this.name = name;
 		this.contactNumber = contactNumber;
 		this.address = address;
+		this.latitude = latitude;
+		this.longitude = longitude;
 		this.status = status;
 		this.storeType = storeType;
 	}
