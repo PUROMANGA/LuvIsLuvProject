@@ -18,12 +18,12 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 		Map<String, Object> attributes) throws Exception {
 
-		if(request instanceof ServletServerHttpRequest servletServerHttpRequest) {
-			HttpServletRequest httpServletRequest = (HttpServletRequest) servletServerHttpRequest;
+		if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
+			HttpServletRequest httpServletRequest = (HttpServletRequest)servletServerHttpRequest;
 
 			String authHeader = httpServletRequest.getHeader("Authorization");
 
-			if(authHeader != null && authHeader.startsWith("Bearer ")) {
+			if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				String token = authHeader.substring(7);
 
 				//if절로 JWTPROVIDER의 VALIDATETOKEN을 이용해서 TOKEN이 정상적인지 확인
@@ -40,7 +40,7 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 	public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
 		Exception exception) {
 
-		if(request instanceof ServletServerHttpRequest servletServerHttpRequest) {
+		if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
 			String ip = servletServerHttpRequest.getServletRequest().getRemoteAddr();
 			String userAgent = servletServerHttpRequest.getServletRequest().getHeader("User-Agent");
 
