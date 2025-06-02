@@ -10,6 +10,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -72,5 +73,20 @@ public class ChatController {
 		@PathVariable Long chatId,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
 		return ResponseEntity.ok(chatService.getAndCheckMessage(member.getEmail(), chatId, pageable));
+	}
+
+	/**
+	 * member 확인해주면서 채팅방 삭제
+	 * @param member
+	 * @param chatId
+	 * @return
+	 */
+
+	@DeleteMapping("/chats/{chatId}")
+	public ResponseEntity<String> deleteChatRoom(
+		@AuthenticationPrincipal Member member,
+		@PathVariable Long chatId) {
+		chatService.deleteChatRoomService(member, chatId);
+		return ResponseEntity.ok("삭제완료");
 	}
 }

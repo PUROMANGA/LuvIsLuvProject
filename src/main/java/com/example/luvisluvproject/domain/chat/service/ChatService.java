@@ -105,4 +105,20 @@ public class ChatService {
 		String destination = "sub/chats/" + message.getChatRoom().getId();
 		simpMessagingTemplate.convertAndSend(destination, message);
 	}
+
+	/**
+	 * member 확인해주면서 채팅방 삭제
+	 * @param member
+	 * @param chatId
+	 */
+
+	public void deleteChatRoomService(Member member, Long chatId) {
+		ChatRoom chatRoom = chatRoomRepository.findById(chatId).orElseThrow(() -> new RuntimeException("채팅방이 없습니다."));
+
+		if(member.getEmail().equals(chatRoom.getMemberB().getEmail())) {
+			chatRoomRepository.delete(chatRoom);
+		} else {
+			throw new RuntimeException("자격이 없습니다");
+		}
+	}
 }
