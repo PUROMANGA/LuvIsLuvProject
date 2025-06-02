@@ -9,7 +9,7 @@ public class MatchRequestDto {
 
 	private Long receiverId;
 
-	MatchRequestDto(Member member) {
+	public MatchRequestDto(Member member) {
 		this.receiverId = member.getId();
 	}
 }
