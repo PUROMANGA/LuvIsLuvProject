@@ -12,6 +12,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,12 +21,13 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "members")
 @NoArgsConstructor
+@Builder
 public class Member extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, length = 50)
+	@Column(unique = true, nullable = false, length = 50)
 	private String name;
 
 	@Column(unique = true, nullable = false)
@@ -74,5 +77,13 @@ public class Member extends BaseEntity {
 
 	public void plusIsLike() {
 		this.likeCount++;
+	}
+
+	public void update(String password) {
+		this.password = password;
+	}
+
+	public void softDelete() {
+		this.status = true;
 	}
 }

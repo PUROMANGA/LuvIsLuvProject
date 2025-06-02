@@ -86,7 +86,7 @@ public class MatchService {
 		redisTemplate.delete(senderId + ":" + me.getId());
 
 		if (acceptMatchDto.getMatchStatus().equals(MatchStatus.ACCEPTED)) {
-				applicationEventPublisher.publishEvent(new ChatCreateEvent(this, senderId, me.getId()));
+			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, senderId, me.getId()));
 		}
 
 		return new MatchResponseDto(matchRepository.save(match));
