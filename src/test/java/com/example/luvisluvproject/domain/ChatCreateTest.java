@@ -27,6 +27,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -87,14 +88,16 @@ public class ChatCreateTest {
 	Boolean isRead = false;
 
 	Message message = new Message(
+		"1",
 		1L,
-		chatRoom,
 		memberA.getId(),
 		memberB.getId(),
-		false,
 		"아아아아아아",
 		"대충 주소",
-		MessageType.IMAGE
+		MessageType.IMAGE,
+		false,
+		LocalDateTime.now(),
+		LocalDateTime.now()
 	);
 
 	@Test

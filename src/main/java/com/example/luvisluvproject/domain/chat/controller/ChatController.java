@@ -20,6 +20,7 @@ import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
 import com.example.luvisluvproject.domain.chat.dto.ResponseMessageDto;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
 import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.global.common.AuthUser;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,8 +41,8 @@ public class ChatController {
 	public void sendMessage(
 		@Validated RequestMessageDto requestMessageDto,
 		@DestinationVariable Long chatId,
-		@AuthenticationPrincipal Member member) {
-		chatService.sendChatMessage(requestMessageDto, chatId, member.getEmail());
+		@AuthenticationPrincipal AuthUser member) {
+		chatService.sendChatMessage(requestMessageDto, chatId, member.getUsername());
 	}
 
 	/**
@@ -54,8 +55,8 @@ public class ChatController {
 	@PatchMapping("/messages/{messageId}")
 	public ResponseEntity<String> updateIsRead(
 		@PathVariable Long messageId,
-		@AuthenticationPrincipal Member member) {
-		chatService.updateIsReadService(messageId, member);
+		@AuthenticationPrincipal AuthUser member) {
+		chatService.updateIsReadService(messageId, member.getUsername());
 		return ResponseEntity.ok("읽음 처리 완료");
 	}
 
@@ -69,10 +70,10 @@ public class ChatController {
 
 	@GetMapping("/chats/{chatId}")
 	public ResponseEntity<Slice<ResponseMessageDto>> checkMessage(
-		@AuthenticationPrincipal Member member,
+		@AuthenticationPrincipal AuthUser member,
 		@PathVariable Long chatId,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
-		return ResponseEntity.ok(chatService.getAndCheckMessage(member.getEmail(), chatId, pageable));
+		return ResponseEntity.ok(chatService.getAndCheckMessage(member.getUsername(), chatId, pageable));
 	}
 
 	/**
@@ -84,9 +85,9 @@ public class ChatController {
 
 	@DeleteMapping("/chats/{chatId}")
 	public ResponseEntity<String> deleteChatRoom(
-		@AuthenticationPrincipal Member member,
+		@AuthenticationPrincipal AuthUser member,
 		@PathVariable Long chatId) {
-		chatService.deleteChatRoomService(member, chatId);
+		chatService.deleteChatRoomService(member.getUsername(), chatId);
 		return ResponseEntity.ok("삭제완료");
 	}
 }
