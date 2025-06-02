@@ -19,6 +19,7 @@ public enum ExceptionCode implements ErrorCode {
 	//가게
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게를 찾을 수 없습니다."),
 	CANT_FIND_INTERFACE(HttpStatus.NOT_FOUND, "해당 정보를 찾을 수 없습니다"),
+	KAKAO_API_EMPTY_RESULT(HttpStatus.NOT_FOUND, "Kakao API 응답에 좌표 정보가 없습니다."),
 
 	//유저(=멤버)
 	USER_CANT_FIND(HttpStatus.NOT_FOUND, "해당 유저를 찾을 수 없습니다"),
