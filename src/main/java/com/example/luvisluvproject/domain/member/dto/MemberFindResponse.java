@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.member.dto;
 
+import java.time.LocalDate;
+
 import lombok.Getter;
 
 @Getter
@@ -11,9 +13,9 @@ public class MemberFindResponse {
 
 	private final String email;
 
-	private final String birthday;
+	private final LocalDate birthday;
 
-	public MemberFindResponse(Long userId, String name, String email, String birthday) {
+	public MemberFindResponse(Long userId, String name, String email, LocalDate birthday) {
 		this.userId = userId;
 		this.name = name;
 		this.email = email;
