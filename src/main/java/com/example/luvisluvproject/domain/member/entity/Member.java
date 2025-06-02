@@ -26,7 +26,7 @@ public class Member extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(nullable = false, length = 50)
+	@Column(unique = true, nullable = false, length = 50)
 	private String name;
 
 	@Column(unique = true, nullable = false)
@@ -52,6 +52,7 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 	}
+
 	public Member(Long id, String name, String email, String password, String birthday, UserRole userRole,
 		boolean status) {
 		this.id = id;
@@ -61,5 +62,13 @@ public class Member extends BaseEntity {
 		this.birthday = birthday;
 		this.userRole = userRole;
 		this.status = status;
+	}
+
+	public void update(String password) {
+		this.password = password;
+	}
+
+	public void softDelete() {
+		this.status = true;
 	}
 }
