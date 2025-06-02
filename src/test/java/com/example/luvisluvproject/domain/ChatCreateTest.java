@@ -115,6 +115,7 @@ public class ChatCreateTest {
 		chatService.sendChatMessage(requestMessageDto, chatRoom.getId(), memberB.getEmail());
 
 		//then
-		verify(simpMessagingTemplate, times(1)).convertAndSend(eq("/sub/chats/" + chatRoom.getId()), eq(requestMessageDto));
+		verify(simpMessagingTemplate, times(1)).convertAndSend(eq("/sub/chats/" + chatRoom.getId()),
+			eq(requestMessageDto));
 	}
 }

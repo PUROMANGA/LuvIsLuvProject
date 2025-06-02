@@ -8,5 +8,5 @@ import com.example.luvisluvproject.domain.chat.entity.Message;
 
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-	Slice<Message> findAllByChatId(Long chatId, Pageable pageable);
+	Slice<Message> findAllByChatRoomId(Long chatId, Pageable pageable);
 }
