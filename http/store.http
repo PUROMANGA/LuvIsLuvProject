@@ -1,0 +1,60 @@
+###  1. 가게 등록 성공
+# @no-cookie-jar
+POST http://localhost:8080/stores
+Content-Type: application/json
+
+{
+  "name": "bella coffe",
+  "businessNumber": 1234567890,
+  "contactNumber": "010-1234-5678",
+  "address": "서울시 구로구",
+  "status": "OPEN",
+  "storeType": "CAFE"
+}
+
+###  2. 가게 등록 실패 (빈 name)
+# @no-cookie-jar
+POST http://localhost:8080/stores
+Content-Type: application/json
+
+{
+  "name": "",
+  "businessNumber": 1234567890,
+  "contactNumber": "010-1234-5678",
+  "address": "서울시 구로구",
+  "status": "OPEN",
+  "storeType": "CAFE"
+}
+
+
+
+###  3. 가게 수정 성공
+PUT http://localhost:8080/stores/1
+Content-Type: application/json
+
+{
+  "name": "bella bar & coffee",
+  "contactNumber": "010-2222-3333",
+  "address": "서울시 성동구",
+  "status": "CLOSED",
+  "storeType": "CAFE"
+}
+
+###  4. 가게 수정 실패 (존재하지 않는 ID)
+PUT http://localhost:8080/stores/99999
+Content-Type: application/json
+
+{
+  "name": "없는 가게 수정",
+  "contactNumber": "010-0000-0000",
+  "address": "서울시 구로구",
+  "status": "CLOSED",
+  "storeType": "CAFE"
+}
+
+
+###  5. 가게 삭제 성공
+DELETE http://localhost:8080/stores/1
+
+###  6. 가게 삭제 실패 (이미 삭제되었거나 없는 ID)
+DELETE http://localhost:8080/stores/99999
