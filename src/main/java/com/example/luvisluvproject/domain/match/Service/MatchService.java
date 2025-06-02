@@ -6,6 +6,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchRequestDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
@@ -26,6 +27,7 @@ public class MatchService {
 	private final MatchRepository matchRepository;
 	private final MemberRepository memberRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final BlockService blockService;
 
 	/**
 	 * 매칭을 걸면 해당 사람에게 요청이 갑니다.
@@ -43,6 +45,7 @@ public class MatchService {
 		Member receiverMember = memberRepository.findById(matchRequestDto.getReceiverId())
 			.orElseThrow(() -> new CustomRuntimeException(
 				ExceptionCode.USER_CANT_FIND));
+
 		//match(수락 안 된 상태) 객체 생성
 		Match match = new Match(senderMember.getId(), receiverMember.getId());
 		//match를 저장합니다.

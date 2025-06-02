@@ -32,7 +32,18 @@ public enum ExceptionCode implements ErrorCode {
 	SAME_NAME(HttpStatus.BAD_REQUEST, "이전과 동일한 이름은 변경할 수 없습니다."),
 
 	//매치
-	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다.");
+	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다."),
+
+	//차단
+	ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "이미 차단한 사용자입니다."),
+	CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 차단할 수 없습니다."),
+	BLOCK_NOT_FOUND(HttpStatus.NOT_FOUND, "차단 정보가 존재하지 않습니다."),
+	PROFILE_ACCESS_DENIED(HttpStatus.FORBIDDEN, "프로필 접근이 차단되었습니다."),
+
+	// 신고
+	ALREADY_REPORTED(HttpStatus.BAD_REQUEST, "이미 신고한 사용자입니다."),
+	CANNOT_REPORT_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 신고할 수 없습니다."),
+	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고 내역이 존재하지 않습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
