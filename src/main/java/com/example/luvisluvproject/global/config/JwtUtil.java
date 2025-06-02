@@ -103,4 +103,10 @@ public class JwtUtil {
 		return null;
 	}
 
+	// 토큰 남은 만료시간 구하기 -> 로그아웃 구현시 사용
+	public long getExpiration(String token) {
+		Claims claims = extractClaims(token);
+		return claims.getExpiration().getTime() - System.currentTimeMillis();
+	}
+
 }

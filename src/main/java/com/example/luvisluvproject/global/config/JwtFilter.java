@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,6 +31,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
 	private final UserDetailsServiceImpl userDetailsService;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
@@ -48,6 +50,14 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		String token = jwtUtil.resolveToken(request);
+
+		// Redis에 로그아웃(블랙리스트) 처리된 토큰인지 확인
+		String isLogout = redisTemplate.opsForValue().get(token);
+		if ("logout".equals(isLogout)) {
+			log.info("로그아웃된 토큰으로 접근 시도");
+			response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "로그아웃된 토큰입니다.");
+			return;
+		}
 
 		if (StringUtils.hasText(token) && jwtUtil.validateToken(token)) {
 

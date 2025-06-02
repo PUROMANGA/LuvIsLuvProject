@@ -11,7 +11,9 @@ import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
+import com.example.luvisluvproject.global.config.JwtUtil;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
 	private final AuthService authService;
+	private final JwtUtil jwtUtil;
 
 	/**
 	 * 회원가입 요청 컨트롤러
@@ -42,6 +45,19 @@ public class AuthController {
 	@PostMapping("/login")
 	public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginRequestDto requestDto) {
 		return ResponseEntity.ok(authService.login(requestDto));
+	}
+
+	/**
+	 * 로그아웃 요청 컨트롤러
+	 *
+	 * @param request HTTP 요청 객체 (헤더에서 토큰 추출)
+	 * @return 성공 메시지
+	 */
+	@PostMapping("/logout")
+	public ResponseEntity<String> logout(HttpServletRequest request) {
+		String accessToken = jwtUtil.resolveToken(request);
+		authService.logout(accessToken);
+		return ResponseEntity.ok("로그아웃 되었습니다.");
 	}
 
 }

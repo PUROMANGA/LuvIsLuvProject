@@ -1,5 +1,8 @@
 package com.example.luvisluvproject.domain.auth.service;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +27,7 @@ public class AuthService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
+	private final RedisTemplate<String, String> redisTemplate;
 
 	/**
 	 * 회원가입
@@ -41,6 +45,7 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.EMAIL_ALREADY_EXIST);
 		}
 
+		// 이름 중복확인
 		if (memberRepository.existsByName(requestDto.getName())) {
 			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
 		}
@@ -100,6 +105,25 @@ public class AuthService {
 
 		return new LoginResponseDto(accessToken, refreshToken);
 
+	}
+
+	/**
+	 * 로그아웃
+	 *
+	 * @param accessToken 클라이언트가 사용 중인 JWT Access Token
+	 * @throws CustomRuntimeException 유효하지 않은 토큰일 경우
+	 */
+	@Transactional
+	public void logout(String accessToken) {
+		if (!jwtUtil.validateToken(accessToken)) {
+			throw new CustomRuntimeException(ExceptionCode.INVALID_TOKEN);
+		}
+
+		// 토큰 남은 유효 시간 계산
+		long expiration = jwtUtil.getExpiration(accessToken);
+
+		// Redis에 access token을 블랙리스트로 저장
+		redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
 	}
 
 }
