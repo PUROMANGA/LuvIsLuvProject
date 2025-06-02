@@ -43,7 +43,8 @@ public class MemberService {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
-		return new MemberFindResponse(member.getId(),
+		return new MemberFindResponse(
+			member.getId(),
 			member.getName(),
 			member.getEmail(),
 			member.getBirthday()
