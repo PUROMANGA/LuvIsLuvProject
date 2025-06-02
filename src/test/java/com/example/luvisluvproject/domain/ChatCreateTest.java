@@ -26,6 +26,7 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +58,7 @@ public class ChatCreateTest {
 		"송진영",
 		"songjinyong@email.com",
 		"test1234",
-		"2001-01-01",
+		LocalDate.parse("2001-01-01"),
 		UserRole.USER,
 		true,
 		1L
@@ -68,7 +69,7 @@ public class ChatCreateTest {
 		"이유리",
 		"leeyuuri@email.com",
 		"test5678",
-		"2001-02-01",
+		LocalDate.parse("2001-02-01"),
 		UserRole.USER,
 		true,
 		1L

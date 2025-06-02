@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.member.entity;
 
-import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
+import java.time.LocalDate;
+
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
@@ -12,7 +13,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,7 +37,7 @@ public class Member extends BaseEntity {
 	private String password;
 
 	@Column(nullable = false, length = 10)
-	private String birthday;
+	private LocalDate birthday;
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
@@ -50,7 +50,7 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private Long likeCount;
 
-	public Member(String name, String email, String password, String birthday, UserRole userRole) {
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
@@ -58,7 +58,7 @@ public class Member extends BaseEntity {
 		this.userRole = userRole;
 	}
 
-	public Member(Long id, String name, String email, String password, String birthday, UserRole userRole,
+	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
 		boolean status,
 		Long likeCount) {
 		this.id = id;

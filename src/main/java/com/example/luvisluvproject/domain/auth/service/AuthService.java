@@ -1,14 +1,20 @@
 package com.example.luvisluvproject.domain.auth.service;
 
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
+import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -20,7 +26,17 @@ public class AuthService {
 
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final JwtUtil jwtUtil;
+	private final RedisTemplate<String, String> redisTemplate;
 
+	/**
+	 * 회원가입
+	 *
+	 * @param requestDto 회원 가입 요청 정보
+	 * @return 가입된 회원 정보가 담긴 응답 DTO
+	 * @throws CustomRuntimeException 이메일 중복일 경우 {@code ExceptionCode.EMAIL_ALREADY_EXIST}
+	 */
+	// todo 미성년자 체크 로직 추가해야함 !!
 	@Transactional
 	public SignupResponseDto signup(SignupRequestDto requestDto) {
 
@@ -29,6 +45,7 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.EMAIL_ALREADY_EXIST);
 		}
 
+		// 이름 중복확인
 		if (memberRepository.existsByName(requestDto.getName())) {
 			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
 		}
@@ -56,6 +73,57 @@ public class AuthService {
 			saved.getBirthday(),
 			saved.getUserRole()
 		);
+	}
+
+	/**
+	 * 로그인 및 JWT 토큰 발급
+	 *
+	 * @param requestDto 로그인 요청 정보
+	 * @return 발급된 액세스 토큰과 리프레시 토큰이 담긴 응답 DTO
+	 * @throws CustomRuntimeException 회원이 존재하지 않거나 로그인 실패 시
+	 */
+	@Transactional
+	public LoginResponseDto login(LoginRequestDto requestDto) {
+
+		// 이메일 체크해 실존하는 멤버인지 체크
+		Member member = memberRepository.findByEmail(requestDto.getEmail())
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+
+		// 이메일 일치 확인
+		if (!requestDto.getEmail().equals(member.getEmail())) {
+			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
+		}
+
+		// 비밀번호 일치 확인
+		if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
+			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
+		}
+
+		// 맞으면 토큰 발급
+		String accessToken = jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
+		String refreshToken = jwtUtil.createRefreshToken(member.getEmail());
+
+		return new LoginResponseDto(accessToken, refreshToken);
+
+	}
+
+	/**
+	 * 로그아웃
+	 *
+	 * @param accessToken 클라이언트가 사용 중인 JWT Access Token
+	 * @throws CustomRuntimeException 유효하지 않은 토큰일 경우
+	 */
+	@Transactional
+	public void logout(String accessToken) {
+		if (!jwtUtil.validateToken(accessToken)) {
+			throw new CustomRuntimeException(ExceptionCode.INVALID_TOKEN);
+		}
+
+		// 토큰 남은 유효 시간 계산
+		long expiration = jwtUtil.getExpiration(accessToken);
+
+		// Redis에 access token을 블랙리스트로 저장
+		redisTemplate.opsForValue().set(accessToken, "logout", expiration, TimeUnit.MILLISECONDS);
 	}
 
 }

@@ -30,7 +30,19 @@ spring:
       timeout: 3000
       password: ${REDIS_PASSWORD}
 
+jwt:
+  secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
+  accessToken:
+    time: 3600000
+  refreshToken:
+    time: 1209600000
+
 logging:
   level:
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+
+# 카카오 API Key
+kakao:
+  api:
+    key: ${KAKAO_API_KEY}

@@ -25,4 +25,16 @@ public class StoreUpdateRequest {
 
 	@NotNull(message = "가게 유형은 필수입니다.")
 	private StoreType storeType;
+
+	/**
+	 * 테스트용 생성자 (편의상 넣음)
+	 */
+	public StoreUpdateRequest(String name, String contactNumber,
+		String address, StoreStatus status, StoreType storeType) {
+		this.name = name;
+		this.contactNumber = contactNumber;
+		this.address = address;
+		this.status = status;
+		this.storeType = storeType;
+	}
 }
