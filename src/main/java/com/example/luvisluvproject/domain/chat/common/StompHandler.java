@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
+import com.example.luvisluvproject.global.config.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,10 +22,10 @@ import lombok.extern.slf4j.Slf4j;
 
 public class StompHandler implements ChannelInterceptor {
 
-	// private final JwtTokenProvider jwtTokenProvider;
 	private final ChatService chatService;
 	private final ChatRoomRepository chatRoomRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final JwtUtil jwtUtil;
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -34,12 +35,16 @@ public class StompHandler implements ChannelInterceptor {
 			String authToken = accessor.getFirstNativeHeader("Authorization");
 			String token = authToken.substring(7);
 
-			// if(!jwtTokenProvider.validateToken(token)) {
-			// 	throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
-			// }
-			//
-			// String username = jwtTokenProvider.getUserNameFromToken(token);
-			// accessor.setUser(() -> username);
+			if (authToken == null || !authToken.startsWith("Bearer ")) {
+				throw new IllegalArgumentException("Authorization 헤더가 없거나 형식이 잘못되었습니다.");
+			}
+
+			if(!jwtUtil.validateToken(token)) {
+				throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
+			}
+
+			String username = jwtUtil.extractClaims(token).getSubject();
+			accessor.setUser(() -> username);
 
 		} else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
 
