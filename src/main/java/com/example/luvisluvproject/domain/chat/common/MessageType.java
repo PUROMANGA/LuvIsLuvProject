@@ -4,5 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum MessageType {
-	TEXT, IMAGE, ENTER;
+	TEXT,
+	IMAGE,
+	ENTER;
 }

@@ -60,4 +60,10 @@ public class ChatRoom extends BaseEntity {
 		this.memberA = memberA;
 		this.memberB = memberB;
 	}
+
+	public ChatRoom(List<MemberChatRoom> memberChatRoomRList, Member memberA, Member memberB) {
+		this.memberChatRoomRList = memberChatRoomRList;
+		this.memberA = memberA;
+		this.memberB = memberB;
+	}
 }

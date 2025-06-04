@@ -8,11 +8,18 @@ import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
+import com.example.luvisluvproject.global.config.JwtUtil;
+
 import jakarta.servlet.http.HttpServletRequest;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
+@RequiredArgsConstructor
+
 public class HttpHandshakeInterceptor implements HandshakeInterceptor {
+
+	private final JwtUtil jwtUtil;
 
 	@Override
 	public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,
@@ -26,8 +33,10 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 			if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				String token = authHeader.substring(7);
 
-				//if절로 JWTPROVIDER의 VALIDATETOKEN을 이용해서 TOKEN이 정상적인지 확인
-				// 이후 위에 ATTRIBUTE을 사용해서 WEBSOCKERT세션에 저장
+				if(jwtUtil.validateToken(token)) {
+					attributes.put("token", token);
+					return true;
+				}
 
 			} else {
 				throw new RuntimeException("헤더 정보가 없습니다");

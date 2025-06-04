@@ -39,7 +39,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		List<String> whitelist = List.of(
 			"/auth/login",
-			"/auth/signup"
+			"/auth/signup",
+			"/ws/**"
 		);
 
 		String requestUri = request.getRequestURI();

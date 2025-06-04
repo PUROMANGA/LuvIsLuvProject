@@ -26,6 +26,8 @@ import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -50,49 +52,29 @@ public class MatchServiceTest {
 	@Mock
 	private MemberRepository memberRepository;
 	@Mock
-	private RedisTemplate<String, Object> redisTemplate;
+	private RedisTemplate<String, Object> matchRedisTemplate;
 	@Mock
 	private ApplicationEventPublisher applicationEventPublisher;
 	@InjectMocks
 	private MatchService matchService;
 
-	Member senderMember = new Member(
-		1L,
-		"송진영",
-		"songjinyong@email.com",
-		"test1234",
-		LocalDate.parse("2001-01-01"),
-		UserRole.USER,
-		true,
-		1L
-	);
+	Member senderMember = new Member(1L, "송진영", "songjinyong@email.com", "test1234", LocalDate.parse("2001-01-01"),
+		UserRole.USER, true, 1L);
 
-	Member receiverMember = new Member(
-		2L,
-		"이유리",
-		"leeyuuri@email.com",
-		"test5678",
-		LocalDate.parse("2001-02-01"),
-		UserRole.USER,
-		true,
-		1L
-	);
+	Member receiverMember = new Member(2L, "이유리", "leeyuuri@email.com", "test5678", LocalDate.parse("2001-02-01"),
+		UserRole.USER, true, 1L);
 
-	Match match = new Match(
-		1L,
-		senderMember.getId(),
-		receiverMember.getId()
-	);
+	Match match = new Match(senderMember.getId(), receiverMember.getId());
 
 	SetOperations<String, Object> setOps;
 	AcceptMatchDto acceptMatchDto = new AcceptMatchDto(MatchStatus.ACCEPTED);
 
 	@Test
 	@DisplayName("송진영이 이유리에게 매칭을 걸었습니다")
-	public void createMatchSongToLee() {
+	public void createMatchSongToLee() throws JsonProcessingException {
 
 		setOps = mock(SetOperations.class);
-		given(redisTemplate.opsForSet()).willReturn(setOps);
+		given(matchRedisTemplate.opsForSet()).willReturn(setOps);
 
 		//given
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(senderMember));
@@ -109,37 +91,35 @@ public class MatchServiceTest {
 
 	@Test
 	@DisplayName("이유리가 송진영의 매칭을 수락하였습니다.")
-	public void patchMatchServiceTest() {
+	public void patchMatchServiceTest() throws JsonProcessingException {
 
 		setOps = mock(SetOperations.class);
-		given(redisTemplate.opsForSet()).willReturn(setOps);
+		given(matchRedisTemplate.opsForSet()).willReturn(setOps);
 
 		Set<Object> matchSet = new HashSet<>();
 		matchSet.add(match);
 
 		//given
-		given(matchRepository.findById(anyLong())).willReturn(Optional.of(match));
+		given(memberRepository.findById(anyLong())).willReturn(Optional.of(senderMember));
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
 		given(setOps.members(anyString())).willReturn(matchSet);
 		Match newMatch = matchSet.stream().map(obj -> {
-				Match m = (Match)obj;
-				m.updateMatchingStatus(acceptMatchDto);
-				return m;
-			})
-			.findFirst()
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+			Match m = (Match)obj;
+			m.updateMatchingStatus(acceptMatchDto);
+			return m;
+		}).findFirst().orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 
-		given(matchRepository.save(newMatch)).willReturn(newMatch);
+		given(matchRepository.save(any(Match.class))).willReturn(newMatch);
 
 		//when
-		MatchResponseDto result = matchService.patchMatchService(match.getId(), acceptMatchDto,
+		MatchResponseDto result = matchService.patchMatchService(senderMember.getId(), acceptMatchDto,
 			receiverMember.getEmail());
 
 		//then
 		assertThat(result.getMatchStatus()).isEqualTo(MatchStatus.ACCEPTED);
 		String expectedKey = senderMember.getId() + ":" + receiverMember.getId();
 		verify(applicationEventPublisher, times(1)).publishEvent(any(ChatCreateEvent.class));
-		verify(redisTemplate, times(1)).delete(eq(expectedKey));
+		verify(matchRedisTemplate, times(1)).delete(eq(expectedKey));
 	}
 
 	@Test
@@ -149,14 +129,15 @@ public class MatchServiceTest {
 
 		List<Match> matchList = new ArrayList<>();
 		matchList.add(match);
-		Pageable pageable = PageRequest.of(0,10);
+		Pageable pageable = PageRequest.of(0, 10);
 		Slice<Match> matches = new SliceImpl<>(matchList, pageable, false);
 
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
 		given(matchRepository.findMatchByReceiverId(anyLong(), any(Pageable.class))).willReturn(matches);
 
 		//when
-		Slice<MatchResponseDto> matchResponseDtoSlice = matchService.getMatchService(receiverMember.getEmail(), pageable);
+		Slice<MatchResponseDto> matchResponseDtoSlice = matchService.getMatchService(receiverMember.getEmail(),
+			pageable);
 
 		//then
 		assertThat(matchResponseDtoSlice).isNotNull();
