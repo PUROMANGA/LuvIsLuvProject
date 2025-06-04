@@ -40,7 +40,7 @@ public class ChatController {
 	@MessageMapping("/chats/{chatId}")
 	public void sendMessage(
 		@Validated RequestMessageDto requestMessageDto,
-		@DestinationVariable Long chatId,
+		@DestinationVariable Long chatId
 		@AuthenticationPrincipal AuthUser member) {
 		chatService.sendChatMessage(requestMessageDto, chatId, member.getUsername());
 	}
