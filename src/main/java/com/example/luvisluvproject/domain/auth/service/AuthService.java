@@ -1,5 +1,8 @@
 package com.example.luvisluvproject.domain.auth.service;
 
+import java.time.LocalDate;
+import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -48,6 +51,14 @@ public class AuthService {
 		// 이름 중복확인
 		if (memberRepository.existsByName(requestDto.getName())) {
 			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
+		}
+
+		// 미성년자 확인
+		LocalDate birthday = requestDto.getBirthday();
+		LocalDate today = LocalDate.now();
+
+		if (birthday.plusYears(19).isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
 		}
 
 		// 비밀번호 암호화
