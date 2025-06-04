@@ -34,8 +34,9 @@ public class ChatService {
 
 	/**
 	 * /pub/chats/chatID로 메세지가 보내지면 /sub/chats/chatId로 convertAndSend를 사용해서 메세지를 전달하게 됩니다.
-	 * @param destination
-	 * @return
+	 * @param requestMessageDto
+	 * @param chatId
+	 * @param email
 	 */
 	@Transactional
 	public void sendChatMessage(RequestMessageDto requestMessageDto, Long chatId, String email) {
