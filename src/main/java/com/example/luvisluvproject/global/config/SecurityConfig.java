@@ -2,7 +2,6 @@ package com.example.luvisluvproject.global.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -11,7 +10,6 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@EnableJpaAuditing
 public class SecurityConfig {
 
 	// 인증 미적용할 부분 필터링
@@ -20,7 +18,7 @@ public class SecurityConfig {
 		http
 			.csrf((csrf) -> csrf.disable())
 			.authorizeHttpRequests((authz) -> authz
-				.requestMatchers("/auth/signup", "/auth/login").permitAll()
+				.requestMatchers("/auth/signup", "/auth/login", "/ws/**").permitAll()
 				.anyRequest().authenticated()
 			);
 

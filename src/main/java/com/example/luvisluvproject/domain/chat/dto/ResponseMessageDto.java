@@ -11,7 +11,7 @@ import lombok.Getter;
 
 public class ResponseMessageDto {
 
-	private Long id;
+	private String id;
 	private Long chatRoomId;
 	private Long senderId;
 	private Long receiverId;
@@ -24,7 +24,7 @@ public class ResponseMessageDto {
 
 	public ResponseMessageDto(Message message) {
 		this.id = message.getId();
-		this.chatRoomId = message.getChatRoom().getId();
+		this.chatRoomId = message.getChatRoomId();
 		this.senderId = message.getSenderId();
 		this.receiverId = message.getReceiverId();
 		this.isRead = message.getIsRead();

@@ -86,4 +86,15 @@ public class Member extends BaseEntity {
 	public void softDelete() {
 		this.status = true;
 	}
+
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
+		Long likeCount) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = status;
+		this.likeCount = likeCount;
+	}
 }

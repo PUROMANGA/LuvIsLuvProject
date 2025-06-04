@@ -42,10 +42,11 @@ public class ChatService {
 		Boolean isRead = false;
 		simpMessagingTemplate.convertAndSend("/sub/chats/" + chatId, requestMessageDto);
 		ChatRoom chatRoom = chatRoomRepository.findById(chatId).orElseThrow(() -> new RuntimeException("채팅방이 없습니다."));
-		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Member opponent = chatRoom.checkMember(me);
-		Message message = new Message(chatRoom, me, opponent, isRead, requestMessageDto);
+		Message message = new Message(chatId, me.getId(), opponent.getId(), requestMessageDto, isRead);
 		messageRepository.save(message);
 	}
 
@@ -58,13 +59,15 @@ public class ChatService {
 	 */
 	@Transactional
 	public Slice<ResponseMessageDto> getAndCheckMessage(String email, Long chatId, Pageable pageable) {
-		Slice<Message> messageList = messageRepository.findAllByChatId(chatId, pageable);
+		Slice<Message> messageList = messageRepository.findAllByChatRoomId(chatId, pageable);
+		ChatRoom chatRoom = chatRoomRepository.findById(chatId).orElseThrow(() -> new RuntimeException("채팅방이 없습니다."));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		List<ResponseMessageDto> responseMessageDtoList = messageList.stream()
-			.peek(m -> m.updateIsRead())
+
 			.map(ResponseMessageDto::new)
 			.toList();
-
 		return new SliceImpl<>(responseMessageDtoList, pageable, messageList.hasNext());
 	}
 
@@ -75,47 +78,28 @@ public class ChatService {
 	 */
 
 	@Transactional
-	public void updateIsReadService(Long messageId, Member member) {
+	public void updateIsReadService(Long messageId, String email) {
 		Message message = messageRepository.findById(messageId).orElseThrow(() -> new RuntimeException("메세지가 없습니다."));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		if(!message.getSenderId().equals(member.getId())) {
+		if (!message.getSenderId().equals(me.getId())) {
 			message.updateIsRead();
 			messageRepository.save(message);
 		}
 	}
 
 	/**
-	 * 세션에 방 아이디를 저장해야하기 때문에 목적지인 주소를 subString해주고 roomId를 찾아서 return해줍니다.
-	 * @param destination
-	 * @return
-	 */
-	public Long submitRoomId(String destination) {
-		if (destination == null) {
-			throw new RuntimeException("잘못된 방 주소 입니다");
-		}
-		String roomId = destination.substring(destination.lastIndexOf("/") + 1);
-		return Long.parseLong(roomId);
-	}
-
-	/**
-	 * 구독이 시작됐을 때
-	 * @param message
-	 */
-	public void sendChatEnterMessage(Message message) {
-		String destination = "sub/chats/" + message.getChatRoom().getId();
-		simpMessagingTemplate.convertAndSend(destination, message);
-	}
-
-	/**
 	 * member 확인해주면서 채팅방 삭제
-	 * @param member
+	 * @param email
 	 * @param chatId
 	 */
-
-	public void deleteChatRoomService(Member member, Long chatId) {
+	public void deleteChatRoomService(String email, Long chatId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(chatId).orElseThrow(() -> new RuntimeException("채팅방이 없습니다."));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		if(member.getEmail().equals(chatRoom.getMemberB().getEmail())) {
+		if (me.getEmail().equals(chatRoom.getMemberB().getEmail())) {
 			chatRoomRepository.delete(chatRoom);
 		} else {
 			throw new RuntimeException("자격이 없습니다");

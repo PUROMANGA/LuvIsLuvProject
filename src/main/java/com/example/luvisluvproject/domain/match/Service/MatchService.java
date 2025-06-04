@@ -19,6 +19,8 @@ import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -29,7 +31,7 @@ public class MatchService {
 
 	private final MatchRepository matchRepository;
 	private final MemberRepository memberRepository;
-	private final RedisTemplate<String, Object> redisTemplate;
+	private final RedisTemplate<String, Object> matchRedisTemplate;
 	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
@@ -39,14 +41,13 @@ public class MatchService {
 	 * @return
 	 */
 	@Transactional
-	public MatchResponseDto createMatchService(Long receiverId, String email) {
+	public MatchResponseDto createMatchService(Long receiverId, String email) throws JsonProcessingException {
 		//senderId(로그인된 유저)
-		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
-			ExceptionCode.USER_CANT_FIND));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 		//receiverId(좋아요 받은 유저)
 		Member receiverMember = memberRepository.findById(receiverId)
-			.orElseThrow(() -> new CustomRuntimeException(
-				ExceptionCode.USER_CANT_FIND));
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		//매칭 요청 받은 사람 인기수치 올림
 		receiverMember.plusIsLike();
@@ -54,7 +55,7 @@ public class MatchService {
 		Match match = new Match(me.getId(), receiverId);
 		//match를 저장합니다.
 		String redisKey = me.getId() + ":" + receiverId;
-		redisTemplate.opsForSet().add(redisKey, match);
+		matchRedisTemplate.opsForSet().add(redisKey, match);
 		return new MatchResponseDto(match);
 	}
 
@@ -66,30 +67,30 @@ public class MatchService {
 	 * @return
 	 */
 	@Transactional
-	public MatchResponseDto patchMatchService(Long matchId, AcceptMatchDto acceptMatchDto, String email) {
-		//매치 찾고
-		Match savedmatch = matchRepository.findById(matchId).orElseThrow(() -> new RuntimeException("매치가 존재하지 않습니다."));
+	public MatchResponseDto patchMatchService(Long senderId, AcceptMatchDto acceptMatchDto, String email) {
 		//매치에서 내가 아닌 보낸사람 들고오기
-		Long senderId = savedmatch.getSenderId();
+		Member sender = memberRepository.findById(senderId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 		//나 들고오기
-		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
-			ExceptionCode.USER_CANT_FIND));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 		//
-		Set<Object> matchCache = redisTemplate.opsForSet().members(senderId + ":" + me.getId());
-		Match match = matchCache.stream().map(obj -> {
+		Set<Object> matchCache = matchRedisTemplate.opsForSet().members(sender.getId() + ":" + me.getId());
+		Match newMatch = matchCache.stream().map(obj -> {
 				Match m = (Match)obj;
 				m.updateMatchingStatus(acceptMatchDto);
-				return m;})
+				return m;
+			})
 			.findFirst()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 
-		redisTemplate.delete(senderId + ":" + me.getId());
+		matchRedisTemplate.delete(sender.getId() + ":" + me.getId());
 
 		if (acceptMatchDto.getMatchStatus().equals(MatchStatus.ACCEPTED)) {
-			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, senderId, me.getId()));
+			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, sender.getId(), me.getId()));
 		}
 
-		return new MatchResponseDto(matchRepository.save(match));
+		return new MatchResponseDto(matchRepository.save(newMatch));
 	}
 
 	/**
@@ -101,8 +102,8 @@ public class MatchService {
 
 	@Transactional(readOnly = true)
 	public Slice<MatchResponseDto> getMatchService(String email, Pageable pageable) {
-		Member me = memberRepository.findByEmail(email).orElseThrow(() -> new CustomRuntimeException(
-			ExceptionCode.USER_CANT_FIND));
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Slice<Match> matches = matchRepository.findMatchByReceiverId(me.getId(), pageable);
 

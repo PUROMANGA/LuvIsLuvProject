@@ -43,5 +43,6 @@ public class Report {
 
 	// 신고 생성 시간
 	// 주의: @Builder 사용 시 초기값 무시됨. @Builder.Default 필요.
+	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
 }
