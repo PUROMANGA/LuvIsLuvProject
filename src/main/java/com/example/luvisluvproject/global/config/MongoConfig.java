@@ -12,22 +12,24 @@ import org.springframework.data.mongodb.core.convert.MappingMongoConverter;
 import org.springframework.data.mongodb.core.index.Index;
 import org.springframework.data.mongodb.core.mapping.MongoMappingContext;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @RequiredArgsConstructor
 
 public class MongoConfig {
-	private final MongoTemplate mongoTemplate;
 
-	@PostConstruct
-	public void createTTLIndex() {
-		Index ttlIndex = new Index()
-			.on("creatTime", Sort.Direction.ASC)
-			.expire(2592000);
+	@Bean
+	public MongoTemplate mongoTemplate(MongoDatabaseFactory mongoDatabaseFactory,
+		MappingMongoConverter mappingMongoConverter) {
 
-		mongoTemplate.indexOps("messages").createIndex(ttlIndex);
+		MongoTemplate template = new MongoTemplate(mongoDatabaseFactory, mappingMongoConverter);
+
+		// TTL 인덱스 생성
+		Index ttlIndex = new Index().on("creatTime", Sort.Direction.ASC).expire(2592000);
+		template.indexOps("messages").createIndex(ttlIndex); // 또는 createIndex
+
+		return template;
 	}
 
 	@Bean
