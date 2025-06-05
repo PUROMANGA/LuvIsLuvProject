@@ -48,7 +48,10 @@ public enum ExceptionCode implements ErrorCode {
 	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고 내역이 존재하지 않습니다."),
 
 	//리뷰
-	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
+	STORE_REVIEW_MISMATCH(HttpStatus.BAD_REQUEST, "해당 가게에 속한 리뷰가 아닙니다."),
+	DELETE_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 삭제할 수 있습니다."),
+	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
