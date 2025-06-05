@@ -142,8 +142,8 @@ public class AuthServiceTest {
 
 		LoginResponseDto response = authService.login(dto);
 
-		assertEquals("access-token", response.getAccessToken());
-		assertEquals("refresh-token", response.getRefreshToken());
+		assertEquals("Bearer access-token", response.getAccessToken());
+		assertEquals("Bearer refresh-token", response.getRefreshToken());
 	}
 
 	@Test
@@ -160,7 +160,6 @@ public class AuthServiceTest {
 	@Test
 	@DisplayName("유효한 토큰이면 블랙리스트에 저장")
 	void logoutSuccess() {
-		// given
 		String token = "valid-token";
 		long expiration = 60000L;
 
@@ -169,10 +168,8 @@ public class AuthServiceTest {
 		given(jwtUtil.validateToken(token)).willReturn(true);
 		given(jwtUtil.getExpiration(token)).willReturn(expiration);
 
-		// when + then
 		assertDoesNotThrow(() -> authService.logout(token));
 
-		// then: redisTemplate에 해당 토큰을 블랙리스트로 저장
 		then(redisTemplate.opsForValue()).should()
 			.set(token, "logout", expiration, TimeUnit.MILLISECONDS);
 	}

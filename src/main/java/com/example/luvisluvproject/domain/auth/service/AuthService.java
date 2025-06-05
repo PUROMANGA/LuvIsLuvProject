@@ -115,7 +115,7 @@ public class AuthService {
 		String accessToken = jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
 		String refreshToken = jwtUtil.createRefreshToken(member.getEmail());
 
-		return new LoginResponseDto(accessToken, refreshToken);
+		return new LoginResponseDto("Bearer " + accessToken, "Bearer " + refreshToken);
 
 	}
 
