@@ -48,7 +48,7 @@ public class Member extends BaseEntity {
 
 	//호감도
 	@Column(nullable = false)
-	private Long likeCount;
+	private Long likeCount = 0L;
 
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
@@ -59,8 +59,7 @@ public class Member extends BaseEntity {
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
-		boolean status,
-		Long likeCount) {
+		boolean status, Long likeCount) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
@@ -85,5 +84,16 @@ public class Member extends BaseEntity {
 
 	public void softDelete() {
 		this.status = true;
+	}
+
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
+		Long likeCount) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = status;
+		this.likeCount = likeCount;
 	}
 }

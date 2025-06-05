@@ -29,6 +29,8 @@ spring:
       port: 6379
       timeout: 3000
       password: ${REDIS_PASSWORD}
+    mongodb:
+      uri: mongodb://localhost:27017/luvisluv
 
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==

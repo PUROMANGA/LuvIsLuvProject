@@ -4,8 +4,10 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import com.example.luvisluvproject.domain.chat.common.MessageType;
 import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.chat.entity.MemberChatRoom;
+import com.example.luvisluvproject.domain.chat.entity.Message;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;

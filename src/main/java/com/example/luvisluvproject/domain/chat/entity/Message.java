@@ -1,78 +1,64 @@
 package com.example.luvisluvproject.domain.chat.entity;
 
+import java.time.LocalDateTime;
+
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import com.example.luvisluvproject.domain.chat.common.MessageType;
 import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
-import com.example.luvisluvproject.domain.member.entity.Member;
-import com.example.luvisluvproject.global.common.BaseEntity;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
+@Document(collection = "messages")
+@EntityListeners(AuditingEntityListener.class)
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "messages")
 
-public class Message extends BaseEntity {
+public class Message {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+	private String id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "chatroom_id")
-	private ChatRoom chatRoom;
-
-	@Column(nullable = false)
+	private Long chatRoomId;
 	private Long senderId;
-
-	@Column(nullable = false)
 	private Long receiverId;
-
-	@Column(nullable = false)
-	private Boolean isRead;
-
-	@Column(nullable = false)
 	private String content;
-
-	@Column(nullable = false)
 	private String fileUrl;
-
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
 	private MessageType messageType;
+	private Boolean isRead;
+	@CreatedDate
+	private LocalDateTime creatTime;
+	@LastModifiedDate
+	private LocalDateTime modifiedTime;
 
-	public Message(ChatRoom chatRoom, Member me, Member opponent, Boolean isRead, RequestMessageDto requestMessageDto) {
-		this.chatRoom = chatRoom;
-		this.senderId = opponent.getId();
-		this.receiverId = me.getId();
+	public Message(String id, Long chatRoomId, Long senderId, Long receiverId, String content, String fileUrl,
+		MessageType messageType, Boolean isRead, LocalDateTime creatTime, LocalDateTime modifiedTime) {
+		this.id = id;
+		this.chatRoomId = chatRoomId;
+		this.senderId = senderId;
+		this.receiverId = receiverId;
+		this.content = content;
+		this.fileUrl = fileUrl;
+		this.messageType = messageType;
 		this.isRead = isRead;
+		this.creatTime = creatTime;
+		this.modifiedTime = modifiedTime;
+	}
+
+	public Message(Long chatRoomId, Long senderId, Long receiverId, RequestMessageDto requestMessageDto,
+		Boolean isRead) {
+		this.chatRoomId = chatRoomId;
+		this.senderId = senderId;
+		this.receiverId = receiverId;
 		this.content = requestMessageDto.getContent();
 		this.fileUrl = requestMessageDto.getFileUrl();
 		this.messageType = requestMessageDto.getMessageType();
-	}
-
-	@Builder
-	public Message(MessageType messageType, String content, ChatRoom chatRoom, Long senderId) {
-		this.messageType = messageType;
-		this.content = content;
-		this.chatRoom = chatRoom;
-		this.senderId = senderId;
+		this.isRead = isRead;
 	}
 
 	public void updateIsRead() {

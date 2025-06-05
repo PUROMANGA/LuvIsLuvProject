@@ -33,4 +33,8 @@ public class AuthUser implements UserDetails {
 	public String getUsername() {
 		return member.getEmail(); // 로그인 ID로 이메일을 쓴다면
 	}
+
+	public Long getId() {
+		return member.getId();
+	}
 }
