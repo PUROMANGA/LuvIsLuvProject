@@ -47,13 +47,13 @@ public class MatchController {
 	@PostMapping
 	public ResponseEntity<MatchResponseDto> createMatch(
 		@RequestParam Long receiverId,
-		@AuthenticationPrincipal AuthUser member) throws JsonProcessingException {
+		@AuthenticationPrincipal AuthUser member) {
 		return ResponseEntity.ok(matchService.createMatchService(receiverId, member.getUsername()));
 	}
 
 	/**
 	 * 해당 매칭이 오고, 매칭의 상태를 '수락' 혹은 '거절'로 변경합니다. 이때 senderId는 현재 로그인된 멤버 자기 자신의 ID입니다.
-	 * @param matchId
+	 * @param senderId
 	 * @param acceptMatchDto
 	 * @param member
 	 * @return
