@@ -1,6 +1,8 @@
 package com.example.luvisluvproject.domain.tag.repository;
 
 import com.example.luvisluvproject.domain.tag.entity.Tag;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -16,7 +18,7 @@ public interface TagJpaRepository extends JpaRepository<Tag, Long> {
 	/**
 	 * 카테고리별 태그 전체 조회 (활성된 것만)
 	 */
-	List<Tag> findAllByCategoryAndActiveTrueOrderByPriorityDesc(String category);
+	List<Tag> findAllByCategoryAndActiveTrueOrderByPriorityDesc(TagCategory category);
 
 	/**
 	 * 전체 태그 중 활성화된 태그만 (우선순위 높은 순)

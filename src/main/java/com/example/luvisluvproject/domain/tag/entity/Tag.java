@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.tag.entity;
 
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 import com.example.luvisluvproject.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -29,7 +30,7 @@ public class Tag extends BaseEntity {
 	 * 태그 카테고리 (예: 취미, 성격 등)
 	 */
 	@Column(length = 30)
-	private String category;
+	private TagCategory category;
 
 	/**
 	 * 생성 출처: USER 또는 ADMIN

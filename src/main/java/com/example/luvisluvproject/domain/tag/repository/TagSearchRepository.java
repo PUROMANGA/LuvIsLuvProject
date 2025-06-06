@@ -1,12 +1,19 @@
 package com.example.luvisluvproject.domain.tag.repository;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch._types.ElasticsearchException;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.elasticsearch.indices.CreateIndexRequest;
+import co.elastic.clients.elasticsearch.indices.DeleteIndexRequest;
 import com.example.luvisluvproject.domain.tag.document.TagDocument;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Repository;
 
 import java.io.IOException;
@@ -20,32 +27,83 @@ public class TagSearchRepository {
 
 	private final ElasticsearchClient elasticsearchClient;
 
+	private static final String INDEX_NAME = "tags";
+
 	/**
-	 * 엘라스틱서치에서 name 필드로 자동완성 검색
-	 * @param keyword 입력 키워드
-	 * @return 매칭되는 태그 문서 리스트
+	 * 자동완성 검색 - Slice 방식
 	 */
-	public List<TagDocument> searchByName(String keyword) {
+	public Slice<TagDocument> searchByName(String keyword, Pageable pageable) {
 		try {
+			int from = (int) pageable.getOffset();
+			int size = pageable.getPageSize() + 1; // hasNext 확인용
+
 			SearchResponse<TagDocument> response = elasticsearchClient.search(s -> s
-					.index("tags")
+					.index(INDEX_NAME)
+					.from(from)
+					.size(size)
 					.query(q -> q
-						.match(m -> m
+						.prefix(p -> p
 							.field("name")
-							.query(keyword)
+							.value(keyword) // "독서"
 						)
-					)
-					.size(10),
+					),
 				TagDocument.class
 			);
 
-			return response.hits().hits().stream()
+			List<TagDocument> content = response.hits().hits().stream()
 				.map(Hit::source)
 				.collect(Collectors.toList());
 
+			boolean hasNext = content.size() > pageable.getPageSize();
+			if (hasNext) {
+				content = content.subList(0, pageable.getPageSize());
+			}
+
+			return new SliceImpl<>(content, pageable, hasNext);
+
 		} catch (IOException e) {
-			log.error("[Elasticsearch] 태그 자동완성 검색 실패: keyword = {}", keyword, e);
-			throw new RuntimeException("엘라스틱서치 태그 검색 중 오류 발생: " + keyword, e);
+			log.error("[Elasticsearch] 태그 검색 실패: {}", keyword, e);
+			throw new RuntimeException("Elasticsearch 검색 오류", e);
+		}
+	}
+
+	/**
+	 * 테스트용 - 인덱스 삭제
+	 */
+	public void deleteIndex() {
+		try {
+			elasticsearchClient.indices().delete(d -> d.index(INDEX_NAME));
+		} catch (IOException | ElasticsearchException e) {
+			log.warn("[Elasticsearch] 인덱스 삭제 실패 또는 존재하지 않음 (무시): {}", e.getMessage());
+		}
+	}
+
+	/**
+	 * 테스트용 - 인덱스 생성
+	 */
+	public void createIndex() {
+		try {
+			elasticsearchClient.indices().create(CreateIndexRequest.of(c -> c.index(INDEX_NAME)));
+		} catch (IOException e) {
+			log.error("[Elasticsearch] 인덱스 생성 실패", e);
+		}
+	}
+
+	/**
+	 * 테스트용 - 여러 문서 저장
+	 */
+	public void saveAll(List<TagDocument> documents) {
+		for (TagDocument doc : documents) {
+			try {
+				IndexResponse response = elasticsearchClient.index(i -> i
+					.index(INDEX_NAME)
+					.id(String.valueOf(doc.getId()))
+					.document(doc)
+				);
+				log.debug("[Elasticsearch] 저장 성공: {}", response.result());
+			} catch (IOException e) {
+				log.error("[Elasticsearch] 저장 실패 - {}: {}", doc.getName(), e.getMessage());
+			}
 		}
 	}
 }

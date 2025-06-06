@@ -10,8 +10,12 @@ import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
 import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
 import com.example.luvisluvproject.domain.tag.repository.TagSearchRepository;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,7 +37,7 @@ public class TagService {
 	public TagResponseDto createTag(TagRequestDto requestDto) {
 		Tag tag = Tag.builder()
 			.name(requestDto.getName())
-			.category(requestDto.getCategory())
+			.category(TagCategory.from(requestDto.getCategory()))
 			.createdByType(requestDto.getCreatedByType())
 			.active(requestDto.isActive())
 			.priority(requestDto.getPriority())
@@ -52,7 +56,7 @@ public class TagService {
 
 		tag.update(Tag.builder()
 			.name(requestDto.getName())
-			.category(requestDto.getCategory())
+			.category(TagCategory.from(requestDto.getCategory()))
 			.createdByType(requestDto.getCreatedByType())
 			.active(requestDto.isActive())
 			.priority(requestDto.getPriority())
@@ -73,28 +77,30 @@ public class TagService {
 	}
 
 	/**
-	 * 자동완성 검색
+	 * 자동완성 검색 - Slice 적용
 	 */
-	public List<TagResponseDto> searchTags(String keyword) {
-		List<TagDocument> results = tagSearchRepository.searchByName(keyword);
+	public Slice<TagResponseDto> searchTags(String keyword, Pageable pageable) {
+		Slice<TagDocument> documents = tagSearchRepository.searchByName(keyword, pageable);
 
-		return results.stream()
+		List<TagResponseDto> tagDtos = documents.stream()
 			.map(tag -> TagResponseDto.builder()
 				.id(tag.getId())
 				.name(tag.getName())
-				.category(tag.getCategory())
+				.category(TagCategory.from(tag.getCategory()))
 				.createdByType(tag.getCreatedByType())
 				.active(tag.isActive())
 				.priority(tag.getPriority())
 				.build())
 			.collect(Collectors.toList());
+
+		return new SliceImpl<>(tagDtos, pageable, documents.hasNext());
 	}
 
 	/**
-	 * 사용자에게 태그 할당
+	 * 사용자에게 태그 할당 - Slice 반환
 	 */
 	@Transactional
-	public List<TagResponseDto> assignTagsToMember(Long memberId, List<Long> tagIds) {
+	public Slice<TagResponseDto> assignTagsToMember(Long memberId, List<Long> tagIds, Pageable pageable) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
@@ -110,19 +116,29 @@ public class TagService {
 
 		memberTagRepository.saveAll(memberTags);
 
-		return tags.stream()
+		List<TagResponseDto> dtoList = tags.stream()
 			.map(TagResponseDto::from)
 			.collect(Collectors.toList());
+
+		boolean hasNext = dtoList.size() > pageable.getPageSize();
+		List<TagResponseDto> content = hasNext ? dtoList.subList(0, pageable.getPageSize()) : dtoList;
+
+		return new SliceImpl<>(content, pageable, hasNext);
 	}
 
 	/**
-	 * 사용자 ID로 태그 조회
+	 * 사용자 ID로 태그 조회 - Slice 반환
 	 */
-	public List<TagResponseDto> getTagsByMemberId(Long memberId) {
+	public Slice<TagResponseDto> getTagsByMemberId(Long memberId, Pageable pageable) {
 		List<MemberTag> memberTags = memberTagRepository.findAllByMemberId(memberId);
 
-		return memberTags.stream()
+		List<TagResponseDto> dtoList = memberTags.stream()
 			.map(mt -> TagResponseDto.from(mt.getTag()))
 			.collect(Collectors.toList());
+
+		boolean hasNext = dtoList.size() > pageable.getPageSize();
+		List<TagResponseDto> content = hasNext ? dtoList.subList(0, pageable.getPageSize()) : dtoList;
+
+		return new SliceImpl<>(content, pageable, hasNext);
 	}
 }

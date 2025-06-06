@@ -11,14 +11,14 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/admin/tags")
+@RequestMapping("/tags")
 @RequiredArgsConstructor
 public class TagAdminController {
 
 	private final TagService tagService;
 
 	/**
-	 * 태그 수정
+	 * 태그 수정 - 관리자만 가능
 	 */
 	@PatchMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -31,16 +31,12 @@ public class TagAdminController {
 	}
 
 	/**
-	 * 태그 삭제
+	 * 태그 삭제 - 관리자만 가능
 	 */
 	@DeleteMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<?> deleteTag(@PathVariable Long tagId) {
+	public ResponseEntity<String> deleteTag(@PathVariable Long tagId) {
 		tagService.deleteTag(tagId);
-
-		// ✅ 간단한 메시지 응답 객체를 컨트롤러 내부에서 생성
-		return ResponseEntity.ok(new Object() {
-			public final String message = "태그가 성공적으로 삭제되었습니다.";
-		});
+		return ResponseEntity.ok("태그가 성공적으로 삭제되었습니다.");
 	}
 }

@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.tag.dto;
 
 import com.example.luvisluvproject.domain.tag.entity.Tag;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,7 +11,7 @@ import lombok.Getter;
 public class TagResponseDto {
 	private Long id;
 	private String name;
-	private String category;
+	private TagCategory category;
 	private TagCreatedByType createdByType;
 	private Boolean active;
 	private Integer priority;

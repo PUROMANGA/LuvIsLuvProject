@@ -2,14 +2,18 @@ package com.example.luvisluvproject.domain.member.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.example.luvisluvproject.domain.member.enums.UserRole;
-import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -46,22 +50,14 @@ public class Member extends BaseEntity {
 	private boolean status;
 
 	@Column(nullable = false)
-	private Long likeCount;
-
-	@Column(nullable = false)
 	private int reportCount = 0;
+
+	//호감도
+	@Column(nullable = false)
+	private Long likeCount = 0L;
 
 	private LocalDateTime restrictedUntil;
 
-	@ManyToMany
-	@JoinTable(
-		name = "member_tags",
-		joinColumns = @JoinColumn(name = "member_id"),
-		inverseJoinColumns = @JoinColumn(name = "tag_id")
-	)
-	private List<Tag> tags = new ArrayList<>();
-
-	// 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
@@ -82,6 +78,22 @@ public class Member extends BaseEntity {
 		this.likeCount = likeCount;
 	}
 
+	/**
+	 * 호감도 업!
+	 */
+
+	public void plusIsLike() {
+		this.likeCount++;
+	}
+
+	public void update(String password) {
+		this.password = password;
+	}
+
+	public void softDelete() {
+		this.status = true;
+	}
+
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
 		Long likeCount) {
 		this.name = name;
@@ -91,21 +103,6 @@ public class Member extends BaseEntity {
 		this.userRole = userRole;
 		this.status = status;
 		this.likeCount = likeCount;
-	}
-
-	// 호감도 증가
-	public void plusIsLike() {
-		this.likeCount++;
-	}
-
-	// 비밀번호 변경
-	public void update(String password) {
-		this.password = password;
-	}
-
-	// 소프트 삭제
-	public void softDelete() {
-		this.status = true;
 	}
 
 	// 신고 횟수 증가 및 제한 설정
