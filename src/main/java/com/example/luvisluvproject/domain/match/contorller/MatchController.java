@@ -2,6 +2,7 @@ package com.example.luvisluvproject.domain.match.contorller;
 
 import static org.springframework.data.domain.Sort.Direction.*;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
@@ -36,6 +38,15 @@ import lombok.RequiredArgsConstructor;
 public class MatchController {
 	private final MatchService matchService;
 	private final RedisTemplate<String, Object> redisTemplate;
+
+	/**
+	 * 매칭을 해줍니다
+	 */
+
+	@GetMapping
+	public ResponseEntity<List<MatchMemberDto>> getMatchMemberList(@AuthenticationPrincipal AuthUser member) {
+		return ResponseEntity.ok(matchService.getMatchMemberListService(member.getUsername()));
+	}
 
 	/**
 	 * 내(member)가 원하는 상대방(receiverId)에게 매칭을 신청합니다.
@@ -73,10 +84,14 @@ public class MatchController {
 	 * @return
 	 */
 
-	@GetMapping
+	@GetMapping("/{memberId}")
 	public ResponseEntity<Slice<MatchResponseDto>> getMatch(
+		@PathVariable Long memberId,
 		@AuthenticationPrincipal AuthUser member,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
+		if (!member.getMember().getId().equals(memberId)) {
+			throw new RuntimeException("자신의 매칭만 조회할 수 있습니다.");
+		}
 		return ResponseEntity.ok(matchService.getMatchService(member.getUsername(), pageable));
 	}
 }

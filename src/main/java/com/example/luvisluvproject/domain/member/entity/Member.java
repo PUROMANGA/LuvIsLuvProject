@@ -1,11 +1,11 @@
 package com.example.luvisluvproject.domain.member.entity;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 
-import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
+import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -15,16 +15,21 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @Entity
 @Table(name = "members")
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
+@ToString(of = {"name", "email"})
 public class Member extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,9 +54,19 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	@Builder.Default
+	@Column(nullable = false)
+	private int reportCount = 0;
+
 	//호감도
+	@Builder.Default
 	@Column(nullable = false)
 	private Long likeCount = 0L;
+
+	@OneToMany(mappedBy = "member")
+	private List<MemberTag> memberTagList;
+
+	private LocalDateTime restrictedUntil;
 
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
@@ -98,5 +113,18 @@ public class Member extends BaseEntity {
 		this.userRole = userRole;
 		this.status = status;
 		this.likeCount = likeCount;
+	}
+
+	// 신고 횟수 증가 및 제한 설정
+	public void increaseReportCount() {
+		this.reportCount++;
+		if (this.reportCount >= 3 && this.restrictedUntil == null) {
+			this.restrictedUntil = LocalDateTime.now().plusDays(30);
+		}
+	}
+
+	// 활동 제한 상태인지 확인
+	public boolean isRestricted() {
+		return this.restrictedUntil != null && this.restrictedUntil.isAfter(LocalDateTime.now());
 	}
 }
