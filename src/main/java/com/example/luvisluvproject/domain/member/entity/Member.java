@@ -1,7 +1,10 @@
 package com.example.luvisluvproject.domain.member.entity;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
+import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
