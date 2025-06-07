@@ -19,8 +19,6 @@ import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -41,7 +39,7 @@ public class MatchService {
 	 * @return
 	 */
 	@Transactional
-	public MatchResponseDto createMatchService(Long receiverId, String email) throws JsonProcessingException {
+	public MatchResponseDto createMatchService(Long receiverId, String email) {
 		//senderId(로그인된 유저)
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));

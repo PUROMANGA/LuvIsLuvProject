@@ -54,7 +54,7 @@ public class Member extends BaseEntity {
 
 	//호감도
 	@Column(nullable = false)
-	private Long likeCount = 0L;
+	private Long likeCount;
 
 	private LocalDateTime restrictedUntil;
 
@@ -67,7 +67,8 @@ public class Member extends BaseEntity {
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
-		boolean status, Long likeCount) {
+		boolean status,
+		Long likeCount) {
 		this.id = id;
 		this.name = name;
 		this.email = email;
