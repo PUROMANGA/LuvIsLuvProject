@@ -1,0 +1,229 @@
+package com.example.luvisluvproject.domain.member.service;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+import java.time.LocalDate;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
+import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.domain.member.enums.UserRole;
+import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.global.error.CustomRuntimeException;
+import com.example.luvisluvproject.global.error.ExceptionCode;
+
+class MemberServiceTest {
+
+	@Mock
+	private MemberRepository memberRepository;
+
+	@Mock
+	private PasswordEncoder passwordEncoder;
+
+	@InjectMocks
+	private MemberService memberService;
+
+	private Member activeMember;
+	private Member deletedMember;
+
+	@BeforeEach
+	void setUp() {
+		MockitoAnnotations.openMocks(this);
+
+		activeMember = Member.builder()
+			.id(1L)
+			.name("TestUser")
+			.email("test@example.com")
+			.password("encodedPassword")
+			.birthday(LocalDate.of(1990, 1, 1))
+			.userRole(UserRole.USER)
+			.status(false)
+			.likeCount(0L)
+			.build();
+
+		deletedMember = Member.builder()
+			.id(2L)
+			.name("DeletedUser")
+			.email("deleted@example.com")
+			.password("encodedPassword")
+			.birthday(LocalDate.of(1990, 1, 1))
+			.userRole(UserRole.USER)
+			.status(true) // 소프트 삭제 상태
+			.likeCount(0L)
+			.build();
+	}
+
+	@Test
+	@DisplayName("회원 조회 성공 - 활성 상태")
+	void findById_Success() {
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+
+		MemberFindResponse response = memberService.findById(1L);
+
+		assertEquals(activeMember.getId(), response.getUserId());
+		assertEquals(activeMember.getName(), response.getName());
+		assertEquals(activeMember.getEmail(), response.getEmail());
+		assertEquals(activeMember.getBirthday(), response.getBirthday());
+	}
+
+	@Test
+	@DisplayName("회원 조회 실패 - 회원 없음")
+	void findById_MemberNotFound() {
+		when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.findById(1L);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 조회 실패 - 소프트 삭제된 회원")
+	void findById_MemberDeleted() {
+		when(memberRepository.findById(2L)).thenReturn(Optional.of(deletedMember));
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.findById(2L);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 비밀번호 변경 성공")
+	void updateMember_Success() {
+		MemberUpdateRequest request = new MemberUpdateRequest("oldPassword", "newPassword");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+		when(passwordEncoder.matches("oldPassword", activeMember.getPassword())).thenReturn(true);
+		when(passwordEncoder.encode("newPassword")).thenReturn("encodedNewPassword");
+
+		assertDoesNotThrow(() -> memberService.updateMember(1L, request));
+		assertEquals("encodedNewPassword", activeMember.getPassword());
+	}
+
+	@Test
+	@DisplayName("회원 비밀번호 변경 실패 - 회원 없음")
+	void updateMember_MemberNotFound() {
+		MemberUpdateRequest request = new MemberUpdateRequest("oldPassword", "newPassword");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.updateMember(1L, request);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 비밀번호 변경 실패 - 소프트 삭제 회원")
+	void updateMember_MemberDeleted() {
+		MemberUpdateRequest request = new MemberUpdateRequest("oldPassword", "newPassword");
+
+		when(memberRepository.findById(2L)).thenReturn(Optional.of(deletedMember));
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.updateMember(2L, request);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 비밀번호 변경 실패 - 이전 비밀번호 불일치")
+	void updateMember_PasswordMismatch() {
+		MemberUpdateRequest request = new MemberUpdateRequest("wrongOldPassword", "newPassword");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+		when(passwordEncoder.matches("wrongOldPassword", activeMember.getPassword())).thenReturn(false);
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.updateMember(1L, request);
+		});
+
+		assertEquals(ExceptionCode.PASSWORD_MISMATCH, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 비밀번호 변경 실패 - 새 비밀번호가 이전 비밀번호와 동일")
+	void updateMember_SamePassword() {
+		MemberUpdateRequest request = new MemberUpdateRequest("oldPassword", "oldPassword");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+		when(passwordEncoder.matches("oldPassword", activeMember.getPassword())).thenReturn(true);
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.updateMember(1L, request);
+		});
+
+		assertEquals(ExceptionCode.SAME_PASSWORD, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 삭제 성공")
+	void deleteMember_Success() {
+		MemberDeleteRequest request = new MemberDeleteRequest("password");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+		when(passwordEncoder.matches("password", activeMember.getPassword())).thenReturn(true);
+
+		assertDoesNotThrow(() -> memberService.deleteMember(1L, request));
+		assertTrue(activeMember.isStatus());
+	}
+
+	@Test
+	@DisplayName("회원 삭제 실패 - 회원 없음")
+	void deleteMember_MemberNotFound() {
+		MemberDeleteRequest request = new MemberDeleteRequest("password");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.empty());
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.deleteMember(1L, request);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 삭제 실패 - 소프트 삭제 회원")
+	void deleteMember_MemberDeleted() {
+		MemberDeleteRequest request = new MemberDeleteRequest("password");
+
+		when(memberRepository.findById(2L)).thenReturn(Optional.of(deletedMember));
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.deleteMember(2L, request);
+		});
+
+		assertEquals(ExceptionCode.MEMBER_NOT_FOUND, exception.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("회원 삭제 실패 - 비밀번호 불일치")
+	void deleteMember_PasswordMismatch() {
+		MemberDeleteRequest request = new MemberDeleteRequest("wrongPassword");
+
+		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
+		when(passwordEncoder.matches("wrongPassword", activeMember.getPassword())).thenReturn(false);
+
+		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class, () -> {
+			memberService.deleteMember(1L, request);
+		});
+
+		assertEquals(ExceptionCode.PASSWORD_MISMATCH, exception.getExceptionCode());
+	}
+}

@@ -9,6 +9,8 @@ import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
+import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -25,13 +27,15 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final TagJpaRepository tagJpaRepository;
+	private final MemberTagRepository memberTagRepository;
 
 	/**
 	 * 주어진 회원 ID로 회원 정보를 조회합니다.
-	 * 회원이 존재하지 않거나, 소프트 딜리트된(status=true) 경우 {@link CustomRuntimeException}이 발생합니다.
+	 * 회원이 존재하지 않거나 소프트 삭제된 경우 예외를 발생시킵니다.
 	 * @param memberId 조회할 회원의 ID
-	 * @return 조회된 회원의 정보를 담은 {@link MemberFindResponse}
-	 * @throws CustomRuntimeException {@link ExceptionCode#MEMBER_NOT_FOUND} - 회원이 존재하지 않거나 삭제된 경우
+	 * @return 조회된 회원 정보를 담은 {@link MemberFindResponse}
+	 * @throws CustomRuntimeException 회원이 존재하지 않거나 삭제된 경우 (ExceptionCode.MEMBER_NOT_FOUND)
 	 */
 	@Transactional(readOnly = true)
 	public MemberFindResponse findById(Long memberId) {
@@ -52,48 +56,55 @@ public class MemberService {
 	}
 
 	/**
-	 * 회원의 비밀번호를 수정합니다.
-	 * 주어진 회원 ID로 회원을 조회하고, 요청된 이전 비밀번호가 일치하는 경우 새 비밀번호로 변경합니다.
-	 * 이전 비밀번호와 새 비밀번호가 같을 경우 {@link ExceptionCode#SAME_PASSWORD} 예외가 발생하며,
-	 * 비밀번호가 일치하지 않을 경우 {@link ExceptionCode#PASSWORD_MISMATCH} 예외가 발생합니다.
+	 * 주어진 회원 ID의 회원 비밀번호를 변경합니다.
+	 * 이전 비밀번호가 일치하지 않거나 새 비밀번호가 이전 비밀번호와 같으면 예외를 발생시킵니다.
+	 * 회원이 존재하지 않거나 소프트 삭제된 경우도 예외가 발생합니다.
 	 * @param memberId 수정할 회원의 ID
-	 * @param memberUpdateRequest 수정 요청 정보 (기존 비밀번호와 새 비밀번호 포함)
-	 * @throws CustomRuntimeException {@link ExceptionCode#MEMBER_NOT_FOUND} - 회원이 존재하지 않을 경우
-	 * @throws CustomRuntimeException {@link ExceptionCode#PASSWORD_MISMATCH} - 기존 비밀번호가 일치하지 않을 경우
-	 * @throws CustomRuntimeException {@link ExceptionCode#SAME_PASSWORD} - 기존 비밀번호와 새 비밀번호가 같은 경우
+	 * @param request 비밀번호 변경 요청 정보({@link MemberUpdateRequest})
+	 * @throws CustomRuntimeException 회원이 존재하지 않거나 삭제된 경우 (ExceptionCode.MEMBER_NOT_FOUND)
+	 * @throws CustomRuntimeException 이전 비밀번호가 일치하지 않는 경우 (ExceptionCode.PASSWORD_MISMATCH)
+	 * @throws CustomRuntimeException 이전 비밀번호와 새 비밀번호가 같은 경우 (ExceptionCode.SAME_PASSWORD)
 	 */
 	@Transactional
-	public void updateMember(Long memberId, MemberUpdateRequest memberUpdateRequest) {
+	public void updateMember(Long memberId, MemberUpdateRequest request) {
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
-		if (!passwordEncoder.matches(memberUpdateRequest.getOldPassword(), member.getPassword())) {
+		if (member.isStatus()) {
+			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+		}
+
+		if (!passwordEncoder.matches(request.getOldPassword(), member.getPassword())) {
 			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
 		}
-		if (memberUpdateRequest.getOldPassword().equals(memberUpdateRequest.getNewPassword())) {
+		if (request.getOldPassword().equals(request.getNewPassword())) {
 			throw new CustomRuntimeException(ExceptionCode.SAME_PASSWORD);
 		}
-		member.update(passwordEncoder.encode(memberUpdateRequest.getNewPassword()));
+
+		member.update(passwordEncoder.encode(request.getNewPassword()));
 	}
 
 	/**
-	 * 회원을 소프트 딜리트(Soft Delete) 처리합니다.
-	 * 주어진 회원 ID로 회원을 조회한 뒤, 요청된 비밀번호가 일치하는 경우
-	 * 해당 회원의 상태(status)를 true로 변경하여 논리적 삭제를 수행합니다.
-	 * 비밀번호가 일치하지 않으면 {@link ExceptionCode#PASSWORD_MISMATCH} 예외가 발생합니다.
+	 * 주어진 회원 ID의 회원을 소프트 삭제 처리합니다.
+	 * 비밀번호가 일치하지 않으면 예외를 발생시킵니다.
+	 * 회원이 존재하지 않거나 소프트 삭제된 경우도 예외가 발생합니다.
 	 * @param memberId 삭제할 회원의 ID
-	 * @param memberDeleteRequest 삭제 요청 정보 (비밀번호 포함)
-	 * @throws CustomRuntimeException {@link ExceptionCode#MEMBER_NOT_FOUND} - 회원이 존재하지 않을 경우
-	 * @throws CustomRuntimeException {@link ExceptionCode#PASSWORD_MISMATCH} - 비밀번호가 일치하지 않을 경우
+	 * @param request 삭제 요청 정보({@link MemberDeleteRequest})
+	 * @throws CustomRuntimeException 회원이 존재하지 않거나 삭제된 경우 (ExceptionCode.MEMBER_NOT_FOUND)
+	 * @throws CustomRuntimeException 비밀번호가 일치하지 않는 경우 (ExceptionCode.PASSWORD_MISMATCH)
 	 */
 	@Transactional
-	public void deleteMember(Long memberId, @Valid MemberDeleteRequest memberDeleteRequest) {
+	public void deleteMember(Long memberId, @Valid MemberDeleteRequest request) {
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
-		if (!passwordEncoder.matches(memberDeleteRequest.getPassword(), member.getPassword())) {
+		if (member.isStatus()) {
+			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+		}
+
+		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
 		}
 		member.softDelete();
