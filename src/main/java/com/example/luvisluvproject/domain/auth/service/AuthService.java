@@ -54,12 +54,16 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
 		}
 
-		// 미성년자 확인
-		// TODO 생일을 현재 날짜 이후로 설정한 경우 -> 예외
 		LocalDate birthday = requestDto.getBirthday();
 		LocalDate today = LocalDate.now();
-
-		if (birthday.plusYears(19).isAfter(today)) {
+		// 오늘 날짜 이후로 생일 설정한 경우
+		if (birthday.isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.INVALID_BIRTHDAY_IN_FUTURE);
+		}
+		// 미성년자 확인
+		if (birthday.plusYears(19)
+			.isAfter(
+				today)) { // 생일년도 + 19 한게 오늘 년도보다 많으면 ?? 안됨 / 2000년도 + 19 = 2019 < 오늘 2025년  -> ㄱㅊ / 2007년도 + 19 = 2026 > 오늘 2025년 미자 !!
 			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
 		}
 
