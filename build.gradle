@@ -65,6 +65,13 @@ dependencies {
 
     //Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    //H2
+    testImplementation 'com.h2database:h2'
+
+    // 엘라스틱서치
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+    implementation 'co.elastic.clients:elasticsearch-java:8.12.1'
 }
 
 tasks.named('test') {

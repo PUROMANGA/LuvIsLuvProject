@@ -9,6 +9,8 @@ import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
+import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -25,6 +27,8 @@ public class MemberService {
 
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
+	private final TagJpaRepository tagJpaRepository;
+	private final MemberTagRepository memberTagRepository;
 
 	/**
 	 * 주어진 회원 ID로 회원 정보를 조회합니다.
