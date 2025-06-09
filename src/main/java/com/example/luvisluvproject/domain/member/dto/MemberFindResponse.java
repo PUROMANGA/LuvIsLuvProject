@@ -17,6 +17,7 @@ public class MemberFindResponse {
 
 	private final LocalDate birthday;
 
+
 	private Member member;
 
 	public MemberFindResponse(Long userId, String name, String email, LocalDate birthday) {

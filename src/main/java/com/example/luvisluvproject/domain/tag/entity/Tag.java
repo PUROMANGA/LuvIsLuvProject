@@ -66,4 +66,5 @@ public class Tag extends BaseEntity {
 		this.createdByType = createdByType;
 		this.active = active;
 	}
+
 }

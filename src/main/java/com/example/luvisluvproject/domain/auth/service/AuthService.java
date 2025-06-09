@@ -38,8 +38,9 @@ public class AuthService {
 	 * @param requestDto 회원 가입 요청 정보
 	 * @return 가입된 회원 정보가 담긴 응답 DTO
 	 * @throws CustomRuntimeException 이메일 중복일 경우 {@code ExceptionCode.EMAIL_ALREADY_EXIST}
+	 * @throws CustomRuntimeException 이름 중복일 경우 {@code ExceptionCode.NAME_ALREADY_EXIST}
+	 * @throws CustomRuntimeException 미성년자 확인 {@code ExceptionCode.UNDERAGE_USER}
 	 */
-	// todo 미성년자 체크 로직 추가해야함 !!
 	@Transactional
 	public SignupResponseDto signup(SignupRequestDto requestDto) {
 
@@ -114,7 +115,7 @@ public class AuthService {
 		String accessToken = jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
 		String refreshToken = jwtUtil.createRefreshToken(member.getEmail());
 
-		return new LoginResponseDto(accessToken, refreshToken);
+		return new LoginResponseDto("Bearer " + accessToken, "Bearer " + refreshToken);
 
 	}
 
