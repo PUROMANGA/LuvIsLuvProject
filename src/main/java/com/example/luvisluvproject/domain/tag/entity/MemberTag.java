@@ -26,4 +26,9 @@ public class MemberTag {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "tag_id", nullable = false)
 	private Tag tag;
+
+	public MemberTag(Member member, Tag tag) {
+		this.member = member;
+		this.tag = tag;
+	}
 }
