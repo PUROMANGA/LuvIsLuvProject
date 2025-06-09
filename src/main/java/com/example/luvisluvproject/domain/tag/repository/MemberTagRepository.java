@@ -12,13 +12,6 @@ import java.util.List;
 
 public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, CustomMemberTagRepository {
 
-import com.example.luvisluvproject.domain.tag.entity.MemberTag;
-import org.springframework.data.jpa.repository.JpaRepository;
-
-import java.util.List;
-
-public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
-
 	/**
 	 * 유저가 선택한 태그 전체 삭제
 	 */

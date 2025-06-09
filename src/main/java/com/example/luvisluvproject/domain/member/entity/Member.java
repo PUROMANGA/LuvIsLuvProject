@@ -61,14 +61,12 @@ public class Member extends BaseEntity {
 	//호감도
 	@Builder.Default
 	@Column(nullable = false)
-	private Long likeCount;
+	private Long likeCount = 0L;
 
 	private LocalDateTime restrictedUntil;
 
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
-
-	private LocalDateTime restrictedUntil;
 
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
