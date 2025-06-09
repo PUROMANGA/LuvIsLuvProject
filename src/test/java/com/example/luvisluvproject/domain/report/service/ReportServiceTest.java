@@ -52,7 +52,7 @@ class ReportServiceTest {
 	}
 
 	@Test
-	void 유저신고_성공시_자동차단된다() {
+	void 유저신고_성공시_자동차단되고_신고횟수증가_및_저장된다() {
 		// given
 		ReportRequestDto requestDto = new ReportRequestDto(
 			ReportTargetType.USER,
@@ -64,6 +64,7 @@ class ReportServiceTest {
 		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
 			.willReturn(false);
 		given(memberRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+		given(memberRepository.findById(targetUser.getId())).willReturn(Optional.of(targetUser));
 		given(reportRepository.save(any(Report.class)))
 			.willReturn(Report.builder().reporter(reporter).targetId(targetUser.getId()).targetType(ReportTargetType.USER).build());
 
@@ -74,6 +75,7 @@ class ReportServiceTest {
 		assertThat(response.getMessage()).isEqualTo("신고가 정상적으로 접수되었습니다.");
 		then(blockService).should().blockUser(eq(reporter.getId()), any(BlockRequestDto.class));
 		then(reportRepository).should().save(any(Report.class));
+		then(memberRepository).should().save(eq(targetUser)); // 신고 누적 저장 확인
 	}
 
 	@Test

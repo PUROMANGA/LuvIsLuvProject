@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.auth.dto.request;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -31,4 +32,7 @@ public class SignupRequestDto {
 	@NotBlank(message = "멤버 권한을 입력해주세요.")
 	private final String userRole;
 
+	//태그 선택해야함
+	@NotNull(message = "선택한 태그가 없습니다.")
+	private final List<Long> tagIds;
 }

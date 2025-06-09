@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
+import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoom;
+import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoomCount;
 import com.example.luvisluvproject.domain.chat.dto.ResponseMessageDto;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -89,5 +91,30 @@ public class ChatController {
 		@PathVariable Long chatId) {
 		chatService.deleteChatRoomService(member.getUsername(), chatId);
 		return ResponseEntity.ok("삭제완료");
+	}
+
+	/**
+	 * 해당 사용자가 들어가있는 채팅방을 전부 다 불러옵니다.
+	 * @param member
+	 * @param pageable
+	 * @return
+	 */
+	@GetMapping("/chats")
+	public ResponseEntity<Slice<ResponseChatRoom>> getAllChatRoom(
+		@AuthenticationPrincipal AuthUser member,
+		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
+		return ResponseEntity.ok(chatService.getAllChatRoomService(member.getUsername(), pageable));
+	}
+
+	/**
+	 * 해당 사용자가 들어있는 채팅방을 전부 다 셉니다.
+	 * @param member
+	 * @return
+	 */
+
+	@GetMapping("/chats/count")
+	public ResponseEntity<ResponseChatRoomCount> getChatCount(
+		@AuthenticationPrincipal AuthUser member) {
+		return ResponseEntity.ok(chatService.getAllChatCount(member.getUsername()));
 	}
 }
