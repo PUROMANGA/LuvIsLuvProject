@@ -20,17 +20,15 @@ public class CustomMemberTagRepositoryImpl  implements CustomMemberTagRepository
 		QMemberTag mt1 = new QMemberTag("mt1");
 		QMemberTag mt2 = new QMemberTag("mt2");
 
-		List<String> tagName = jpaQueryFactory
-			.select(mt1.tag.name)
-			.from(mt1)
-			.where(mt1.member.email.eq(email))
-			.fetch();
-
 		List<Member> memberList = jpaQueryFactory
 			.select(mt2.member)
 			.from(mt2)
-			.where(mt2.tag.name.in(tagName)
-			.and(mt2.member.email.ne(email)))
+			.join(mt1).on(mt1.tag.eq(mt2.tag))
+			.where(mt1.member.email.eq(email)
+				.and(mt2.member.email.ne(email)))
+			.limit(10)
+			.groupBy(mt2.member.id)
+			.orderBy(mt2.member.likeCount.desc())
 			.fetch();
 
 		return memberList.stream().map(MatchMemberDto::new).toList();
