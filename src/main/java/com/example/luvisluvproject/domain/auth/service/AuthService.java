@@ -55,6 +55,7 @@ public class AuthService {
 		}
 
 		// 미성년자 확인
+		// TODO 생일을 현재 날짜 이후로 설정한 경우 -> 예외
 		LocalDate birthday = requestDto.getBirthday();
 		LocalDate today = LocalDate.now();
 
@@ -68,6 +69,7 @@ public class AuthService {
 		// userRole string -> enum 변환
 		UserRole userRole = UserRole.of(requestDto.getUserRole());
 
+		// TODO userrole api 분리
 		Member member = new Member(
 			requestDto.getName(),
 			requestDto.getEmail(),
@@ -102,6 +104,7 @@ public class AuthService {
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
 		// 이메일 일치 확인
+		// TODO 불필요 -> 삭제
 		if (!requestDto.getEmail().equals(member.getEmail())) {
 			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
 		}
