@@ -103,12 +103,6 @@ public class AuthService {
 		Member member = memberRepository.findByEmail(requestDto.getEmail())
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
-		// 이메일 일치 확인
-		// TODO 불필요 -> 삭제
-		if (!requestDto.getEmail().equals(member.getEmail())) {
-			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
-		}
-
 		// 비밀번호 일치 확인
 		if (!passwordEncoder.matches(requestDto.getPassword(), member.getPassword())) {
 			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
