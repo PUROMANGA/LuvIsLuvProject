@@ -101,6 +101,7 @@ public class ChatService {
 	 * @param email
 	 * @param chatId
 	 */
+	@Transactional
 	public void deleteChatRoomService(String email, Long chatId) {
 		ChatRoom chatRoom = chatRoomRepository.findById(chatId).orElseThrow(() -> new RuntimeException("채팅방이 없습니다."));
 		Member me = memberRepository.findByEmail(email)
@@ -119,7 +120,7 @@ public class ChatService {
 	 * @param pageable
 	 * @return
 	 */
-
+	@Transactional(readOnly = true)
 	public Slice<ResponseChatRoom> getAllChatRoomService(String email, Pageable pageable) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
@@ -147,7 +148,7 @@ public class ChatService {
 	 * @param email
 	 * @return
 	 */
-
+	@Transactional(readOnly = true)
 	public ResponseChatRoomCount getAllChatCount(String email) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
