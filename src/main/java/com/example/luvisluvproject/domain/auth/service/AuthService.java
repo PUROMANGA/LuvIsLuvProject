@@ -1,8 +1,6 @@
 package com.example.luvisluvproject.domain.auth.service;
 
 import java.time.LocalDate;
-import java.time.Period;
-import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -33,16 +31,16 @@ public class AuthService {
 	private final RedisTemplate<String, String> redisTemplate;
 
 	/**
-	 * 회원가입
+	 * 일반회원(USER) 회원가입
 	 *
-	 * @param requestDto 회원 가입 요청 정보
+	 * @param requestDto 회원가입 요청 정보
 	 * @return 가입된 회원 정보가 담긴 응답 DTO
 	 * @throws CustomRuntimeException 이메일 중복일 경우 {@code ExceptionCode.EMAIL_ALREADY_EXIST}
 	 * @throws CustomRuntimeException 이름 중복일 경우 {@code ExceptionCode.NAME_ALREADY_EXIST}
 	 * @throws CustomRuntimeException 미성년자 확인 {@code ExceptionCode.UNDERAGE_USER}
 	 */
 	@Transactional
-	public SignupResponseDto signup(SignupRequestDto requestDto) {
+	public SignupResponseDto signupUser(SignupRequestDto requestDto) {
 
 		// 이메일 중복확인
 		if (memberRepository.existsByEmail(requestDto.getEmail())) {
@@ -61,25 +59,114 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.INVALID_BIRTHDAY_IN_FUTURE);
 		}
 		// 미성년자 확인
-		if (birthday.plusYears(19)
-			.isAfter(
-				today)) { // 생일년도 + 19 한게 오늘 년도보다 많으면 ?? 안됨 / 2000년도 + 19 = 2019 < 오늘 2025년  -> ㄱㅊ / 2007년도 + 19 = 2026 > 오늘 2025년 미자 !!
+		if (birthday.plusYears(19).isAfter(today)) {
 			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
 		}
 
 		// 비밀번호 암호화
 		String encodePassword = passwordEncoder.encode(requestDto.getPassword());
 
-		// userRole string -> enum 변환
-		UserRole userRole = UserRole.of(requestDto.getUserRole());
-
-		// TODO userrole api 분리
 		Member member = new Member(
 			requestDto.getName(),
 			requestDto.getEmail(),
 			encodePassword,
 			requestDto.getBirthday(),
-			userRole
+			UserRole.USER
+		);
+
+		Member saved = memberRepository.save(member);
+
+		return new SignupResponseDto(
+			saved.getId(),
+			saved.getName(),
+			saved.getEmail(),
+			saved.getBirthday(),
+			saved.getUserRole()
+		);
+	}
+
+	/**
+	 * 사장(MANAGER) 회원가입
+	 * @param requestDto 회원가입 요청 정보
+	 * @return 가입된 회원 정보가 담긴 응답 DTO
+	 */
+	@Transactional
+	public SignupResponseDto signupManager(SignupRequestDto requestDto) {
+
+		if (memberRepository.existsByEmail(requestDto.getEmail())) {
+			throw new CustomRuntimeException(ExceptionCode.EMAIL_ALREADY_EXIST);
+		}
+
+		if (memberRepository.existsByName(requestDto.getName())) {
+			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
+		}
+
+		LocalDate birthday = requestDto.getBirthday();
+		LocalDate today = LocalDate.now();
+
+		if (birthday.isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.INVALID_BIRTHDAY_IN_FUTURE);
+		}
+
+		if (birthday.plusYears(19).isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
+		}
+
+		String encodePassword = passwordEncoder.encode(requestDto.getPassword());
+
+		Member member = new Member(
+			requestDto.getName(),
+			requestDto.getEmail(),
+			encodePassword,
+			requestDto.getBirthday(),
+			UserRole.MANAGER
+		);
+
+		Member saved = memberRepository.save(member);
+
+		return new SignupResponseDto(
+			saved.getId(),
+			saved.getName(),
+			saved.getEmail(),
+			saved.getBirthday(),
+			saved.getUserRole()
+		);
+	}
+
+	/**
+	 * 관리자(ADMIN) 회원가입
+	 * @param requestDto 회원가입 요청 정보
+	 * @return 가입된 회원 정보가 담긴 응답 DTO
+	 */
+	@Transactional
+	public SignupResponseDto signupAdmin(SignupRequestDto requestDto) {
+		if (memberRepository.existsByEmail(requestDto.getEmail())) {
+			throw new CustomRuntimeException(ExceptionCode.EMAIL_ALREADY_EXIST);
+		}
+
+		if (memberRepository.existsByName(requestDto.getName())) {
+			throw new CustomRuntimeException(ExceptionCode.NAME_ALREADY_EXIST);
+		}
+
+		LocalDate birthday = requestDto.getBirthday();
+		LocalDate today = LocalDate.now();
+
+		if (birthday.isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.INVALID_BIRTHDAY_IN_FUTURE);
+		}
+
+		if (birthday.plusYears(19).isAfter(today)) {
+			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
+		}
+
+		String encodePassword = passwordEncoder.encode(requestDto.getPassword());
+
+		Member member = new Member(
+			requestDto.getName(),
+			requestDto.getEmail(),
+			encodePassword,
+			requestDto.getBirthday(),
+			UserRole.ADMIN
 		);
 
 		Member saved = memberRepository.save(member);
