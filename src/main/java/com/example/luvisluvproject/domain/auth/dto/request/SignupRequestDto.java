@@ -38,4 +38,5 @@ public class SignupRequestDto {
 		this.birthday = birthday;
 		this.userRole = userRole;
 	}
+
 }
