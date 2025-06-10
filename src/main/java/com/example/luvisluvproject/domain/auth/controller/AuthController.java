@@ -1,7 +1,6 @@
 package com.example.luvisluvproject.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,8 +12,6 @@ import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.global.config.JwtUtil;
-import com.example.luvisluvproject.global.error.CustomRuntimeException;
-import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
 
@@ -31,16 +28,46 @@ public class AuthController {
 	private final JwtUtil jwtUtil;
 
 	/**
-	 * 회원가입 요청 컨트롤러
+	 * 일반 유저 회원가입 요청 컨트롤러
 	 *
 	 * @param requestDto 회원가입 요청 데이터
 	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
 	 */
-	@PostMapping("/signup")
-	public ResponseEntity<ApiResponse<SignupResponseDto>> signup(
+	@PostMapping("/signup/user")
+	public ResponseEntity<ApiResponse<SignupResponseDto>> signupUser(
 		@Valid @RequestBody SignupRequestDto requestDto
 	) {
-		SignupResponseDto responseDto = authService.signup(requestDto);
+		SignupResponseDto responseDto = authService.signupUser(requestDto);
+		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
+	 * 사장(MANAGER) 회원가입 요청 컨트롤러
+	 *
+	 * @param requestDto 회원가입 요청 데이터
+	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
+	 */
+	@PostMapping("/signup/manager")
+	public ResponseEntity<ApiResponse<SignupResponseDto>> signupManager(
+		@Valid @RequestBody SignupRequestDto requestDto
+	) {
+		SignupResponseDto responseDto = authService.signupManager(requestDto);
+		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
+		return ResponseEntity.ok(apiResponse);
+	}
+
+	/**
+	 * 관리자(ADMIN) 회원가입 요청 컨트롤러
+	 *
+	 * @param requestDto 회원가입 요청 데이터
+	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
+	 */
+	@PostMapping("/signup/admin")
+	public ResponseEntity<ApiResponse<SignupResponseDto>> signupAdmin(
+		@RequestBody @Valid SignupRequestDto requestDto
+	) {
+		SignupResponseDto responseDto = authService.signupAdmin(requestDto);
 		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
 		return ResponseEntity.ok(apiResponse);
 	}
