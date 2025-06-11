@@ -1,6 +1,9 @@
 package com.example.luvisluvproject.domain.tag.repository;
 
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -21,4 +24,6 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
 	 * 특정 유저가 연결한 모든 태그 정보
 	 */
 	List<MemberTag> findAllByMemberId(Long memberId);
+
+	Page<MemberTag> findByMemberId(Long memberId, Pageable pageable);
 }

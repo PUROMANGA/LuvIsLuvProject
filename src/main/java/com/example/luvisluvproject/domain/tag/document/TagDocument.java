@@ -6,6 +6,8 @@ import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.example.luvisluvproject.domain.tag.dto.TagResponseDto;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 
 @Getter
@@ -47,4 +49,15 @@ public class TagDocument {
 	 */
 	@Field(type = FieldType.Integer)
 	private int priority;
+
+	public TagResponseDto toDto() {
+		return TagResponseDto.builder()
+			.id(this.id)
+			.name(this.name)
+			.category(TagCategory.from(this.category))
+			.createdByType(this.createdByType)
+			.active(this.active)
+			.priority(this.priority)
+			.build();
+	}
 }
