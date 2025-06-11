@@ -29,10 +29,4 @@ public class SignupRequestDto {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
 
-	@NotBlank(message = "멤버 권한을 입력해주세요.")
-	private final String userRole;
-
-	//태그 선택해야함
-	@NotNull(message = "선택한 태그가 없습니다.")
-	private final List<Long> tagIds;
 }

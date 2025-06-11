@@ -50,29 +50,64 @@ public class AuthServiceTest {
 	private AuthService authService;
 
 	@Test
-	@DisplayName("회원가입 성공")
-	void signupSuccess() {
+	@DisplayName("유저 회원가입 성공")
+	void signupUserSuccess() {
 		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1), "USER");
+			LocalDate.of(2000, 1, 1));
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
 		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
 		given(memberRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0)); // 저장된 멤버 그대로 반환
 
-		SignupResponseDto response = authService.signup(dto);
+		SignupResponseDto response = authService.signupUser(dto);
 
 		assertEquals("박회원", response.getName());
 		assertEquals("park1@email.com", response.getEmail());
+		assertEquals(UserRole.USER, response.getUserRole());
+	}
+
+	@Test
+	@DisplayName("사장 회원가입 성공")
+	void signupManagerSuccess() {
+		SignupRequestDto dto = new SignupRequestDto("김사장", "kim1@email.com", "Test1234!",
+			LocalDate.of(2000, 1, 1));
+		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
+		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
+		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
+		given(memberRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0)); // 저장된 멤버 그대로 반환
+
+		SignupResponseDto response = authService.signupManager(dto);
+
+		assertEquals("김사장", response.getName());
+		assertEquals("kim1@email.com", response.getEmail());
+		assertEquals(UserRole.MANAGER, response.getUserRole());
+	}
+
+	@Test
+	@DisplayName("관리자 회원가입 성공")
+	void signupAdminSuccess() {
+		SignupRequestDto dto = new SignupRequestDto("정관리", "jung1@email.com", "Test1234!",
+			LocalDate.of(2000, 1, 1));
+		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
+		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
+		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
+		given(memberRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0)); // 저장된 멤버 그대로 반환
+
+		SignupResponseDto response = authService.signupAdmin(dto);
+
+		assertEquals("정관리", response.getName());
+		assertEquals("jung1@email.com", response.getEmail());
+		assertEquals(UserRole.ADMIN, response.getUserRole());
 	}
 
 	@Test
 	@DisplayName("이메일 중복이면 예외 발생")
 	void emailDuplicate() {
 		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1), "USER");
+			LocalDate.of(2000, 1, 1));
 		given(memberRepository.existsByEmail(anyString())).willReturn(true); // 이메일 중복
 
-		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signup(dto));
+		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signupUser(dto));
 
 		assertEquals(ExceptionCode.EMAIL_ALREADY_EXIST, ex.getExceptionCode());
 	}
@@ -81,11 +116,11 @@ public class AuthServiceTest {
 	@DisplayName("이름 중복이면 예외 발생")
 	void nameDuplicate() {
 		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1), "USER");
+			LocalDate.of(2000, 1, 1));
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 X
 		given(memberRepository.existsByName(anyString())).willReturn(true);  // 이름 중복 O
 
-		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signup(dto));
+		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signupUser(dto));
 
 		assertEquals(ExceptionCode.NAME_ALREADY_EXIST, ex.getExceptionCode());
 	}
@@ -94,13 +129,28 @@ public class AuthServiceTest {
 	@DisplayName("만 19세 미만이면 예외 발생")
 	void underage() {
 		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2010, 1, 1), "USER"); // 미성년자
+			LocalDate.of(2010, 1, 1)); // 미성년자
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 X
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 X
 
-		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signup(dto));
+		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signupUser(dto));
 
 		assertEquals(ExceptionCode.UNDERAGE_USER, ex.getExceptionCode());
+	}
+
+	@Test
+	@DisplayName("생일이 오늘 날짜보다 미래면 예외 발생")
+	void birthdayInFutureThrowsException() {
+		LocalDate futureDate = LocalDate.now().plusDays(1); // 내일 날짜
+		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
+			futureDate);
+
+		given(memberRepository.existsByEmail(anyString())).willReturn(false);
+		given(memberRepository.existsByName(anyString())).willReturn(false);
+
+		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signupUser(dto));
+
+		assertEquals(ExceptionCode.INVALID_BIRTHDAY_IN_FUTURE, ex.getExceptionCode());
 	}
 
 	@Test
