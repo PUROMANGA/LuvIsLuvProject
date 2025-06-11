@@ -12,7 +12,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class SignupRequestDto {
 
 	@NotBlank(message = "이름을 입력해주세요.")
@@ -32,7 +31,12 @@ public class SignupRequestDto {
 	@NotBlank(message = "멤버 권한을 입력해주세요.")
 	private final String userRole;
 
-	//태그 선택해야함
-	@NotNull(message = "선택한 태그가 없습니다.")
-	private final List<Long> tagIds;
+	public SignupRequestDto(String name, String email, String password, LocalDate birthday, String userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
+
 }

@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.match.service;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.context.ApplicationEventPublisher;
@@ -11,12 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.chat.event.ChatCreateEvent;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
+import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
 import com.example.luvisluvproject.domain.match.entity.Match;
 import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -31,6 +34,7 @@ public class MatchService {
 	private final MemberRepository memberRepository;
 	private final RedisTemplate<String, Object> matchRedisTemplate;
 	private final ApplicationEventPublisher applicationEventPublisher;
+	private final MemberTagRepository memberTagRepository;
 
 	/**
 	 * 매칭을 걸면 해당 사람에게 요청이 갑니다.
@@ -102,9 +106,18 @@ public class MatchService {
 	public Slice<MatchResponseDto> getMatchService(String email, Pageable pageable) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-
 		Slice<Match> matches = matchRepository.findMatchByReceiverId(me.getId(), pageable);
-
 		return matches.map(MatchResponseDto::new);
+	}
+
+	/**
+	 * 매칭 시스템
+	 * @param email
+	 * @return
+	 */
+	@Transactional(readOnly = true)
+	public List<MatchMemberDto> getMatchMemberListService(String email) {
+		List<MatchMemberDto> matchMemberDtoList = memberTagRepository.findMatchMemberDtoFindByEmail(email);
+		return matchMemberDtoList;
 	}
 }

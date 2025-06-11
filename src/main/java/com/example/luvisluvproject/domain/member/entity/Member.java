@@ -2,8 +2,10 @@ package com.example.luvisluvproject.domain.member.entity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.example.luvisluvproject.domain.member.enums.UserRole;
+import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -13,11 +15,13 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @Entity
@@ -25,6 +29,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@ToString(of = {"name", "email"})
 public class Member extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,21 +54,30 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
+	@Builder.Default
 	@Column(nullable = false)
 	private int reportCount = 0;
 
 	//호감도
+	@Builder.Default
 	@Column(nullable = false)
-	private Long likeCount;
+	private Long likeCount = 0L;
 
 	private LocalDateTime restrictedUntil;
 
+	@OneToMany(mappedBy = "member")
+	private List<MemberTag> memberTagList;
+
+	// 새 멤버 생성시 사용하는 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.birthday = birthday;
 		this.userRole = userRole;
+		this.status = false;
+		this.likeCount = 0L;
+		this.reportCount = 0;
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,

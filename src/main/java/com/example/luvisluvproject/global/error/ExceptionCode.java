@@ -18,6 +18,8 @@ public enum ExceptionCode implements ErrorCode {
 	USER_ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "지원하지 않는 사용자 역할입니다."),
 	LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 혹은 비밀번호가 올바르지 않습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
+	UNDERAGE_USER(HttpStatus.FORBIDDEN, "만 19세 미만은 이용할 수 없습니다."),
+	INVALID_BIRTHDAY_IN_FUTURE(HttpStatus.BAD_REQUEST, "생일은 미래 날짜로 설정할 수 없습니다."),
 
 	//가게
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게를 찾을 수 없습니다."),
@@ -48,7 +50,10 @@ public enum ExceptionCode implements ErrorCode {
 	REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고 내역이 존재하지 않습니다."),
 
 	//리뷰
-	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다.");
+	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
+	STORE_REVIEW_MISMATCH(HttpStatus.BAD_REQUEST, "해당 가게에 속한 리뷰가 아닙니다."),
+	DELETE_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 삭제할 수 있습니다."),
+	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

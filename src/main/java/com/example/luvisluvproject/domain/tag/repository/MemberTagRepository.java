@@ -1,14 +1,19 @@
 package com.example.luvisluvproject.domain.tag.repository;
 
+
+import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import com.example.luvisluvproject.domain.tag.entity.Tag;
+
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
-public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
+public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, CustomMemberTagRepository {
 
 	/**
 	 * 유저가 선택한 태그 전체 삭제
@@ -26,4 +31,10 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long> {
 	List<MemberTag> findAllByMemberId(Long memberId);
 
 	Page<MemberTag> findByMemberId(Long memberId, Pageable pageable);
+
+	@Query("select distinct  m.member from MemberTag m where m.tag.name = :tagName")
+	List<Member> findAllMemberByTag(String tagName);
+
+	List<MemberTag> tag(Tag tag);
+
 }

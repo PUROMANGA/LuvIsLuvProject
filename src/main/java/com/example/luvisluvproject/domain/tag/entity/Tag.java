@@ -59,4 +59,12 @@ public class Tag extends BaseEntity {
 		this.active = updated.isActive();
 		this.priority = updated.getPriority();
 	}
+
+	public Tag(String name, TagCategory category, TagCreatedByType createdByType, boolean active) {
+		this.name = name;
+		this.category = category;
+		this.createdByType = createdByType;
+		this.active = active;
+	}
+
 }

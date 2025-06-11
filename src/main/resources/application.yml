@@ -32,6 +32,10 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/luvisluv
 
+  elasticsearch:
+    rest:
+      uris: http://localhost:9200
+
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
   accessToken:
@@ -41,6 +45,7 @@ jwt:
 
 logging:
   level:
+    root: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
 
