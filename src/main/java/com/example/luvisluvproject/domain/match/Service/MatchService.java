@@ -1,6 +1,5 @@
 package com.example.luvisluvproject.domain.match.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -20,8 +19,6 @@ import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
-import com.example.luvisluvproject.domain.tag.entity.MemberTag;
-import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
@@ -109,9 +106,7 @@ public class MatchService {
 	public Slice<MatchResponseDto> getMatchService(String email, Pageable pageable) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-
 		Slice<Match> matches = matchRepository.findMatchByReceiverId(me.getId(), pageable);
-
 		return matches.map(MatchResponseDto::new);
 	}
 
@@ -120,7 +115,7 @@ public class MatchService {
 	 * @param email
 	 * @return
 	 */
-
+	@Transactional(readOnly = true)
 	public List<MatchMemberDto> getMatchMemberListService(String email) {
 		List<MatchMemberDto> matchMemberDtoList = memberTagRepository.findMatchMemberDtoFindByEmail(email);
 		return matchMemberDtoList;
