@@ -15,6 +15,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -200,15 +204,24 @@ class ReviewServiceTest {
 		@Test
 		@DisplayName("가게 리뷰 목록 조회 성공")
 		void getAllReviewsByStore_success() {
+			// given
 			when(storeRepository.findById(1L)).thenReturn(Optional.of(store));
-			when(reviewRepository.findByStoreId(store)).thenReturn(List.of(
+
+			List<Review> reviewList = List.of(
 				new Review(store, member, 4, "리뷰1"),
 				new Review(store, member, 5, "리뷰2")
-			));
+			);
+			Pageable pageable = PageRequest.of(0, 10);
+			Page<Review> reviewPage = new PageImpl<>(reviewList, pageable, reviewList.size());
 
-			List<ReviewListResponseDto> reviews = reviewService.getAllReviewsByStore(1L);
+			when(reviewRepository.findByStoreId(store, pageable)).thenReturn(reviewPage);
 
-			assertEquals(2, reviews.size());
+			// when
+			Page<ReviewListResponseDto> reviews = reviewService.getAllReviewsByStore(1L, pageable);
+
+			// then
+			assertEquals(2, reviews.getTotalElements());
+			assertEquals("리뷰1", reviews.getContent().get(0).getContent());
 		}
 	}
 
