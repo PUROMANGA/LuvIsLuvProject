@@ -38,19 +38,23 @@ public class StoreService {
 		// 1. Kakao API 호출
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
-		// 2. 응답이 없거나 documents가 비어있으면 예외
-		if (kakaoResponse.getDocuments() == null || kakaoResponse.getDocuments().isEmpty()) {
-			throw new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT);
-		}
+		// 2. 위도/경도 Optional 추출 및 예외 처리
+		Double latitude = kakaoResponse.getLatitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
+		Double longitude = kakaoResponse.getLongitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
-		// 3. 첫 결과의 위도/경도 추출
-		var document = kakaoResponse.getDocuments().get(0);
-		Double latitude = kakaoResponse.getLatitude();   // 위도
-		Double longitude = kakaoResponse.getLongitude(); // 경도
-
-		// 4. Store 생성 및 저장
-		Store store = new Store(request.getName(), request.getBusinessNumber(), request.getContactNumber(),
-			request.getAddress(), latitude, longitude, request.getStatus(), request.getStoreType());
+		// 3. Store 생성 및 저장
+		Store store = Store.builder()
+			.name(request.getName())
+			.businessNumber(request.getBusinessNumber())
+			.contactNumber(request.getContactNumber())
+			.address(request.getAddress())
+			.latitude(latitude)
+			.longitude(longitude)
+			.status(request.getStatus())
+			.storeType(request.getStoreType())
+			.build();
 
 		Store saved = storeRepository.save(store);
 
@@ -80,23 +84,27 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.STORE_NOT_FOUND));
 
-		// 2. Kakao API 호출 → 새 주소로 위도/경도 조회
+		// 2. Kakao API 호출
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
-		if (kakaoResponse.getDocuments() == null || kakaoResponse.getDocuments().isEmpty()) {
-			throw new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT);
-		}
-
-		Double latitude = kakaoResponse.getLatitude();
-		Double longitude = kakaoResponse.getLongitude();
+		Double latitude = kakaoResponse.getLatitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
+		Double longitude = kakaoResponse.getLongitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
 		// 3. 기존 Store 정보 업데이트
-		store.update(request.getName(), request.getContactNumber(), request.getAddress(), latitude, longitude,
-			request.getStatus(), request.getStoreType());
+		store.update(
+			request.getName(),
+			request.getContactNumber(),
+			request.getAddress(),
+			latitude,
+			longitude,
+			request.getStatus(),
+			request.getStoreType()
+		);
 
 		Store updated = storeRepository.save(store);
 
-		// 4. 응답 반환
 		return StoreResponse.builder()
 			.id(updated.getId())
 			.name(updated.getName())
