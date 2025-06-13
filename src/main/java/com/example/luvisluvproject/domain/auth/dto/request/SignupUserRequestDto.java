@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class SignupRequestDto {
+public class SignupUserRequestDto {
 
 	@NotBlank(message = "이름을 입력해주세요.")
 	private final String name;
@@ -28,4 +28,6 @@ public class SignupRequestDto {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
 
+	@NotNull(message = "소개글을 입력해주세요.")
+	private final String content;
 }
