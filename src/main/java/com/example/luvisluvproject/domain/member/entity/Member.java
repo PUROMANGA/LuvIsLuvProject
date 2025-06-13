@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.global.common.BaseEntity;
@@ -68,7 +70,23 @@ public class Member extends BaseEntity {
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
 
-	// 새 멤버 생성시 사용하는 생성자
+	@Nullable
+	private String content;
+
+	// 일반 유저 생성시 사용하는 생성자
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = false;
+		this.likeCount = 0L;
+		this.reportCount = 0;
+		this.content = content;
+	}
+
+	// 가게 사장님, 관리자 생성시 사용하는 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
@@ -101,8 +119,12 @@ public class Member extends BaseEntity {
 		this.likeCount++;
 	}
 
-	public void update(String password) {
+	public void updatePassword(String password) {
 		this.password = password;
+	}
+
+	public void updateContent(String content) {
+		this.content = content;
 	}
 
 	public void softDelete() {

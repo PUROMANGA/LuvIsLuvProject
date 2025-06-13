@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
-import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberMyProfileResponse;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdateContentRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdatePasswordRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.service.MemberService;
 import com.example.luvisluvproject.global.common.AuthUser;
@@ -34,49 +36,82 @@ public class MemberController {
 	private final BlockService blockService;
 
 	/**
-	 * 현재 로그인한 사용자의 회원 정보를 조회합니다.
-	 * 인증된 사용자 정보(authUser)로부터 회원 ID를 추출하여 해당 회원 정보를 조회합니다.
-	 * 회원 정보는 {@link MemberFindResponse} 형태로 반환됩니다.
-	 * @param authUser 인증된 사용자의 {@link AuthUser} 객체
-	 * @return 조회된 회원 정보를 담은 {@link ApiResponse} 객체와 함께 HTTP 200 상태 반환
+	 * 로그인한 사용자의 프로필 정보를 조회합니다.
+	 * 요청을 보낸 사용자의 인증 정보를 바탕으로,
+	 * 해당 사용자의 아이디, 이름, 이메일, 나이, 소개글 프로필 정보를 조회하여 반환합니다.
+	 *
+	 * @param authUser 인증된 사용자 정보 (Spring Security의 @AuthenticationPrincipal을 통해 주입됨)
+	 * @return 사용자 프로필 정보와 함께 200 OK 응답을 반환
+	 * (응답 본문은 {@link MemberMyProfileResponse}를 포함한 {@link ApiResponse})
 	 */
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<MemberFindResponse>> findMyInfo(
+	public ResponseEntity<ApiResponse<MemberMyProfileResponse>> findMyInfo(
 		@AuthenticationPrincipal AuthUser authUser
 	) {
-		MemberFindResponse memberResponse = memberService.findById(authUser.getId());
-		ApiResponse<MemberFindResponse> response = ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, memberResponse);
-		return ResponseEntity.ok(response);
-	}
-
-	@GetMapping("/{memberId}/profile")
-	public ResponseEntity<ApiResponse<MemberFindResponse>> getProfile(
-		@AuthenticationPrincipal Member viewer, // 로그인한 사용자
-		@PathVariable Long memberId
-	) {
-		MemberFindResponse profile = memberService.findById(memberId);
-
-		if (blockService.isProfileBlocked(viewer, profile.getMember())) {
-			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
-		}
-
-		ApiResponse<MemberFindResponse> response = ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profile);
-		return ResponseEntity.ok(response);
+		MemberMyProfileResponse profileResponse = memberService.getMyProfile(authUser.getId());
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profileResponse));
 	}
 
 	/**
-	 * 현재 로그인한 사용자의 회원 정보를 조회합니다.
-	 * 인증된 사용자 정보(authUser)로부터 회원 ID를 추출하여 해당 회원 정보를 조회합니다.
-	 * 회원 정보는 {@link MemberFindResponse} 형태로 반환됩니다.
-	 * @param authUser 인증된 사용자의 {@link AuthUser} 객체
-	 * @return 조회된 회원 정보를 담은 {@link ApiResponse} 객체와 함께 HTTP 200 상태 반환
+	 * 특정 회원의 프로필 정보를 조회합니다.
+	 * 로그인한 사용자(viewer)가 요청한 memberId에 해당하는 회원의 프로필을 조회합니다.
+	 * 조회 대상 회원과 로그인한 사용자 간에 차단 관계가 존재하면 접근이 거부됩니다.
+	 *
+	 * @param viewer 현재 인증된 로그인 사용자 (조회자)
+	 * @param memberId 조회할 회원의 고유 ID
+	 * @return 조회 성공 시 {@code 200 OK}와 함께 회원 프로필 정보가 담긴 {@link ApiResponse}를 반환합니다.
+	 * @throws CustomRuntimeException {@link ExceptionCode#PROFILE_ACCESS_DENIED} 로그인 사용자와 조회 대상 회원 간 차단 관계가 있을 경우 발생
+	 * @throws CustomRuntimeException {@link ExceptionCode#MEMBER_NOT_FOUND} 조회 대상 회원이 없거나 비활성 상태일 경우 발생
 	 */
-	@PutMapping("/me")
+	@GetMapping("/{memberId}/profile")
+	public ResponseEntity<ApiResponse<MemberFindResponse>> getProfile(
+		@AuthenticationPrincipal Member viewer,
+		@PathVariable Long memberId
+	) {
+		Member targetMember = memberService.getMemberEntityById(memberId);
+
+		if (blockService.isProfileBlocked(viewer, targetMember)) {
+			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
+		}
+
+		MemberFindResponse profile = new MemberFindResponse(
+			targetMember.getId(),
+			targetMember.getName(),
+			targetMember.getBirthday(),
+			targetMember.getContent()
+		);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profile));
+	}
+
+	/**
+	 * 로그인한 사용자의 비밀번호를 수정합니다.
+	 *
+	 * @param authUser 인증된 사용자 정보
+	 * @param memberUpdatePasswordRequest 수정할 비밀번호 요청 정보
+	 * @return 수정 성공 응답 (200 OK)
+	 */
+	@PutMapping("/me/password")
 	public ResponseEntity<ApiResponse<Void>> updateMyInfo(
 		@AuthenticationPrincipal AuthUser authUser,
-		@RequestBody @Valid MemberUpdateRequest memberUpdateRequest
+		@RequestBody @Valid MemberUpdatePasswordRequest memberUpdatePasswordRequest
 	) {
-		memberService.updateMember(authUser.getId(), memberUpdateRequest);
+		memberService.updatePasswordMember(authUser.getId(), memberUpdatePasswordRequest);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_MEMBER_SUCCESS, null));
+	}
+
+	/**
+	 * 로그인한 사용자의 자기소개(content)를 수정합니다.
+	 *
+	 * @param authUser 인증된 사용자 정보
+	 * @param memberUpdateContentRequest 수정할 자기소개 요청 정보
+	 * @return 수정 성공 응답 (200 OK)
+	 */
+	@PutMapping("/me/content")
+	public ResponseEntity<ApiResponse<Void>> updateMyInfo(
+		@AuthenticationPrincipal AuthUser authUser,
+		@RequestBody @Valid MemberUpdateContentRequest memberUpdateContentRequest
+	) {
+		memberService.updateContentMember(authUser.getId(), memberUpdateContentRequest);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_MEMBER_SUCCESS, null));
 	}
 

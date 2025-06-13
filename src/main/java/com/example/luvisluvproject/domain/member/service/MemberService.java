@@ -1,12 +1,16 @@
 package com.example.luvisluvproject.domain.member.service;
 
+import java.util.Objects;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
-import com.example.luvisluvproject.domain.member.dto.MemberUpdateRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberMyProfileResponse;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdateContentRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdatePasswordRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
@@ -37,9 +41,25 @@ public class MemberService {
 	 * @return 조회된 회원 정보를 담은 {@link MemberFindResponse}
 	 * @throws CustomRuntimeException 회원이 존재하지 않거나 삭제된 경우 (ExceptionCode.MEMBER_NOT_FOUND)
 	 */
+	// @Transactional(readOnly = true)
+	// public MemberFindResponse findById(Long memberId) {
+	//
+	// 	Member member = memberRepository.findById(memberId)
+	// 		.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+	//
+	// 	if (member.isStatus()) {
+	// 		throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+	// 	}
+	//
+	// 	return new MemberFindResponse(
+	// 		member.getId(),
+	// 		member.getName(),
+	// 		member.getEmail(),
+	// 		member.getBirthday()
+	// 	);
+	// }
 	@Transactional(readOnly = true)
-	public MemberFindResponse findById(Long memberId) {
-
+	public Member getMemberEntityById(Long memberId) {
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
@@ -47,11 +67,24 @@ public class MemberService {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
-		return new MemberFindResponse(
+		return member;
+	}
+
+	@Transactional(readOnly = true)
+	public MemberMyProfileResponse getMyProfile(Long memberId) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+
+		if (member.isStatus()) {
+			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+		}
+
+		return new MemberMyProfileResponse(
 			member.getId(),
 			member.getName(),
 			member.getEmail(),
-			member.getBirthday()
+			member.getBirthday(),
+			member.getContent()
 		);
 	}
 
@@ -60,13 +93,13 @@ public class MemberService {
 	 * 이전 비밀번호가 일치하지 않거나 새 비밀번호가 이전 비밀번호와 같으면 예외를 발생시킵니다.
 	 * 회원이 존재하지 않거나 소프트 삭제된 경우도 예외가 발생합니다.
 	 * @param memberId 수정할 회원의 ID
-	 * @param request 비밀번호 변경 요청 정보({@link MemberUpdateRequest})
+	 * @param request 비밀번호 변경 요청 정보({@link MemberUpdatePasswordRequest})
 	 * @throws CustomRuntimeException 회원이 존재하지 않거나 삭제된 경우 (ExceptionCode.MEMBER_NOT_FOUND)
 	 * @throws CustomRuntimeException 이전 비밀번호가 일치하지 않는 경우 (ExceptionCode.PASSWORD_MISMATCH)
 	 * @throws CustomRuntimeException 이전 비밀번호와 새 비밀번호가 같은 경우 (ExceptionCode.SAME_PASSWORD)
 	 */
 	@Transactional
-	public void updateMember(Long memberId, MemberUpdateRequest request) {
+	public void updatePasswordMember(Long memberId, MemberUpdatePasswordRequest request) {
 
 		Member member = memberRepository.findById(memberId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
@@ -82,7 +115,26 @@ public class MemberService {
 			throw new CustomRuntimeException(ExceptionCode.SAME_PASSWORD);
 		}
 
-		member.update(passwordEncoder.encode(request.getNewPassword()));
+		member.updatePassword(passwordEncoder.encode(request.getNewPassword()));
+	}
+
+	@Transactional
+	public void updateContentMember(Long memberId, MemberUpdateContentRequest request) {
+		Member member = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+
+		if (member.isStatus()) {
+			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+		}
+
+		String newContent = request.getContent();
+		String currentContent = member.getContent();
+
+		if (Objects.equals(currentContent, newContent)) {
+			throw new CustomRuntimeException(ExceptionCode.SAME_CONTENT);
+		}
+
+		member.updateContent(newContent);
 	}
 
 	/**
