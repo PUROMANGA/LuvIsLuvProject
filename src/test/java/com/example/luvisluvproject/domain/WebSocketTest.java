@@ -11,9 +11,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -37,6 +39,7 @@ import com.example.luvisluvproject.domain.chat.repository.MessageRepository;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.entity.MatchStatus;
+import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
@@ -46,6 +49,7 @@ import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class WebSocketTest {
 
@@ -81,9 +85,15 @@ public class WebSocketTest {
 
 	@Autowired
 	private JwtUtil jwtUtil;
+	@Autowired
+	private MatchRepository matchRepository;
 
-	@BeforeEach
+	@BeforeAll
 	public void setUp() {
+		chatRoomRepository.deleteAll();
+		memberRepository.deleteAll();
+		matchRepository.deleteAll();
+
 		webSocketStompClient = new WebSocketStompClient(
 			new StandardWebSocketClient()
 		);

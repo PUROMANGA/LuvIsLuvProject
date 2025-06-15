@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -45,9 +46,12 @@ public class MatchingTest {
 
 	@Autowired
 	private TagJpaRepository tagJpaRepository;
+	@Autowired
+	private ChatRoomRepository chatRoomRepository;
 
 	@BeforeEach
 	public void setUp() {
+		chatRoomRepository.deleteAll();
 		memberRepository.deleteAll();
 		tagJpaRepository.deleteAll();
 		memberTagRepository.deleteAll();
