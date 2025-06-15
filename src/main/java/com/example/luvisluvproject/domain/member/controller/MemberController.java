@@ -20,7 +20,6 @@ import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.service.MemberService;
 import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
-import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
 
@@ -53,33 +52,22 @@ public class MemberController {
 	}
 
 	/**
-	 * 특정 회원의 프로필 정보를 조회합니다.
-	 * 로그인한 사용자(viewer)가 요청한 memberId에 해당하는 회원의 프로필을 조회합니다.
-	 * 조회 대상 회원과 로그인한 사용자 간에 차단 관계가 존재하면 접근이 거부됩니다.
+	 * 지정된 회원의 프로필 정보를 조회합니다.
+	 * 현재 로그인한 회원(authUser)이 요청 대상 회원(memberId)의 프로필을 차단한 경우 예외가 발생합니다.
 	 *
-	 * @param viewer 현재 인증된 로그인 사용자 (조회자)
-	 * @param memberId 조회할 회원의 고유 ID
-	 * @return 조회 성공 시 {@code 200 OK}와 함께 회원 프로필 정보가 담긴 {@link ApiResponse}를 반환합니다.
-	 * @throws CustomRuntimeException {@link ExceptionCode#PROFILE_ACCESS_DENIED} 로그인 사용자와 조회 대상 회원 간 차단 관계가 있을 경우 발생
-	 * @throws CustomRuntimeException {@link ExceptionCode#MEMBER_NOT_FOUND} 조회 대상 회원이 없거나 비활성 상태일 경우 발생
+	 * @param authUser 인증된 사용자 정보를 담은 {@link AuthUser}
+	 * @param memberId 프로필을 조회할 대상 회원의 ID
+	 * @return 대상 회원의 프로필 정보와 성공 응답을 담은 {@link ResponseEntity}
+	 * @throws CustomRuntimeException 프로필 접근이 차단된 경우 또는 회원이 존재하지 않거나 탈퇴한 경우
 	 */
 	@GetMapping("/{memberId}/profile")
 	public ResponseEntity<ApiResponse<MemberFindResponse>> getProfile(
-		@AuthenticationPrincipal Member viewer,
+		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long memberId
 	) {
-		Member targetMember = memberService.getMemberEntityById(memberId);
+		Member viewer = authUser.getMember();
+		MemberFindResponse profile = memberService.getMemberProfile(memberId, viewer);
 
-		if (blockService.isProfileBlocked(viewer, targetMember)) {
-			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
-		}
-
-		MemberFindResponse profile = new MemberFindResponse(
-			targetMember.getId(),
-			targetMember.getName(),
-			targetMember.getBirthday(),
-			targetMember.getContent()
-		);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profile));
 	}
 
