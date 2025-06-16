@@ -7,13 +7,11 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -21,8 +19,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
+import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
+import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
@@ -52,14 +52,14 @@ public class AuthServiceTest {
 	@Test
 	@DisplayName("유저 회원가입 성공")
 	void signupUserSuccess() {
-		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1));
+		SignupUserRequestDto dto = new SignupUserRequestDto("박회원", "park1@email.com", "Test1234!",
+			LocalDate.of(2000, 1, 1), "안녕하세요.");
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
 		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
 		given(memberRepository.save(any())).willAnswer(invocation -> invocation.getArgument(0)); // 저장된 멤버 그대로 반환
 
-		SignupResponseDto response = authService.signupUser(dto);
+		SignupUserResponseDto response = authService.signupUser(dto);
 
 		assertEquals("박회원", response.getName());
 		assertEquals("park1@email.com", response.getEmail());
@@ -103,8 +103,8 @@ public class AuthServiceTest {
 	@Test
 	@DisplayName("이메일 중복이면 예외 발생")
 	void emailDuplicate() {
-		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1));
+		SignupUserRequestDto dto = new SignupUserRequestDto("박회원", "park1@email.com", "Test1234!",
+			LocalDate.of(2000, 1, 1), "안녕하세요.");
 		given(memberRepository.existsByEmail(anyString())).willReturn(true); // 이메일 중복
 
 		CustomRuntimeException ex = assertThrows(CustomRuntimeException.class, () -> authService.signupUser(dto));
@@ -115,8 +115,8 @@ public class AuthServiceTest {
 	@Test
 	@DisplayName("이름 중복이면 예외 발생")
 	void nameDuplicate() {
-		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1));
+		SignupUserRequestDto dto = new SignupUserRequestDto("박회원", "park1@email.com", "Test1234!",
+			LocalDate.of(2000, 1, 1), "안녕하세요.");
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 X
 		given(memberRepository.existsByName(anyString())).willReturn(true);  // 이름 중복 O
 
@@ -128,8 +128,8 @@ public class AuthServiceTest {
 	@Test
 	@DisplayName("만 19세 미만이면 예외 발생")
 	void underage() {
-		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			LocalDate.of(2010, 1, 1)); // 미성년자
+		SignupUserRequestDto dto = new SignupUserRequestDto("박회원", "park1@email.com", "Test1234!",
+			LocalDate.of(2010, 1, 1), "안녕하세요."); // 미성년자
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 X
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 X
 
@@ -142,8 +142,8 @@ public class AuthServiceTest {
 	@DisplayName("생일이 오늘 날짜보다 미래면 예외 발생")
 	void birthdayInFutureThrowsException() {
 		LocalDate futureDate = LocalDate.now().plusDays(1); // 내일 날짜
-		SignupRequestDto dto = new SignupRequestDto("박회원", "park1@email.com", "Test1234!",
-			futureDate);
+		SignupUserRequestDto dto = new SignupUserRequestDto("박회원", "park1@email.com", "Test1234!",
+			futureDate, "안녕하세요.");
 
 		given(memberRepository.existsByEmail(anyString())).willReturn(false);
 		given(memberRepository.existsByName(anyString())).willReturn(false);
