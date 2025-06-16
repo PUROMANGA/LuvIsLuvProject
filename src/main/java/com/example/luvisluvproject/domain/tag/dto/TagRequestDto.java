@@ -7,34 +7,37 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * 태그 생성/수정 시 사용하는 요청 DTO
+ */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class TagRequestDto {
 
 	/**
-	 * 태그 이름 (예: "캠핑", "독서", "고양이")
+	 * 태그 이름 (예: 독서, 캠핑 등)
 	 */
 	@NotBlank(message = "태그 이름은 공백일 수 없습니다.")
 	private String name;
 
 	/**
-	 * 태그 카테고리 (예: "취미", "성격", "라이프스타일")
+	 * 태그 카테고리 (예: HOBBY, GENDER_IDENTITY 등)
 	 */
 	private String category;
 
 	/**
-	 * 생성 출처: 사용자(User), 관리자(Admin)
+	 * 생성자 유형 (USER 또는 ADMIN)
 	 */
 	private TagCreatedByType createdByType;
 
 	/**
-	 * 태그 활성 상태 (false인 경우 추천, 노출 등 제외)
+	 * 사용 가능 여부
 	 */
 	private boolean active = true;
 
 	/**
-	 * 노출 우선순위 (높을수록 상단에 추천됨)
+	 * 노출 우선순위 (높을수록 먼저 추천됨)
 	 */
 	private int priority = 0;
 }

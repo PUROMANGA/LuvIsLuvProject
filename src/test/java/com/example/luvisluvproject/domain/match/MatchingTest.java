@@ -72,7 +72,8 @@ public class MatchingTest {
 			"축구",
 			TagCategory.HOBBY,
 			TagCreatedByType.USER,
-			true
+			true,
+			0
 		);
 
 		tagJpaRepository.save(tag);
@@ -96,7 +97,8 @@ public class MatchingTest {
 				"축구" + i,
 				TagCategory.HOBBY,
 				TagCreatedByType.USER,
-				true
+				true,
+				0
 			);
 
 			memberRepository.save(member);

@@ -2,7 +2,10 @@ package com.example.luvisluvproject.domain.block.service;
 
 import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
 import com.example.luvisluvproject.domain.block.dto.BlockResponseDto;
+import com.example.luvisluvproject.domain.block.dto.BlockUserDto;
+import com.example.luvisluvproject.domain.block.dto.UnblockResponseDto;
 import com.example.luvisluvproject.domain.block.entity.Block;
+import com.example.luvisluvproject.domain.block.entity.Block.BlockType;
 import com.example.luvisluvproject.domain.block.repository.BlockRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -16,7 +19,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -43,14 +45,14 @@ class BlockServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		blocker = Member.builder().id(1L).name("BlockerUser").build();
-		blocked = Member.builder().id(2L).name("BlockedUser").build();
+		blocker = Member.builder().id(1L).name("BlockerUser").email("blocker@email.com").build();
+		blocked = Member.builder().id(2L).name("BlockedUser").email("blocked@email.com").build();
 	}
 
 	@Test
 	void 사용자를_차단한다() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, true, "MANUAL");
+		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, BlockType.MANUAL);
 
 		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
 		given(memberRepository.findById(2L)).willReturn(Optional.of(blocked));
@@ -61,12 +63,8 @@ class BlockServiceTest {
 			.blocked(blocked)
 			.blockUserAccess(true)
 			.excludeFromMatching(true)
-			.excludeFromRecommendation(true)
-			.blockType(Block.BlockType.MANUAL)
+			.blockType(BlockType.MANUAL)
 			.build();
-
-		// createTime 필드 설정 (BaseEntity 필드)
-		LocalDateTime now = LocalDateTime.now();
 
 		given(blockRepository.save(any())).willReturn(block);
 
@@ -81,7 +79,7 @@ class BlockServiceTest {
 	@Test
 	void 자기_자신을_차단하면_예외_발생() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(1L, true, true, true, "MANUAL");
+		BlockRequestDto requestDto = new BlockRequestDto(1L, true, true, BlockType.MANUAL);
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
@@ -92,7 +90,7 @@ class BlockServiceTest {
 	@Test
 	void 이미_차단한_사용자를_다시_차단하면_예외_발생() {
 		// given
-		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, true, "MANUAL");
+		BlockRequestDto requestDto = new BlockRequestDto(2L, true, true, BlockType.MANUAL);
 
 		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
 		given(memberRepository.findById(2L)).willReturn(Optional.of(blocked));
@@ -110,7 +108,7 @@ class BlockServiceTest {
 		Block block = Block.builder()
 			.blocker(blocker)
 			.blocked(blocked)
-			.blockType(Block.BlockType.MANUAL)
+			.blockType(BlockType.MANUAL)
 			.build();
 
 		given(memberRepository.findById(1L)).willReturn(Optional.of(blocker));
@@ -118,10 +116,11 @@ class BlockServiceTest {
 		given(blockRepository.findByBlockerAndBlocked(blocker, blocked)).willReturn(Optional.of(block));
 
 		// when
-		String message = blockService.unblockUser(1L, 2L);
+		UnblockResponseDto response = blockService.unblockUser(1L, 2L);
 
 		// then
-		assertThat(message).isEqualTo("차단을 해제했습니다.");
+		assertThat(response.getUnblockedUserId()).isEqualTo(2L);
+		assertThat(response.getMessage()).isEqualTo("차단을 해제했습니다.");
 		assertThat(block.isUnblocked()).isTrue();
 		assertThat(block.getUnblockedAt()).isNotNull();
 	}
@@ -129,7 +128,7 @@ class BlockServiceTest {
 	@Test
 	void 차단_목록을_조회한다() {
 		// given
-		Member blocked2 = Member.builder().id(3L).name("Blocked2").build();
+		Member blocked2 = Member.builder().id(3L).name("Blocked2").email("b2@email.com").build();
 		Block block1 = Block.builder().blocker(blocker).blocked(blocked).build();
 		Block block2 = Block.builder().blocker(blocker).blocked(blocked2).build();
 
@@ -137,12 +136,11 @@ class BlockServiceTest {
 		given(blockRepository.findAllByBlocker(blocker)).willReturn(List.of(block1, block2));
 
 		// when
-		List<String> result = blockService.getBlockedUsers(1L);
+		List<BlockUserDto> result = blockService.getBlockedUsers(1L);
 
 		// then
-		assertThat(result).containsExactlyInAnyOrder(
-			"BlockedUser을(를) 차단 중입니다.",
-			"Blocked2을(를) 차단 중입니다."
-		);
+		assertThat(result).hasSize(2);
+		assertThat(result).extracting("id").containsExactlyInAnyOrder(2L, 3L);
+		assertThat(result).extracting("name").contains("BlockedUser", "Blocked2");
 	}
 }

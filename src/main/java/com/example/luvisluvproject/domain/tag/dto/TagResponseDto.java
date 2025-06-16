@@ -6,9 +6,13 @@ import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 import lombok.Builder;
 import lombok.Getter;
 
+/**
+ * 태그 조회 응답 DTO
+ */
 @Getter
 @Builder
 public class TagResponseDto {
+
 	private Long id;
 	private String name;
 	private TagCategory category;
@@ -16,6 +20,9 @@ public class TagResponseDto {
 	private Boolean active;
 	private Integer priority;
 
+	/**
+	 * Entity → DTO 변환
+	 */
 	public static TagResponseDto from(Tag tag) {
 		return TagResponseDto.builder()
 			.id(tag.getId())

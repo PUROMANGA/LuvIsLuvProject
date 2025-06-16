@@ -9,6 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * ReportController
+ * 신고 요청을 처리하는 REST 컨트롤러입니다.
+ */
 @RestController
 @RequestMapping("/reports")
 @RequiredArgsConstructor
@@ -16,11 +20,20 @@ public class ReportController {
 
 	private final ReportService reportService;
 
+	/**
+	 * [POST] /reports
+	 * 신고를 생성합니다.
+	 *
+	 * @param member 로그인한 사용자
+	 * @param dto 신고 요청 정보
+	 * @return 신고 응답 정보
+	 */
 	@PostMapping
 	public ResponseEntity<ReportResponseDto> report(
 		@AuthenticationPrincipal Member member,
 		@RequestBody ReportRequestDto dto
 	) {
-		return ResponseEntity.status(201).body(reportService.report(member.getId(), dto));
+		ReportResponseDto response = reportService.report(member.getId(), dto);
+		return ResponseEntity.status(201).body(response);
 	}
 }

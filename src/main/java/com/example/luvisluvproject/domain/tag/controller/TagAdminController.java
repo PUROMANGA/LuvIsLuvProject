@@ -10,15 +10,18 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+/**
+ * 관리자 전용 태그 관리 API
+ */
 @RestController
-@RequestMapping("/tags")
+@RequestMapping("/admin/tags")
 @RequiredArgsConstructor
 public class TagAdminController {
 
 	private final TagService tagService;
 
 	/**
-	 * 태그 수정 - 관리자만 가능
+	 * 태그 수정 (관리자 권한 필요)
 	 */
 	@PatchMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
@@ -31,12 +34,12 @@ public class TagAdminController {
 	}
 
 	/**
-	 * 태그 삭제 - 관리자만 가능
+	 * 태그 삭제 (관리자 권한 필요)
 	 */
 	@DeleteMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
 	public ResponseEntity<String> deleteTag(@PathVariable Long tagId) {
 		tagService.deleteTag(tagId);
-		return ResponseEntity.ok("태그가 성공적으로 삭제되었습니다.");
+		return ResponseEntity.ok("태그가 삭제되었습니다.");
 	}
 }

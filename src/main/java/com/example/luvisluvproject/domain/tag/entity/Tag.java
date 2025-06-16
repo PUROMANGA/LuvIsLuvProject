@@ -3,9 +3,13 @@ package com.example.luvisluvproject.domain.tag.entity;
 import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 import com.example.luvisluvproject.global.common.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
+/**
+ * 태그 도메인 엔티티
+ */
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -21,50 +25,47 @@ public class Tag extends BaseEntity {
 	private Long id;
 
 	/**
-	 * 태그 이름 (예: 캠핑, 고양이, 독서)
+	 * 태그 이름 (예: 독서, 캠핑)
 	 */
 	@Column(nullable = false, unique = true, length = 50)
 	private String name;
 
 	/**
-	 * 태그 카테고리 (예: 취미, 성격 등)
+	 * 태그 카테고리 (HOBBY, GENDER_IDENTITY, 등)
 	 */
+	@Enumerated(EnumType.STRING)
 	@Column(length = 30)
 	private TagCategory category;
 
 	/**
-	 * 생성 출처: USER 또는 ADMIN
+	 * 생성 주체 (USER 또는 ADMIN)
 	 */
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private TagCreatedByType createdByType;
 
 	/**
-	 * 사용 여부 (false면 숨김)
+	 * 태그 활성 여부 (false일 경우 숨김)
 	 */
-	@Builder.Default
+	@Column(nullable = false)
 	private boolean active = true;
 
 	/**
-	 * 노출 우선순위 (높을수록 우선 추천)
+	 * 노출 우선순위 (높을수록 우선 노출)
 	 */
-	@Builder.Default
+	@Column(nullable = false)
 	private int priority = 0;
 
-	// name만 수정하는 경우에도 이 메서드를 사용할 수 있음
-	public void update(Tag updated) {
-		this.name = updated.getName();
-		this.category = updated.getCategory();
-		this.createdByType = updated.getCreatedByType();
-		this.active = updated.isActive();
-		this.priority = updated.getPriority();
-	}
-
-	public Tag(String name, TagCategory category, TagCreatedByType createdByType, boolean active) {
+	/**
+	 * 태그 수정 시 내부 필드 변경
+	 */
+	public Tag(String name, TagCategory category, TagCreatedByType createdByType, boolean active, int priority) {
 		this.name = name;
 		this.category = category;
 		this.createdByType = createdByType;
 		this.active = active;
+		this.priority = priority;
 	}
+
 
 }
