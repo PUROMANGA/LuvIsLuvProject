@@ -22,6 +22,8 @@ public interface StoreRepository extends JpaRepository<Store, Long> {
 	 * @param lng 사용자의 경도
 	 * @return 반경 2km 이내 가게 리스트
 	 */
+	// cos,sin 모든 sql 에 있는지 체크
+	// repository test code
 	@Query(value = """
 		SELECT *
 		FROM store

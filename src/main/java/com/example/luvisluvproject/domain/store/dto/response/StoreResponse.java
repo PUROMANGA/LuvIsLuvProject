@@ -6,7 +6,6 @@ import com.example.luvisluvproject.domain.store.enums.StoreType;
 
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 /**
  * 가게 응답 DTO
@@ -24,7 +23,21 @@ public class StoreResponse {
 	private StoreStatus status;
 	private StoreType storeType;
 	private Double latitude;   // OpenAPI로 변환된 위도
-	private Double longitude;  // OpenAPI로 변환된 경도
+	private Double longitude; // OpenAPI로 변환된 경도
+
+	public static StoreResponse from(Store store) {
+		return StoreResponse.builder()
+			.id(store.getId())
+			.name(store.getName())
+			.businessNumber(store.getBusinessNumber())
+			.contactNumber(store.getContactNumber())
+			.address(store.getAddress())
+			.status(store.getStatus())
+			.storeType(store.getStoreType())
+			.latitude(store.getLatitude())
+			.longitude(store.getLongitude())
+			.build();
+	}
 
 	/**
 	 * 테스트용 생성자
@@ -40,19 +53,5 @@ public class StoreResponse {
 		this.storeType = storeType;
 		this.latitude = latitude;
 		this.longitude = longitude;
-	}
-
-	public static StoreResponse from(Store store) {
-		return StoreResponse.builder()
-			.id(store.getId())
-			.name(store.getName())
-			.businessNumber(store.getBusinessNumber())
-			.contactNumber(store.getContactNumber())
-			.address(store.getAddress())
-			.status(store.getStatus())
-			.storeType(store.getStoreType())
-			.latitude(store.getLatitude())
-			.longitude(store.getLongitude())
-			.build();
 	}
 }

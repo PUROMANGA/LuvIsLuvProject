@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.store.infra;
 
+import java.net.URI;
+
 import com.example.luvisluvproject.domain.store.infra.dto.KakaoAddressResponse;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
@@ -23,7 +25,7 @@ public class KakaoAddressClient {
 
 	private final RestTemplate restTemplate = new RestTemplate();
 
-	@Value("${kakao.api.key}")
+	@Value("${KAKAO_API_KEY}")
 	private String kakaoApiKey;
 
 	/**
@@ -34,7 +36,10 @@ public class KakaoAddressClient {
 	 * @throws CustomRuntimeException Kakao API 호출 결과가 비어있는 경우 예외 발생
 	 */
 	public KakaoAddressResponse fetchCoordinates(String address) {
-		String uri = UriComponentsBuilder.fromHttpUrl(KAKAO_API_URL).queryParam("query", address).toUriString();
+		URI uri = UriComponentsBuilder.fromHttpUrl(KAKAO_API_URL).queryParam("query", address)
+			.encode()
+			.build()
+			.toUri();
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.set("Authorization", "KakaoAK " + kakaoApiKey);

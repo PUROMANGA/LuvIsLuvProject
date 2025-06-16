@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 가게 등록/수정/삭제 등 비즈니스 로직 처리 서비스
- * 위치기반 서비스는 추가 될 예정 !
+ *
  */
 @Service
 @RequiredArgsConstructor
@@ -38,22 +38,27 @@ public class StoreService {
 		// 1. Kakao API 호출
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
-		// 2. 응답이 없거나 documents가 비어있으면 예외
-		if (kakaoResponse.getDocuments() == null || kakaoResponse.getDocuments().isEmpty()) {
-			throw new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT);
-		}
+		// 2. 위도/경도 Optional 추출 및 예외 처리
+		Double latitude = kakaoResponse.getLatitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
+		Double longitude = kakaoResponse.getLongitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
-		// 3. 첫 결과의 위도/경도 추출
-		var document = kakaoResponse.getDocuments().get(0);
-		Double latitude = kakaoResponse.getLatitude();   // 위도
-		Double longitude = kakaoResponse.getLongitude(); // 경도
-
-		// 4. Store 생성 및 저장
-		Store store = new Store(request.getName(), request.getBusinessNumber(), request.getContactNumber(),
-			request.getAddress(), latitude, longitude, request.getStatus(), request.getStoreType());
+		// 3. Store 생성 및 저장
+		Store store = Store.builder()
+			.name(request.getName())
+			.businessNumber(request.getBusinessNumber())
+			.contactNumber(request.getContactNumber())
+			.address(request.getAddress())
+			.latitude(latitude)
+			.longitude(longitude)
+			.status(request.getStatus())
+			.storeType(request.getStoreType())
+			.build();
 
 		Store saved = storeRepository.save(store);
 
+		// 사업자 번호 검증 api ?
 		return StoreResponse.builder()
 			.id(saved.getId())
 			.name(saved.getName())
@@ -66,6 +71,7 @@ public class StoreService {
 			.longitude(saved.getLongitude())
 			.build();
 	}
+
 
 	/**
 	 * 가게 정보 수정
@@ -80,23 +86,31 @@ public class StoreService {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.STORE_NOT_FOUND));
 
-		// 2. Kakao API 호출 → 새 주소로 위도/경도 조회
+		// 2. Kakao API 호출
+		// 카카오 종속
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
-		if (kakaoResponse.getDocuments() == null || kakaoResponse.getDocuments().isEmpty()) {
-			throw new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT);
-		}
-
-		Double latitude = kakaoResponse.getLatitude();
-		Double longitude = kakaoResponse.getLongitude();
+		// 같음
+		// 위도 경도 한묶음
+		// dto 따로?
+		Double latitude = kakaoResponse.getLatitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
+		Double longitude = kakaoResponse.getLongitude()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
 		// 3. 기존 Store 정보 업데이트
-		store.update(request.getName(), request.getContactNumber(), request.getAddress(), latitude, longitude,
-			request.getStatus(), request.getStoreType());
+		store.update(
+			request.getName(),
+			request.getContactNumber(),
+			request.getAddress(),
+			latitude,
+			longitude,
+			request.getStatus(),
+			request.getStoreType()
+		);
 
 		Store updated = storeRepository.save(store);
 
-		// 4. 응답 반환
 		return StoreResponse.builder()
 			.id(updated.getId())
 			.name(updated.getName())
@@ -109,6 +123,7 @@ public class StoreService {
 			.longitude(updated.getLongitude())
 			.build();
 	}
+
 
 	/**
 	 * 가게 삭제 - Hard delete 방식
@@ -140,7 +155,7 @@ public class StoreService {
 	}
 
 	/**
-	 * 두 좌표 간의 거리 계산 (단위: 미터)
+	 * 두 좌표 간의 거리 계산 (단위: 미터) // 엔티티 안에
 	 *
 	 * @param lat1 위도1
 	 * @param lng1 경도1
