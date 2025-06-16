@@ -23,7 +23,7 @@ public enum SuccessCode {
 	UPDATE_REVIEW_SUCCESS(HttpStatus.OK, "리뷰 수정 성공"),
 	GET_REVIEW_SUCCESS(HttpStatus.OK, "리뷰 상세 조회 성공"),
 	GET_ALL_REVIEWS_SUCCESS(HttpStatus.OK, "리뷰 전체 조회 성공"),
-	DELETE_REVIEW_SUCCESS(HttpStatus.OK, "리뷰 전체 조회 성공");
+	DELETE_REVIEW_SUCCESS(HttpStatus.OK, "리뷰 삭제 성공");
 
 	private final HttpStatus httpStatus;
 	private final String message;

@@ -1,7 +1,9 @@
 package com.example.luvisluvproject.domain.review.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -86,15 +89,25 @@ public class ReviewController {
 	}
 
 	/**
-	 * 특정 가게에 작성된 모든 리뷰 목록을 조회합니다.
+	 * 특정 가게에 작성된 모든 리뷰 목록을 페이징 및 정렬하여 조회합니다.
 	 * @param storeId 조회할 리뷰가 속한 가게의 ID
-	 * @return 리뷰 목록과 성공 메시지를 포함한 ApiResponse를 ResponseEntity로 반환
+	 * @param page 요청하는 페이지 번호 (사용자 기준 1부터 시작, 기본값: 1)
+	 * @param size 한 페이지에 보여줄 리뷰 개수 (기본값: 10)
+	 * @param sort 정렬 기준 필드명 (기본값: "createdAt")
+	 * @param direction 정렬 방향 (ASC 또는 DESC, 기본값: DESC)
+	 * @return 페이지 정보와 함께 리뷰 목록, 성공 메시지를 포함한 ApiResponse를 ResponseEntity로 반환
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponse<List<ReviewListResponseDto>>> getAllReviewsByStore(
-		@PathVariable Long storeId
+	public ResponseEntity<ApiResponse<Page<ReviewListResponseDto>>> getAllReviewsByStore(
+		@PathVariable Long storeId,
+		@RequestParam(defaultValue = "1") int page,
+		@RequestParam(defaultValue = "10") int size,
+		@RequestParam(defaultValue = "createdAt") String sort,
+		@RequestParam(defaultValue = "DESC") Sort.Direction direction
 	) {
-		List<ReviewListResponseDto> responseDto = reviewService.getAllReviewsByStore(storeId);
+		// 사용자에게는 1부터 시작하게 하고, 내부적으로는 0부터 시작하도록
+		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(direction, sort));
+		Page<ReviewListResponseDto> responseDto = reviewService.getAllReviewsByStore(storeId, pageable);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.GET_ALL_REVIEWS_SUCCESS, responseDto));
 	}
 

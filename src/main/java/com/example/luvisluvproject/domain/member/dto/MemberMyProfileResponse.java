@@ -6,19 +6,25 @@ import java.time.Period;
 import lombok.Getter;
 
 @Getter
-public class MemberFindResponse {
+public class MemberMyProfileResponse {
 
 	private final Long userId;
 
 	private final String name;
 
+	private final String email;
+
+	private final LocalDate birthday;
+
 	private final int age;
 
 	private final String content;
 
-	public MemberFindResponse(Long userId, String name, LocalDate birthday, String content) {
+	public MemberMyProfileResponse(Long userId, String name, String email, LocalDate birthday, String content) {
 		this.userId = userId;
 		this.name = name;
+		this.email = email;
+		this.birthday = birthday;
 		this.age = calculateAge(birthday);
 		this.content = content;
 	}
