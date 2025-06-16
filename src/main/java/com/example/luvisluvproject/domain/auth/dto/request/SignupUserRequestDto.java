@@ -11,7 +11,8 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-public class SignupRequestDto {
+@RequiredArgsConstructor
+public class SignupUserRequestDto {
 
 	@NotBlank(message = "이름을 입력해주세요.")
 	private final String name;
@@ -27,15 +28,6 @@ public class SignupRequestDto {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
 
-	@NotBlank(message = "멤버 권한을 입력해주세요.")
-	private final String userRole;
-
-	public SignupRequestDto(String name, String email, String password, LocalDate birthday, String userRole) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-	}
-
+	@NotNull(message = "소개글을 입력해주세요.")
+	private final String content;
 }

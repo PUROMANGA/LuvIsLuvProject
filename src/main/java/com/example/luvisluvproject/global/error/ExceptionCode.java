@@ -33,6 +33,7 @@ public enum ExceptionCode implements ErrorCode {
 	SAME_PASSWORD(HttpStatus.BAD_REQUEST, "이전과 동일한 비밀번호는 사용이 불가합니다."),
 	PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "입력한 비밀번호가 일치하지 않습니다."),
 	SAME_NAME(HttpStatus.BAD_REQUEST, "이전과 동일한 이름은 변경할 수 없습니다."),
+	SAME_CONTENT(HttpStatus.BAD_REQUEST, "이전과 동일한 소개입니다."),
 
 	//매치
 	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다."),
@@ -53,7 +54,8 @@ public enum ExceptionCode implements ErrorCode {
 	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
 	STORE_REVIEW_MISMATCH(HttpStatus.BAD_REQUEST, "해당 가게에 속한 리뷰가 아닙니다."),
 	DELETE_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 삭제할 수 있습니다."),
-	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다.");
+	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다."),
+	MEMBER_NOT_ELIGIBLE_FOR_REVIEW(HttpStatus.FORBIDDEN, "해당 가게를 이용한 사용자만 리뷰를 작성할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;
