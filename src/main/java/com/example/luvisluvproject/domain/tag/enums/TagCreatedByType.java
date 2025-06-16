@@ -19,4 +19,16 @@ public enum TagCreatedByType {
 	TagCreatedByType(String label) {
 		this.label = label;
 	}
+
+	/**
+	 * 문자열로부터 enum 매핑
+	 */
+	public static TagCreatedByType from(String value) {
+		for (TagCreatedByType type : TagCreatedByType.values()) {
+			if (type.name().equalsIgnoreCase(value)) {
+				return type;
+			}
+		}
+		throw new IllegalArgumentException("Invalid TagCreatedByType: " + value);
+	}
 }

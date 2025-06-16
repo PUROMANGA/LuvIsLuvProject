@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
+
 /**
  * 관리자 전용 태그 관리 API
  */
@@ -25,12 +28,12 @@ public class TagAdminController {
 	 */
 	@PatchMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<TagResponseDto> updateTag(
+	public ResponseEntity<ApiResponse<TagResponseDto>> updateTag(
 		@PathVariable Long tagId,
 		@RequestBody @Valid TagRequestDto requestDto
 	) {
 		TagResponseDto updatedTag = tagService.updateTag(tagId, requestDto);
-		return ResponseEntity.ok(updatedTag);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_TAG_SUCCESS, updatedTag));
 	}
 
 	/**
@@ -38,8 +41,8 @@ public class TagAdminController {
 	 */
 	@DeleteMapping("/{tagId}")
 	@PreAuthorize("hasRole('ADMIN')")
-	public ResponseEntity<String> deleteTag(@PathVariable Long tagId) {
+	public ResponseEntity<ApiResponse<String>> deleteTag(@PathVariable Long tagId) {
 		tagService.deleteTag(tagId);
-		return ResponseEntity.ok("태그가 삭제되었습니다.");
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_TAG_SUCCESS, "태그가 삭제되었습니다."));
 	}
 }

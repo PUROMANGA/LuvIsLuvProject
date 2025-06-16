@@ -9,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
+
 /**
  * ReportController
  * 신고 요청을 처리하는 REST 컨트롤러입니다.
@@ -29,11 +32,11 @@ public class ReportController {
 	 * @return 신고 응답 정보
 	 */
 	@PostMapping
-	public ResponseEntity<ReportResponseDto> report(
+	public ResponseEntity<ApiResponse<ReportResponseDto>> report(
 		@AuthenticationPrincipal Member member,
 		@RequestBody ReportRequestDto dto
 	) {
 		ReportResponseDto response = reportService.report(member.getId(), dto);
-		return ResponseEntity.status(201).body(response);
+		return ResponseEntity.status(201).body(ApiResponse.of(SuccessCode.CREATE_REPORT_SUCCESS, response));
 	}
 }

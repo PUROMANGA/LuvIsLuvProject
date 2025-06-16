@@ -19,6 +19,8 @@ import java.time.LocalDateTime;
 @Builder
 public class Block extends BaseEntity {
 
+	private boolean excludeFromMatching;
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

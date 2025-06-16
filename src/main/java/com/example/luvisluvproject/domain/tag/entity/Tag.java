@@ -57,7 +57,18 @@ public class Tag extends BaseEntity {
 	private int priority = 0;
 
 	/**
-	 * 태그 수정 시 내부 필드 변경
+	 * 태그 정보 수정
+	 */
+	public void update(String name, TagCategory category, TagCreatedByType createdByType, boolean active, int priority) {
+		this.name = name;
+		this.category = category;
+		this.createdByType = createdByType;
+		this.active = active;
+		this.priority = priority;
+	}
+
+	/**
+	 * 생성자 (update와 구분)
 	 */
 	public Tag(String name, TagCategory category, TagCreatedByType createdByType, boolean active, int priority) {
 		this.name = name;
@@ -66,6 +77,4 @@ public class Tag extends BaseEntity {
 		this.active = active;
 		this.priority = priority;
 	}
-
-
 }

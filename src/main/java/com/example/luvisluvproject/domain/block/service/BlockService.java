@@ -14,6 +14,7 @@ import com.example.luvisluvproject.global.error.ExceptionCode;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class BlockService {
 
 	private final BlockRepository blockRepository;
@@ -78,8 +80,10 @@ public class BlockService {
 	}
 
 	/**
-	 * 차단한 사용자 목록 조회 // 어드민만 가능하게, 어노테이션 트랜잭셔널 붙이기
+	 * 차단한 사용자 목록 조회
 	 */
+	@Transactional
+	@PreAuthorize("hasRole('ADMIN')")
 	public List<BlockUserDto> getBlockedUsers(Long userId) {
 		Member blocker = memberRepository.findById(userId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));

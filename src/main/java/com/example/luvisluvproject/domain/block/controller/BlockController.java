@@ -12,6 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
+
 import java.util.List;
 
 /**
@@ -30,12 +33,12 @@ public class BlockController {
 	 * 사용자를 차단합니다. //어스유저
 	 */
 	@PostMapping
-	public ResponseEntity<BlockResponseDto> blockUser(
+	public ResponseEntity<ApiResponse<BlockResponseDto>> blockUser(
 		@AuthenticationPrincipal Member member,
 		@RequestBody BlockRequestDto requestDto
 	) {
 		BlockResponseDto response = blockService.blockUser(member.getId(), requestDto);
-		return ResponseEntity.status(201).body(response);
+		return ResponseEntity.status(201).body(ApiResponse.of(SuccessCode.BLOCK_USER_SUCCESS, response));
 	}
 
 	/**
@@ -43,12 +46,12 @@ public class BlockController {
 	 * 사용자를 차단 해제합니다.
 	 */
 	@DeleteMapping("/{blockedId}")
-	public ResponseEntity<UnblockResponseDto> unblockUser(
+	public ResponseEntity<ApiResponse<UnblockResponseDto>> unblockUser(
 		@AuthenticationPrincipal Member member,
 		@PathVariable Long blockedId
 	) {
 		UnblockResponseDto response = blockService.unblockUser(member.getId(), blockedId);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UNBLOCK_USER_SUCCESS, response));
 	}
 
 	/**
@@ -56,9 +59,10 @@ public class BlockController {
 	 * 내가 차단한 사용자 목록을 조회합니다.
 	 */
 	@GetMapping
-	public ResponseEntity<List<BlockUserDto>> getBlockedUsers(
+	public ResponseEntity<ApiResponse<List<BlockUserDto>>> getBlockedUsers(
 		@AuthenticationPrincipal Member member
 	) {
-		return ResponseEntity.ok(blockService.getBlockedUsers(member.getId()));
+		List<BlockUserDto> blockedUsers = blockService.getBlockedUsers(member.getId());
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.GET_BLOCKED_USERS_SUCCESS, blockedUsers));
 	}
 }

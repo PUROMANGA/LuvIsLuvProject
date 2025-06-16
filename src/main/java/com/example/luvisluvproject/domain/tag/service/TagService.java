@@ -65,13 +65,13 @@ public class TagService {
 		Tag tag = tagJpaRepository.findById(tagId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 태그가 존재하지 않습니다."));
 
-		tag.update(Tag.builder()
-			.name(requestDto.getName())
-			.category(TagCategory.from(requestDto.getCategory()))
-			.createdByType(requestDto.getCreatedByType())
-			.active(requestDto.isActive())
-			.priority(requestDto.getPriority())
-			.build());
+		tag.update(
+			requestDto.getName(),
+			TagCategory.from(requestDto.getCategory()),
+			requestDto.getCreatedByType(),
+			requestDto.isActive(),
+			requestDto.getPriority()
+		);
 
 		return TagResponseDto.from(tag);
 	}
