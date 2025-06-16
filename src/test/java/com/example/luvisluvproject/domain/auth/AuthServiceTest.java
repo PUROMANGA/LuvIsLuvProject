@@ -70,7 +70,7 @@ public class AuthServiceTest {
 	@DisplayName("사장 회원가입 성공")
 	void signupManagerSuccess() {
 		SignupRequestDto dto = new SignupRequestDto("김사장", "kim1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1));
+			LocalDate.of(2000, 1, 1), "MANAGER");
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
 		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
@@ -87,7 +87,7 @@ public class AuthServiceTest {
 	@DisplayName("관리자 회원가입 성공")
 	void signupAdminSuccess() {
 		SignupRequestDto dto = new SignupRequestDto("정관리", "jung1@email.com", "Test1234!",
-			LocalDate.of(2000, 1, 1));
+			LocalDate.of(2000, 1, 1), "ADMIN");
 		given(memberRepository.existsByEmail(anyString())).willReturn(false); // 이메일 중복 아님
 		given(memberRepository.existsByName(anyString())).willReturn(false); // 이름 중복 아님
 		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
