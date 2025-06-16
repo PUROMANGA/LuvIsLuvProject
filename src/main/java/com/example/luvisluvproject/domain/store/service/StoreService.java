@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 가게 등록/수정/삭제 등 비즈니스 로직 처리 서비스
- * 위치기반 서비스는 추가 될 예정 !
+ *
  */
 @Service
 @RequiredArgsConstructor
@@ -58,6 +58,7 @@ public class StoreService {
 
 		Store saved = storeRepository.save(store);
 
+		// 사업자 번호 검증 api ?
 		return StoreResponse.builder()
 			.id(saved.getId())
 			.name(saved.getName())
@@ -70,6 +71,7 @@ public class StoreService {
 			.longitude(saved.getLongitude())
 			.build();
 	}
+
 
 	/**
 	 * 가게 정보 수정
@@ -85,8 +87,12 @@ public class StoreService {
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.STORE_NOT_FOUND));
 
 		// 2. Kakao API 호출
+		// 카카오 종속
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
+		// 같음
+		// 위도 경도 한묶음
+		// dto 따로?
 		Double latitude = kakaoResponse.getLatitude()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 		Double longitude = kakaoResponse.getLongitude()
@@ -118,6 +124,7 @@ public class StoreService {
 			.build();
 	}
 
+
 	/**
 	 * 가게 삭제 - Hard delete 방식
 	 *
@@ -148,7 +155,7 @@ public class StoreService {
 	}
 
 	/**
-	 * 두 좌표 간의 거리 계산 (단위: 미터)
+	 * 두 좌표 간의 거리 계산 (단위: 미터) // 엔티티 안에
 	 *
 	 * @param lat1 위도1
 	 * @param lng1 경도1

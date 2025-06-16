@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -32,6 +33,7 @@ public class StoreController {
 	 * @param request 가게 등록 요청 DTO
 	 * @return 등록된 가게 정보 (성공 메시지 포함)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping
 	public ResponseEntity<ApiResponse<StoreResponse>> saveStore(@RequestBody @Valid StoreSaveRequest request) {
 		StoreResponse response = storeService.saveStore(request);
@@ -45,6 +47,7 @@ public class StoreController {
 	 * @param request 수정 요청 DTO
 	 * @return 수정된 가게 정보 (성공 메시지 포함)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PutMapping("/{id}")
 	public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
 		@PathVariable Long id,
@@ -60,6 +63,7 @@ public class StoreController {
 	 * @param id 가게 ID
 	 * @return 삭제 성공 메시지 (body 없음)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ApiResponse<Void>> deleteStore(@PathVariable Long id) {
 		storeService.deleteStore(id);

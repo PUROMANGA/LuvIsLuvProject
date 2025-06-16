@@ -1,60 +1,37 @@
-###  1. 가게 등록 성공
-# @no-cookie-jar
+### 1. 가게 등록 (MANAGER 권한 필요)
 POST http://localhost:8080/stores
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMDQ0Njc4LCJleHAiOjE3NTAwNDgyNzh9.6IdbUJsrTA0thfsgsKGfy3k7pKbik8jkK13TKY0BMpc
 
 {
-  "name": "bella coffe",
+  "name": "이슬펍",
   "businessNumber": 1234567890,
   "contactNumber": "010-1234-5678",
-  "address": "서울시 구로구",
+  "address": "서울 강남구 논현로 63길",
   "status": "OPEN",
-  "storeType": "CAFE"
-}
-
-###  2. 가게 등록 실패 (빈 name)
-# @no-cookie-jar
-POST http://localhost:8080/stores
-Content-Type: application/json
-
-{
-  "name": "",
-  "businessNumber": 1234567890,
-  "contactNumber": "010-1234-5678",
-  "address": "서울시 구로구",
-  "status": "OPEN",
-  "storeType": "CAFE"
+  "storeType": "BAR"
 }
 
 
-
-###  3. 가게 수정 성공
+### 2. 가게 수정 (MANAGER 권한 필요)
 PUT http://localhost:8080/stores/1
 Content-Type: application/json
+Authorization: Bearer {{MANAGER_TOKEN}}
 
 {
-  "name": "bella bar & coffee",
-  "contactNumber": "010-2222-3333",
-  "address": "서울시 성동구",
-  "status": "CLOSED",
-  "storeType": "CAFE"
-}
-
-###  4. 가게 수정 실패 (존재하지 않는 ID)
-PUT http://localhost:8080/stores/99999
-Content-Type: application/json
-
-{
-  "name": "없는 가게 수정",
-  "contactNumber": "010-0000-0000",
-  "address": "서울시 구로구",
+  "name": "이슬카페",
+  "contactNumber": "010-9876-5432",
+  "address": "서울특별시 마포구 와우산로 11길",
   "status": "CLOSED",
   "storeType": "CAFE"
 }
 
 
-###  5. 가게 삭제 성공
+### 3. 가게 삭제 (MANAGER 권한 필요)
 DELETE http://localhost:8080/stores/1
+Authorization: Bearer {{MANAGER_TOKEN}}
 
-###  6. 가게 삭제 실패 (이미 삭제되었거나 없는 ID)
-DELETE http://localhost:8080/stores/99999
+
+### 4. 내 주변 가게 조회 (권한 필요 없음)
+GET http://localhost:8080/stores/nearby?lat=37.5665&lng=126.9780&radius=3000
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMDQyOTI4LCJleHAiOjE3NTAwNDMyODh9.PAbc8FGl3grDq0VSSI2f_la56uqtYoTUkfBuzJmzN5A

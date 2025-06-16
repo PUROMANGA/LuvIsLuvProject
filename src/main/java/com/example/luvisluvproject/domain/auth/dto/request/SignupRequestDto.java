@@ -28,7 +28,7 @@ public class SignupRequestDto {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
 
-	@NotBlank(message = "멤버 권한을 입력해주세요.")
+	//@NotBlank(message = "멤버 권한을 입력해주세요.")
 	private final String userRole;
 
 	public SignupRequestDto(String name, String email, String password, LocalDate birthday, String userRole) {

@@ -32,6 +32,7 @@ public class KakaoAddressResponse {
 	 *
 	 * @return Optional<Double> 형태의 위도 값
 	 */
+
 	public Optional<Double> getLatitude() {
 		return documents != null && !documents.isEmpty()
 			? Optional.ofNullable(documents.get(0))

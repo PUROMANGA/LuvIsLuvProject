@@ -1,0 +1,48 @@
+### 일반 유저 회원가입
+POST http://localhost:8080/auth/signup/user
+Content-Type: application/json
+
+{
+  "name": "슬이",
+  "email": "user@example.com",
+  "password": "password1234!",
+  "birthday": "2000-04-15"
+}
+
+
+### 사장(MANAGER) 회원가입
+POST http://localhost:8080/auth/signup/manager
+Content-Type: application/json
+
+{
+  "name": "매니저",
+  "email": "manager@example.com",
+  "password": "password1234!",
+  "birthday": "2000-04-26"
+}
+
+
+### 관리자(ADMIN) 회원가입
+POST http://localhost:8080/auth/signup/admin
+Content-Type: application/json
+
+{
+  "name": "관리자",
+  "email": "admin@example.com",
+  "password": "password1234!",
+  "birthday": "2000-11-24"
+}
+
+
+### 로그인 요청 (JWT 발급)
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+  "email": "manager@example.com",
+  "password": "password1234!"
+}
+
+### 로그아웃 요청 (헤더에 토큰 포함)
+POST http://localhost:8080/auth/logout
+Authorization: Bearer {{YOUR_ACCESS_TOKEN_HERE}}
