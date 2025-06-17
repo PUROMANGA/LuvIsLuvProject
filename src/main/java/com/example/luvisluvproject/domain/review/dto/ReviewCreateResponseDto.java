@@ -9,11 +9,9 @@ public class ReviewCreateResponseDto {
 
 	private final Long reviewId;
 	private final LocalDateTime createdAt;
-	private final String message;
 
-	public ReviewCreateResponseDto(Long reviewId, LocalDateTime createdAt, String message) {
+	public ReviewCreateResponseDto(Long reviewId, LocalDateTime createdAt) {
 		this.reviewId = reviewId;
 		this.createdAt = createdAt;
-		this.message = message;
 	}
 }
