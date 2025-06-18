@@ -109,4 +109,10 @@ public class JwtUtil {
 		return claims.getExpiration().getTime() - System.currentTimeMillis();
 	}
 
+	public String getEmail(String token) {
+		token = token.substring(7);
+		Claims claims = extractClaims(token);
+		return claims.getSubject();
+	}
+
 }

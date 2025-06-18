@@ -1,17 +1,16 @@
 package com.example.luvisluvproject.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
-import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
-import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.success.ApiResponse;
@@ -35,41 +34,10 @@ public class AuthController {
 	 * @param requestDto 회원가입 요청 데이터
 	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
 	 */
-	@PostMapping("/signup/user")
-	public ResponseEntity<ApiResponse<SignupUserResponseDto>> signupUser(
-		@Valid @RequestBody SignupUserRequestDto requestDto
-	) {
-		SignupUserResponseDto responseDto = authService.signupUser(requestDto);
-		ApiResponse<SignupUserResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
-		return ResponseEntity.ok(apiResponse);
-	}
-
-	/**
-	 * 사장(MANAGER) 회원가입 요청 컨트롤러
-	 *
-	 * @param requestDto 회원가입 요청 데이터
-	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
-	 */
-	@PostMapping("/signup/manager")
-	public ResponseEntity<ApiResponse<SignupResponseDto>> signupManager(
-		@Valid @RequestBody SignupRequestDto requestDto
-	) {
-		SignupResponseDto responseDto = authService.signupManager(requestDto);
-		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
-		return ResponseEntity.ok(apiResponse);
-	}
-
-	/**
-	 * 관리자(ADMIN) 회원가입 요청 컨트롤러
-	 *
-	 * @param requestDto 회원가입 요청 데이터
-	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
-	 */
-	@PostMapping("/signup/admin")
-	public ResponseEntity<ApiResponse<SignupResponseDto>> signupAdmin(
-		@RequestBody @Valid SignupRequestDto requestDto
-	) {
-		SignupResponseDto responseDto = authService.signupAdmin(requestDto);
+	@PostMapping("/signup")
+	public ResponseEntity<ApiResponse<SignupResponseDto>> signupUser(
+		@Valid @RequestBody SignupUserRequestDto requestDto) {
+		SignupResponseDto responseDto = authService.signup(requestDto);
 		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
 		return ResponseEntity.ok(apiResponse);
 	}
@@ -82,8 +50,7 @@ public class AuthController {
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<LoginResponseDto>> login(
-		@Valid @RequestBody LoginRequestDto requestDto
-	) {
+		@Valid @RequestBody LoginRequestDto requestDto) {
 		LoginResponseDto responseDto = authService.login(requestDto);
 		ApiResponse<LoginResponseDto> apiResponse = ApiResponse.of(SuccessCode.LOGIN_SUCCESS, responseDto);
 		return ResponseEntity.ok(apiResponse);
@@ -97,13 +64,23 @@ public class AuthController {
 	 */
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
-		HttpServletRequest request
-	) {
+		HttpServletRequest request) {
 		String accessToken = jwtUtil.resolveToken(request);
 		authService.logout(accessToken);
-
 		ApiResponse<Void> apiResponse = ApiResponse.of(SuccessCode.LOGOUT_SUCCESS, null);
 		return ResponseEntity.ok(apiResponse);
 	}
 
+	/**
+	 * 가지고 있는 리프레시 토큰으로 엑세스 토큰을 새로 발급해줍니다.
+	 * @param request
+	 * @return
+	 */
+	@GetMapping("/refresh")
+	public ResponseEntity<ApiResponse<String>> refresh(HttpServletRequest request) {
+		String refreshToken = jwtUtil.resolveToken(request);
+		String accessToken = authService.refreshService(refreshToken);
+		ApiResponse<String> apiResponse = ApiResponse.of(SuccessCode.REFRESH_TOKEN, accessToken);
+		return ResponseEntity.ok(apiResponse);
+	}
 }

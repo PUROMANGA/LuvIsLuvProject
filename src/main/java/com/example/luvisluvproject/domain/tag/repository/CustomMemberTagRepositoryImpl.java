@@ -2,9 +2,9 @@ package com.example.luvisluvproject.domain.tag.repository;
 
 import java.util.List;
 
-import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
-import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
 import com.example.luvisluvproject.domain.tag.entity.QMemberTag;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import lombok.RequiredArgsConstructor;
@@ -16,12 +16,13 @@ public class CustomMemberTagRepositoryImpl  implements CustomMemberTagRepository
 	private final JPAQueryFactory jpaQueryFactory;
 
 	@Override
-	public List<MatchMemberDto> findMatchMemberDtoFindByEmail(String email) {
+	public List<ResponseMatchMemberDto> findResponseMatchMemberDtoFindByEmail(String email) {
 		QMemberTag mt1 = new QMemberTag("mt1");
 		QMemberTag mt2 = new QMemberTag("mt2");
 
-		List<Member> memberList = jpaQueryFactory
-			.select(mt2.member)
+		return jpaQueryFactory
+			.select(Projections.constructor(ResponseMatchMemberDto.class,
+				mt2.member.id, mt2.member.name))
 			.from(mt2)
 			.join(mt1).on(mt1.tag.eq(mt2.tag))
 			.where(mt1.member.email.eq(email)
@@ -30,7 +31,5 @@ public class CustomMemberTagRepositoryImpl  implements CustomMemberTagRepository
 			.groupBy(mt2.member.id)
 			.orderBy(mt2.member.likeCount.desc())
 			.fetch();
-
-		return memberList.stream().map(MatchMemberDto::new).toList();
 	}
 }

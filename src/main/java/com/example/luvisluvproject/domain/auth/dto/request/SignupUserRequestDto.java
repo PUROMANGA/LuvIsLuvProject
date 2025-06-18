@@ -28,6 +28,6 @@ public class SignupUserRequestDto {
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
 
-	@NotNull(message = "소개글을 입력해주세요.")
-	private final String content;
+	@NotNull(message = "가입할 분야를 정확히 선택해주세요.")
+	private final String userRole;
 }

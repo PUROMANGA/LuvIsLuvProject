@@ -1,0 +1,73 @@
+[33mf35fe4d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/chatting[m[33m)[m HEAD@{0}: reset: moving to f35fe4d
+[33ma192529[m[33m ([m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: reset: moving to HEAD
+[33ma192529[m[33m ([m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{2}: reset: moving to HEAD
+[33ma192529[m[33m ([m[1;31morigin/dev[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{3}: merge origin/dev: Fast-forward
+[33m0890f91[m HEAD@{4}: commit: # 리팩토링 : 트랜잭셔널 추가, webSocket test 수정, yml에 엘라스틱서치 추가
+[33m7411608[m HEAD@{5}: checkout: moving from main to feature/chatting
+[33m91a6ef7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{6}: checkout: moving from feature/chatting to main
+[33m7411608[m HEAD@{7}: checkout: moving from main to feature/chatting
+[33m91a6ef7[m[33m ([m[1;32mmain[m[33m)[m HEAD@{8}: merge origin/dev: Fast-forward
+[33m2b18253[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{9}: checkout: moving from dev to main
+[33me6aa3a8[m[33m ([m[1;32mdev[m[33m)[m HEAD@{10}: checkout: moving from feature/chatting to dev
+[33m7411608[m HEAD@{11}: commit: # 리팩토링 : 트랜잭셔널 추가, webSocket test 수정, yml에 엘라스틱서치 추가
+[33mdbd47f8[m HEAD@{12}: commit: # 리팩토링 : dev compile오류 리팩토링
+[33m8ebf1e7[m HEAD@{13}: merge origin/dev: Merge made by the 'ort' strategy.
+[33m4deffe7[m HEAD@{14}: merge origin/feature/chatting: Merge made by the 'ort' strategy.
+[33m602b37e[m HEAD@{15}: commit: # 리팩토링 : 매칭 쿼리 수정
+[33mf13aace[m HEAD@{16}: commit: # feat, 리팩토링 : 매칭 작업, 쿼리dsl추가
+[33me3ecd75[m HEAD@{17}: commit: # 리팩토링 : 안 쓰는 import 정리
+[33m08c5bd6[m HEAD@{18}: pull origin feature/tag: updating HEAD
+[33m08c5bd6[m HEAD@{19}: commit: # feat : 채팅방 목록 가져오기, 채팅방 카운팅하기, 각각 dto, WebTest에 필요한 WebConfig
+[33m2171a17[m HEAD@{20}: commit: # 리팩토링 : 줄 수정
+[33mae2376c[m HEAD@{21}: merge origin/dev: Merge made by the 'ort' strategy.
+[33mc207a69[m HEAD@{22}: commit: # feat : MongoCOnfig 작성
+[33ma49884b[m HEAD@{23}: merge origin/dev: Fast-forward
+[33m2d8c0ae[m HEAD@{24}: commit: # 리팩토링 : 필요없는 거 제거함
+[33mfd6c630[m HEAD@{25}: commit: # 피쳐 : 몽고db 추가, 메세지 리팩토링
+[33m49a5d4a[m HEAD@{26}: commit: # 리팩토링 : WebSocket, 매치부분, 챗 부분 리팩토링
+[33mce8b353[m HEAD@{27}: commit: # 리팩토링 : WebSocket, 매치부분, 챗 부분 리팩토링
+[33m0e55878[m HEAD@{28}: merge origin/dev: Merge made by the 'ort' strategy.
+[33m3701e87[m HEAD@{29}: commit: # 리팩토링 : WebSocket에 jwt부분 추가
+[33m2f048ed[m HEAD@{30}: merge origin/dev: Fast-forward
+[33m5083e39[m HEAD@{31}: merge origin/dev: Fast-forward
+[33mcc532d5[m HEAD@{32}: commit (merge): # merge : dev와 merge
+[33mf35fe4d[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfeature/chatting[m[33m)[m HEAD@{33}: commit: # feat : 채팅방 삭제 기능 구현
+[33m3bef286[m HEAD@{34}: commit: # refactor : chat관련 기능 리팩토링, 테스트 작성
+[33m2fe07c3[m HEAD@{35}: commit: # refactor : chat관련 기능 리팩토링, 테스트 작성
+[33m86d598e[m HEAD@{36}: commit: # refactor : chat관련 기능 리폭태링
+[33ma17eb0f[m HEAD@{37}: commit: # feat : Message레포지토리, dto개발
+[33m43d6e6f[m HEAD@{38}: commit: # refactor : Match 리팩토링
+[33m9fea3b8[m HEAD@{39}: commit: # refactor : Message수정
+[33m8efcdc4[m HEAD@{40}: commit: # refactor : member수정
+[33m2144524[m HEAD@{41}: commit: # feature : deploy.yml 작성
+[33m03cac9d[m HEAD@{42}: commit: # fix : StompHandler추가, Message수정
+[33m849fa70[m HEAD@{43}: commit: # fix : ChatRoom추가, ChatCreateEvent 생성
+[33m3b5287f[m HEAD@{44}: commit: # fix : MatchStatus 추가 및 전체적 리팩토링, 트랜잭셔널 추가
+[33m2646baa[m HEAD@{45}: commit: # fix : Match Test 리팩토링
+[33mda900f4[m HEAD@{46}: commit: # fix : Match Test 리팩토링
+[33mc665615[m HEAD@{47}: commit: # fix : dev 후 MatchService 리팩토링
+[33m0efd29c[m HEAD@{48}: merge origin/dev: Merge made by the 'ort' strategy.
+[33mb26d7ca[m HEAD@{49}: commit (merge): Merge remote-tracking branch 'origin/dev' into feature/chatting
+[33m45a0faf[m HEAD@{50}: commit: # feat : MatchPostMapping, PatchMapping 개발
+[33ma1e20a4[m HEAD@{51}: commit: # feat : ExceptionCode 리팩토링
+[33m1fdff6e[m HEAD@{52}: commit: # feat : 띄어쓰기 리팩토링
+[33m6a0bd47[m HEAD@{53}: commit: # feat : ExceptionCode 추가(유저 정보 찾을 수 없음)
+[33m68840be[m HEAD@{54}: commit: # feat : MatchController postmapping 추가
+[33m3bef527[m HEAD@{55}: commit: # feat : MemberRepository에 findByEmail추가
+[33mf3b5eef[m HEAD@{56}: commit: # feat : Matching로직 작성
+[33m1e42ce3[m HEAD@{57}: commit: # feat : WebSocketConfig, Interceptor 리팩토링
+[33mba6e39c[m HEAD@{58}: commit: # feat : WebSocketConfig작성, interceptorHandler작성
+[33m95f14a2[m HEAD@{59}: commit: # feat : CICD 배포 관련 파일들 작성완료
+[33m057eb42[m HEAD@{60}: merge origin/dev: Fast-forward
+[33me520d7f[m HEAD@{61}: commit: # feat : 템플릿 리팩토링
+[33md663273[m HEAD@{62}: commit: # feat : Message Entity 제작
+[33m2465f41[m HEAD@{63}: merge origin/dev: Merge made by the 'ort' strategy.
+[33m63b727a[m HEAD@{64}: commit: # feat : Message Entity 제작
+[33mf215d8c[m HEAD@{65}: commit: # feat : Chat 서비스 로직 작성
+[33m087d0c8[m HEAD@{66}: commit: # feat : ChatRoom 서비스 로직 작성
+[33m1cc2f00[m HEAD@{67}: commit: # feat : ChatRoom entity 작성
+[33mbc11173[m HEAD@{68}: merge origin/dev: Merge made by the 'ort' strategy.
+[33m657dd33[m HEAD@{69}: commit: # feat : ChatRoom entity 작성
+[33m2b18253[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{70}: checkout: moving from main to feature/chatting
+[33m2b18253[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{71}: checkout: moving from dev to main
+[33m2b18253[m[33m ([m[1;31morigin/main[m[33m)[m HEAD@{72}: commit (initial): # feat : baseEntity, yml 작성
