@@ -114,5 +114,4 @@ public class JwtUtil {
 		Claims claims = extractClaims(token);
 		return claims.getSubject();
 	}
-
 }
