@@ -97,6 +97,7 @@ public class JwtUtil {
 	// 토큰 추출(요청에서 JWT만 순수하게 꺼내줌)
 	public String resolveToken(HttpServletRequest request) {
 		String bearer = request.getHeader("Authorization");
+		System.out.println("🔎 받은 Authorization 헤더: " + bearer);
 		if (StringUtils.hasText(bearer) && bearer.startsWith(BEARER_PREFIX)) {
 			return bearer.substring(BEARER_PREFIX.length());
 		}
