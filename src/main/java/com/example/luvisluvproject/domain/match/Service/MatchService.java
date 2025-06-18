@@ -73,7 +73,11 @@ public class MatchService {
 		//match를 저장합니다.
 		String redisKey = receiverMember.getId().toString();
 		matchRedisTemplate.opsForSet().add(redisKey, match);
-		return new MatchResponseDto(match);
+		return new MatchResponseDto(
+			match.getSenderId(),
+			me.getName(),
+			match.getReceiverId(),
+			receiverMember.getName());
 	}
 
 	/**
