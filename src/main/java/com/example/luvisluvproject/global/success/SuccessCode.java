@@ -12,7 +12,7 @@ public enum SuccessCode {
 	SIGNUP_SUCCESS(HttpStatus.OK, "회원가입 완료"),
 	LOGIN_SUCCESS(HttpStatus.OK, "로그인 성공"),
 	LOGOUT_SUCCESS(HttpStatus.OK, "로그아웃 성공"),
-	REFRESH_TOKEN(HttpStatus.OK, "토큰 재발급 성공"),
+	REFRESH_TOKEN(HttpStatus.OK, "엑세스 토큰 재발급 성공"),
 
 	// 회원
 	FIND_MEMBER_SUCCESS(HttpStatus.OK, "회원 조회 성공"),
