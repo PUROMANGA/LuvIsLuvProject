@@ -66,4 +66,9 @@ public class ChatRoom extends BaseEntity {
 	public void plusDeleteCount() {
 		this.deleteCount++;
 	}
+
+	public ChatRoom(Member memberB, Member memberA) {
+		this.memberB = memberB;
+		this.memberA = memberA;
+	}
 }

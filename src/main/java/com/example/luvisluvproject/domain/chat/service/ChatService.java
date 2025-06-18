@@ -95,7 +95,9 @@ public class ChatService {
 	 */
 	@Transactional
 	public Slice<ResponseMessageDto> getAndCheckMessage(String email, Long chatId, Pageable pageable) {
-		if (!memberChatRoomRepository.existsByMemberEmailAndChatRoom_Id(email, chatId)) {
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+		if (!memberChatRoomRepository.existsByMemberIdAndChatRoomId(me.getId(), chatId)) {
 			throw new CustomRuntimeException(ExceptionCode.CHAT_ROOM_NOT_FOUND);
 		}
 		return messageRepository.findAllByChatRoomId(chatId, pageable)
@@ -113,7 +115,7 @@ public class ChatService {
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 		ChatRoom chatRoom = chatRoomRepository.findById(chatId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.CHAT_ROOM_NOT_FOUND));
-		MemberChatRoom memberChatRoom = memberChatRoomRepository.findByMemberEmailAndChatRoomId(email, chatId);
+		MemberChatRoom memberChatRoom = memberChatRoomRepository.findByMemberIdAndChatRoomId(me.getId(), chatId);
 
 		if (me.equals(chatRoom.getMemberA()) || me.equals(chatRoom.getMemberB())) {
 			memberChatRoom.setDeleted(true);

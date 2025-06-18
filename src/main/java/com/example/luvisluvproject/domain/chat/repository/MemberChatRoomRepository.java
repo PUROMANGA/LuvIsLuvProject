@@ -10,8 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.luvisluvproject.domain.chat.entity.MemberChatRoom;
 
 public interface MemberChatRoomRepository extends JpaRepository<MemberChatRoom, Long> {
-	MemberChatRoom findByMemberEmailAndChatRoomId(String email, Long chatRoomId);
+	MemberChatRoom findByMemberIdAndChatRoomId(Long memberId, Long chatRoomId);
 	Slice<MemberChatRoom> findAllByMemberIdAndDeletedFalse(Long id, Pageable pageable);
-	int countMemberChatRoomsByMemberId(Long id);
-	Boolean existsByMemberEmailAndChatRoom_Id(String email, Long chatRoomId);
+	Boolean existsByMemberIdAndChatRoomId(Long memberId, Long chatRoomId);
 }
