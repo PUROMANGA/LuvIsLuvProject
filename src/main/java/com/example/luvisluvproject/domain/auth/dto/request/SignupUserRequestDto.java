@@ -2,6 +2,7 @@ package com.example.luvisluvproject.domain.auth.dto.request;
 
 import java.time.LocalDate;
 
+import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.validation.constraints.Email;
@@ -29,5 +30,5 @@ public class SignupUserRequestDto {
 	private final LocalDate birthday;
 
 	@NotNull(message = "가입할 분야를 정확히 선택해주세요.")
-	private final String userRole;
+	private final UserRole userRole;
 }
