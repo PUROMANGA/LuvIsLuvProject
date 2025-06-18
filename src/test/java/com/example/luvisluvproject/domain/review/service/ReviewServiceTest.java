@@ -33,6 +33,7 @@ import com.example.luvisluvproject.domain.store.entity.Store;
 import com.example.luvisluvproject.domain.store.enums.StoreStatus;
 import com.example.luvisluvproject.domain.store.enums.StoreType;
 import com.example.luvisluvproject.domain.store.repository.StoreRepository;
+import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 
 class ReviewServiceTest {
@@ -66,6 +67,13 @@ class ReviewServiceTest {
 	@Nested
 	class CreateReviewTest {
 
+		private AuthUser authUser;
+
+		@BeforeEach
+		void setUpEach() {
+			authUser = new AuthUser(member);
+		}
+
 		@Test
 		@DisplayName("리뷰 생성 성공")
 		void createReview_success() {
@@ -75,13 +83,14 @@ class ReviewServiceTest {
 			when(storeRepository.findById(storeId)).thenReturn(Optional.of(store));
 			when(reviewRepository.save(any(Review.class))).thenAnswer(inv -> {
 				Review r = inv.getArgument(0);
+				ReflectionTestUtils.setField(r, "id", 1L); // ID 수동 주입
 				return r;
 			});
 
-			ReviewCreateResponseDto response = reviewService.createReview(storeId, member, dto);
+			ReviewCreateResponseDto response = reviewService.createReview(storeId, authUser, dto);
 
 			assertNotNull(response);
-			assertEquals("후기를 작성했어요.", response.getMessage());
+			assertEquals(1L, response.getReviewId());
 		}
 
 		@Test
@@ -90,7 +99,7 @@ class ReviewServiceTest {
 			when(storeRepository.findById(anyLong())).thenReturn(Optional.empty());
 
 			assertThrows(CustomRuntimeException.class,
-				() -> reviewService.createReview(1L, member, new ReviewCreateRequestDto(5, "내용")));
+				() -> reviewService.createReview(1L, authUser, new ReviewCreateRequestDto(5, "내용")));
 		}
 	}
 
@@ -99,49 +108,55 @@ class ReviewServiceTest {
 
 		private Store store;
 		private Member member;
+		private Review review;
+		private AuthUser authUser;
 
 		@BeforeEach
 		void setUp() {
 			store = new Store("가게", 1234L, "12332131", "서울", 37.5, 127.0, StoreStatus.OPEN, StoreType.CAFE);
 			member = new Member("user", "user@email.com", "password", LocalDate.parse("2000-01-01"), USER);
+			authUser = new AuthUser(member);
 
-			// ID 설정
-			ReflectionTestUtils.setField(store, "id", 1L);
+			review = new Review(store, member, 5, "기존 내용");
 			ReflectionTestUtils.setField(member, "id", 1L);
+			ReflectionTestUtils.setField(store, "id", 1L);
+			ReflectionTestUtils.setField(review, "id", 1L);
 		}
 
 		@Test
 		@DisplayName("리뷰 수정 - 성공")
 		void shouldUpdateReviewSuccessfully() {
 			// given
-			ReviewUpdateRequestDto dto = new ReviewUpdateRequestDto("수정된 내용");
+			ReviewUpdateRequestDto dto = new ReviewUpdateRequestDto(4, "새로운 내용");
 			Review savedReview = new Review(store, member, 5, "기존 내용");
 			ReflectionTestUtils.setField(savedReview, "id", 1L);
 
 			when(reviewRepository.findById(anyLong())).thenReturn(Optional.of(savedReview));
 
 			// when
-			ReviewUpdateResponseDto response = reviewService.updateReview(1L, 1L, member.getId(), dto);
+			ReviewUpdateResponseDto response = reviewService.updateReview(1L, 1L, authUser, dto);
 
 			// then
 			assertNotNull(response);
-			assertEquals("후기를 새롭게 수정했습니다.", response.getMessage());
-			assertEquals("수정된 내용", savedReview.getContent());
+			assertEquals(1L, response.getReviewId());
 		}
 
 		@Test
 		@DisplayName("리뷰 수정 - 작성자가 아니면 실패")
 		void shouldThrowExceptionWhenMemberIsNotAuthor() {
 			// given
-			ReviewUpdateRequestDto dto = new ReviewUpdateRequestDto("수정 시도");
-			Review savedReview = new Review(store, member, 5, "기존 내용");
-			ReflectionTestUtils.setField(savedReview, "id", 1L);
+			ReviewUpdateRequestDto dto = new ReviewUpdateRequestDto(4, "새로운 내용");
 
-			when(reviewRepository.findById(1L)).thenReturn(Optional.of(savedReview));
+			when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
+
+			// 다른 사용자로 AuthUser 생성
+			Member otherMember = new Member("other", "other@email.com", "pass", LocalDate.parse("1990-01-01"), USER);
+			ReflectionTestUtils.setField(otherMember, "id", 999L);
+			AuthUser otherAuthUser = new AuthUser(otherMember);
 
 			// when & then
 			assertThrows(CustomRuntimeException.class,
-				() -> reviewService.updateReview(1L, 1L, 999L, dto));
+				() -> reviewService.updateReview(1L, 1L, otherAuthUser, dto));
 		}
 	}
 
@@ -231,14 +246,16 @@ class ReviewServiceTest {
 		private Store store;
 		private Member member;
 		private Review review;
+		private AuthUser authUser;
 
 		@BeforeEach
 		void setUp() {
 			store = new Store("가게", 1234L, "12332131", "서울", 37.5, 127.0, StoreStatus.OPEN, StoreType.CAFE);
 			member = new Member("user", "user@email.com", "password", LocalDate.parse("2000-01-01"), USER);
+			authUser = new AuthUser(member);
 			review = new Review(store, member, 5, "리뷰 내용");
 
-			// ID 강제 설정 (setter 없이)
+			// ID 강제 설정
 			ReflectionTestUtils.setField(member, "id", 1L);
 			ReflectionTestUtils.setField(store, "id", 1L);
 			ReflectionTestUtils.setField(review, "id", 1L);
@@ -249,7 +266,7 @@ class ReviewServiceTest {
 		void deleteReview_success() {
 			when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 
-			assertDoesNotThrow(() -> reviewService.deleteReview(1L, 1L, member.getId()));
+			assertDoesNotThrow(() -> reviewService.deleteReview(1L, 1L, authUser));
 			verify(reviewRepository, times(1)).delete(review);
 		}
 
@@ -258,10 +275,15 @@ class ReviewServiceTest {
 		void deleteReview_notWriter() {
 			when(reviewRepository.findById(1L)).thenReturn(Optional.of(review));
 
+			// 다른 유저로 authUser 생성
+			Member otherMember = new Member("other", "other@email.com", "pass", LocalDate.parse("1990-01-01"), USER);
+			ReflectionTestUtils.setField(otherMember, "id", 999L);
+			AuthUser otherAuthUser = new AuthUser(otherMember);
+
 			assertThrows(CustomRuntimeException.class,
-				() -> reviewService.deleteReview(1L, 1L, 999L)); // 다른 ID
+				() -> reviewService.deleteReview(1L, 1L, otherAuthUser));
+
 			verify(reviewRepository, never()).delete(any());
 		}
 	}
-
 }
