@@ -8,8 +8,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
+import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
+import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.success.ApiResponse;
@@ -34,11 +36,11 @@ public class AuthController {
 	 * @return 가입된 회원 정보를 담은 응답 DTO와 200 OK 상태
 	 */
 	@PostMapping("/signup/user")
-	public ResponseEntity<ApiResponse<SignupResponseDto>> signupUser(
-		@Valid @RequestBody SignupRequestDto requestDto
+	public ResponseEntity<ApiResponse<SignupUserResponseDto>> signupUser(
+		@Valid @RequestBody SignupUserRequestDto requestDto
 	) {
-		SignupResponseDto responseDto = authService.signupUser(requestDto);
-		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
+		SignupUserResponseDto responseDto = authService.signupUser(requestDto);
+		ApiResponse<SignupUserResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
 		return ResponseEntity.ok(apiResponse);
 	}
 

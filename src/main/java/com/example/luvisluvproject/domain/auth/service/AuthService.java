@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
+import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
+import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -40,7 +42,7 @@ public class AuthService {
 	 * @throws CustomRuntimeException 미성년자 확인 {@code ExceptionCode.UNDERAGE_USER}
 	 */
 	@Transactional
-	public SignupResponseDto signupUser(SignupRequestDto requestDto) {
+	public SignupUserResponseDto signupUser(SignupUserRequestDto requestDto) {
 
 		// 이메일 중복확인
 		if (memberRepository.existsByEmail(requestDto.getEmail())) {
@@ -71,17 +73,19 @@ public class AuthService {
 			requestDto.getEmail(),
 			encodePassword,
 			requestDto.getBirthday(),
-			UserRole.USER
+			UserRole.USER,
+			requestDto.getContent()
 		);
 
 		Member saved = memberRepository.save(member);
 
-		return new SignupResponseDto(
+		return new SignupUserResponseDto(
 			saved.getId(),
 			saved.getName(),
 			saved.getEmail(),
 			saved.getBirthday(),
-			saved.getUserRole()
+			saved.getUserRole(),
+			saved.getContent()
 		);
 	}
 

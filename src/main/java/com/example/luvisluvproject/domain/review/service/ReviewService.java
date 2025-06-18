@@ -1,8 +1,7 @@
 package com.example.luvisluvproject.domain.review.service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -111,26 +110,25 @@ public class ReviewService {
 	}
 
 	/**
-	 * 특정 가게에 작성된 모든 리뷰를 조회합니다.
+	 * 특정 가게에 작성된 모든 리뷰를 페이징 처리하여 조회합니다.
 	 * @param storeId 조회할 가게의 ID
-	 * @return 해당 가게에 작성된 리뷰 목록을 ReviewListResponseDto 리스트로 반환
-	 * @throws CustomRuntimeException 가게가 존재하지 않을 경우 발생
+	 * @param pageable 페이지 번호, 크기, 정렬 정보를 담은 Pageable 객체
+	 * @return 페이지 정보가 포함된 ReviewListResponseDto의 Page 객체
+	 * @throws CustomRuntimeException 해당 가게가 존재하지 않을 경우 발생
 	 */
 	@Transactional(readOnly = true)
-	public List<ReviewListResponseDto> getAllReviewsByStore(Long storeId) {
+	public Page<ReviewListResponseDto> getAllReviewsByStore(Long storeId, Pageable pageable) {
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.STORE_NOT_FOUND));
 
-		List<Review> reviews = reviewRepository.findByStoreId(store);
+		Page<Review> reviewsPage = reviewRepository.findByStoreId(store, pageable);
 
-		return reviews.stream()
-			.map(review -> new ReviewListResponseDto(
-				review.getId(),
-				review.getRating(),
-				review.getContent(),
-				review.getCreatedAt()
-			))
-			.collect(Collectors.toList());
+		return reviewsPage.map(review -> new ReviewListResponseDto(
+			review.getId(),
+			review.getRating(),
+			review.getContent(),
+			review.getCreatedAt()
+		));
 	}
 
 	/**
