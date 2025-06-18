@@ -8,14 +8,17 @@ import lombok.Getter;
 public class ReviewDetailResponseDto {
 
 	private final Long reviewId;
-	private final Long storeId;
+	private final String storeName;
+	private final double averageRating;
 	private final int rating;
 	private final String content;
 	private final LocalDateTime createdAt;
 
-	public ReviewDetailResponseDto(Long reviewId, Long storeId, int rating, String content, LocalDateTime createdAt) {
+	public ReviewDetailResponseDto(Long reviewId, String storeName, double averageRating, int rating, String content,
+		LocalDateTime createdAt) {
 		this.reviewId = reviewId;
-		this.storeId = storeId;
+		this.storeName = storeName;
+		this.averageRating = averageRating;
 		this.rating = rating;
 		this.content = content;
 		this.createdAt = createdAt;

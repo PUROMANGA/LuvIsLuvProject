@@ -39,9 +39,9 @@ spring:
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
   accessToken:
-    time: 3600000
+    time: 360000
   refreshToken:
-    time: 1209600000
+    time: 8640000
 
 logging:
   level:

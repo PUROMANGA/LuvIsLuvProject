@@ -2,7 +2,6 @@ package com.example.luvisluvproject.domain.auth.dto.response;
 
 import java.time.LocalDate;
 
-import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 
 import lombok.AllArgsConstructor;

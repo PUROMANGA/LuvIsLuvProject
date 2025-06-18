@@ -1,7 +1,5 @@
 package com.example.luvisluvproject.domain.review.entity;
 
-import java.time.LocalDateTime;
-
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.store.entity.Store;
 import com.example.luvisluvproject.global.common.BaseEntity;
@@ -48,12 +46,12 @@ public class Review extends BaseEntity {
 	@Column(nullable = false)
 	private String content;
 
-	public LocalDateTime getCreatedAt() {
-		return super.getCreatTime();
-	}
-
 	public void updateContent(String content) {
 		this.content = content;
+	}
+
+	public void updateRating(int rating) {
+		this.rating = rating;
 	}
 
 	public Review(Store storeId, Member memberId, int rating, String content) {

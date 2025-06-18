@@ -85,15 +85,6 @@ public class Member extends BaseEntity {
 		this.content = content;
 	}
 
-	// 가게 사장님, 관리자 생성시 사용하는 생성자
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-	}
-
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
 		boolean status,
 		Long likeCount) {

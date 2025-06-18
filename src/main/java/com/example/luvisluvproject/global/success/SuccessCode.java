@@ -41,7 +41,7 @@ public enum SuccessCode {
 
 	//REPORT
 	CREATE_REPORT_SUCCESS(HttpStatus.CREATED, "신고가 성공적으로 접수되었습니다."),
-
+  
 	// 가게
 	STORE_CREATED(HttpStatus.CREATED, "가게 등록이 완료되었습니다."),
 	STORE_UPDATED(HttpStatus.OK, "가게 수정이 완료되었습니다."),
