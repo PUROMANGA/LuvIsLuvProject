@@ -10,12 +10,12 @@ public class ReviewListResponseDto {
 	private final Long reviewId;
 	private final int rating;
 	private final String content;
-	private final LocalDateTime createdAt;
+	private final LocalDateTime creatAt;
 
-	public ReviewListResponseDto(Long reviewId, int rating, String content, LocalDateTime createdAt) {
+	public ReviewListResponseDto(Long reviewId, int rating, String content, LocalDateTime creatAt) {
 		this.reviewId = reviewId;
 		this.rating = rating;
 		this.content = content;
-		this.createdAt = createdAt;
+		this.creatAt = creatAt;
 	}
 }

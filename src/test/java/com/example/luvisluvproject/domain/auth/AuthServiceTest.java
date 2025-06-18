@@ -20,6 +20,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.luvisluvproject.domain.auth.common.AuthServiceHelper;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
+import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
@@ -73,10 +74,8 @@ public class AuthServiceTest {
 		given(passwordEncoder.encode(anyString())).willReturn("encoded_pw"); // 비밀번호 암호화 결과
 		//객체 만들어주기
 		given(authServiceHelper.createMember(any(), any(), any(), any(), any())).willReturn(member);
-
 		//when
 		SignupResponseDto signupResponseDto = authService.signup(request);
-
 		assertThat(signupResponseDto.getId()).isEqualTo(1L);
 	}
 }
