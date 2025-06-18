@@ -25,8 +25,8 @@ public class SignupRequestDto {
 	@NotNull(message = "생일을 입력해주세요.")
 	@JsonFormat(pattern = "yyyy-MM-dd")
 	private final LocalDate birthday;
-  
-	public SignupRequestDto(String name, String email, String password, LocalDate birthday) 
+
+	public SignupRequestDto(String name, String email, String password, LocalDate birthday) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
