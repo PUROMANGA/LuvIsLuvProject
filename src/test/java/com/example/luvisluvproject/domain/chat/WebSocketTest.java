@@ -167,9 +167,9 @@ public class WebSocketTest {
 
 		LoginResponseDto loginResponseDto = authService.login(requestDto);
 		System.out.println("로그인 성공");
-		MatchResponseDto matchResponseDto = matchService.createMatchService(2L, "songjinyong@email.com");
+		matchService.createMatchService(2L, "songjinyong@email.com");
 		System.out.println("매칭 신청 성공 해당 정보");
-		MatchResponseDto matchResponseDto1 = matchService.patchMatchService(1L, acceptMatchDto, "leeyuuri@email.com");
+		matchService.patchMatchService(1L, acceptMatchDto, "leeyuuri@email.com");
 		System.out.println("매칭 허락, 채팅방 만들기");
 
 		Member memberB = memberRepository.findByEmail("leeyuuri@email.com")
