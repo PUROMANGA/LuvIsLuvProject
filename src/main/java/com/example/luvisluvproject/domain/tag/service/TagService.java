@@ -34,17 +34,30 @@ public class TagService {
 	/**
 	 * 태그 등록
 	 */
-	public TagResponseDto createTag(TagRequestDto requestDto) {
-		Tag tag = Tag.builder()
-			.name(requestDto.getName())
-			.category(TagCategory.from(requestDto.getCategory()))
-			.createdByType(requestDto.getCreatedByType())
-			.active(requestDto.isActive())
-			.priority(requestDto.getPriority())
-			.build();
-
-		Tag saved = tagJpaRepository.save(tag);
-		return TagResponseDto.from(saved);
+	public void createTag(List<TagRequestDto> requestDtos, String email) {
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+		for (TagRequestDto requestDto : requestDtos) {
+			Tag tag = Tag.builder()
+				.name(requestDto.getName())
+				.category(TagCategory.from(requestDto.getCategory()))
+				.createdByType(requestDto.getCreatedByType())
+				.active(requestDto.isActive())
+				.priority(requestDto.getPriority())
+				.build();
+			if (!tagJpaRepository.existsByName(tag.getName())) {
+				tagJpaRepository.save(tag);
+				MemberTag memberTag = new MemberTag(me, tag);
+				memberTagRepository.save(memberTag);
+			} else {
+				Tag savedTag = tagJpaRepository.findByName(tag.getName())
+					.orElseThrow(() -> new RuntimeException("태그가 없습니다."));
+				if (!memberTagRepository.existsByMemberIdAndTagId(me.getId(), savedTag.getId())) {
+					MemberTag memberTag = new MemberTag(me, savedTag);
+					memberTagRepository.save(memberTag);
+				}
+			}
+		}
 	}
 
 	/**

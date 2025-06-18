@@ -38,6 +38,12 @@ public enum ExceptionCode implements ErrorCode {
 	//매치
 	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다."),
 
+	//메세지
+	MESSAGE_NOT_FOUNT(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
+
+	//채팅
+	CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
+
 	//차단
 	ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "이미 차단한 사용자입니다."),
 	CANNOT_BLOCK_SELF(HttpStatus.BAD_REQUEST, "자기 자신을 차단할 수 없습니다."),

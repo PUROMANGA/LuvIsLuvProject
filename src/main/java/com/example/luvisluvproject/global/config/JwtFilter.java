@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -27,13 +28,19 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
 	private final JwtUtil jwtUtil;
 	private final UserDetailsServiceImpl userDetailsService;
 	private final RedisTemplate<String, String> redisTemplate;
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
+
+	public JwtFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,
+		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate) {
+		this.jwtUtil = jwtUtil;
+		this.userDetailsService = userDetailsService;
+		this.redisTemplate = redisTemplate;
+	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,

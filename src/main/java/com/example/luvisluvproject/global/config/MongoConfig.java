@@ -18,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @RequiredArgsConstructor
 @EnableMongoAuditing
-
 public class MongoConfig {
 
 	@Bean

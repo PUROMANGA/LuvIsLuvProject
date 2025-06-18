@@ -3,7 +3,6 @@ package com.example.luvisluvproject.domain.match.contorller;
 import static org.springframework.data.domain.Sort.Direction.*;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -11,7 +10,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,18 +19,21 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
+import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
-import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.AuthUser;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/matches")
 
 public class MatchController {
@@ -44,8 +45,11 @@ public class MatchController {
 	 */
 
 	@GetMapping
-	public ResponseEntity<List<MatchMemberDto>> getMatchMemberList(@AuthenticationPrincipal AuthUser member) {
-		return ResponseEntity.ok(matchService.getMatchMemberListService(member.getUsername()));
+	public ResponseEntity<ApiResponse<List<ResponseMatchMemberDto>>> getMatchMemberList(
+		@AuthenticationPrincipal AuthUser member) {
+		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
+			matchService.getMatchMemberListService(member.getUsername()));
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	/**
@@ -56,10 +60,14 @@ public class MatchController {
 	 */
 
 	@PostMapping
-	public ResponseEntity<MatchResponseDto> createMatch(
+	public ResponseEntity<ApiResponse<MatchResponseDto>> createMatch(
 		@RequestParam Long receiverId,
 		@AuthenticationPrincipal AuthUser member) {
-		return ResponseEntity.ok(matchService.createMatchService(receiverId, member.getUsername()));
+		log.info("[매칭 요청] receiverId: {}, 요청자 email: {}", receiverId, member.getUsername());
+		System.out.println("[DEBUG] 매칭 요청 도착 - " + receiverId + ", " + member.getUsername());
+		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
+			matchService.createMatchService(receiverId, member.getUsername()));
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	/**
@@ -70,11 +78,13 @@ public class MatchController {
 	 * @return
 	 */
 	@PatchMapping("/{senderId}")
-	public ResponseEntity<MatchResponseDto> patchMatch(
+	public ResponseEntity<ApiResponse<MatchResponseDto>> patchMatch(
 		@PathVariable Long senderId,
-		@RequestBody @Validated AcceptMatchDto acceptMatchDto,
+		@RequestBody @Valid AcceptMatchDto acceptMatchDto,
 		@AuthenticationPrincipal AuthUser member) {
-		return ResponseEntity.ok(matchService.patchMatchService(senderId, acceptMatchDto, member.getUsername()));
+		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
+			matchService.patchMatchService(senderId, acceptMatchDto, member.getUsername()));
+		return ResponseEntity.ok(apiResponse);
 	}
 
 	/**
@@ -84,14 +94,12 @@ public class MatchController {
 	 * @return
 	 */
 
-	@GetMapping("/{memberId}")
-	public ResponseEntity<Slice<MatchResponseDto>> getMatch(
-		@PathVariable Long memberId,
+	@GetMapping("/me")
+	public ResponseEntity<ApiResponse<Slice<MatchResponseDto>>> getMatch(
 		@AuthenticationPrincipal AuthUser member,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
-		if (!member.getMember().getId().equals(memberId)) {
-			throw new RuntimeException("자신의 매칭만 조회할 수 있습니다.");
-		}
-		return ResponseEntity.ok(matchService.getMatchService(member.getUsername(), pageable));
+		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
+			matchService.getMatchService(member.getUsername(), pageable));
+		return ResponseEntity.ok(apiResponse);
 	}
 }

@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
+import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
@@ -46,6 +47,7 @@ public class MatchingTest {
 
 	@Autowired
 	private TagJpaRepository tagJpaRepository;
+
 	@Autowired
 	private ChatRoomRepository chatRoomRepository;
 
@@ -81,7 +83,7 @@ public class MatchingTest {
 
 		memberTagRepository.save(memberTag);
 
-		for(int i = 0; i < 999; i++) {
+		for (int i = 0; i < 999; i++) {
 			Member member = new Member(
 				"송진영" + i,
 				"songjinyong" + i + "@email.com",
@@ -120,14 +122,14 @@ public class MatchingTest {
 		List<String> tagsName = new ArrayList<>();
 		List<Member> matches = new ArrayList<>();
 		//태그 꺼내서 이름만 별도로 저장
-		for(MemberTag memberTag : memberTagList) {
+		for (MemberTag memberTag : memberTagList) {
 			String tagName = memberTag.getTag().getName();
 			tagsName.add(tagName);
 		}
 
-		for(String tagName : tagsName) {
+		for (String tagName : tagsName) {
 			List<Member> memberList = memberTagRepository.findAllMemberByTag(tagName);
-			for(Member member : memberList) {
+			for (Member member : memberList) {
 				matches.add(member);
 			}
 		}
@@ -138,14 +140,14 @@ public class MatchingTest {
 		log.info("실행 시간: {} ms", (end - start));
 	}
 
-
 	@Transactional
 	@Test
 	@DisplayName("매칭 해주기 쿼리 DSL")
 	public void testMatchingCase2() {
 		long start = System.currentTimeMillis();
 		String email = "songjinyong@email.com";
-		List<MatchMemberDto> matchMemberDtoList = memberTagRepository.findMatchMemberDtoFindByEmail(email);
+		List<ResponseMatchMemberDto> matchMemberDtoList = memberTagRepository.findResponseMatchMemberDtoFindByEmail(
+			email);
 		assertThat(matchMemberDtoList).isNotNull();
 		long end = System.currentTimeMillis();
 		log.info("매칭 된 사람들: {}", matchMemberDtoList.toString());

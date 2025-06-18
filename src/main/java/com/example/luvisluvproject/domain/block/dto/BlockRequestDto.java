@@ -1,25 +1,37 @@
 package com.example.luvisluvproject.domain.block.dto;
 
+import com.example.luvisluvproject.domain.block.entity.Block;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+/**
+ * BlockRequestDto
+ * 사용자를 차단할 때 클라이언트로부터 입력받는 요청 DTO
+ */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class BlockRequestDto {
-	// 차단 대상 사용자의 ID
+
+	/**
+	 * 차단 대상 사용자 ID
+	 */
 	private Long blockedId;
 
-	// 프로필 접근 차단
+	/**
+	 * 프로필 접근 차단 여부
+	 */
 	private boolean blockUserAccess;
 
-	// 매칭 시스템 제외
+	/**
+	 * 매칭 시스템에서 제외 여부
+	 */
 	private boolean excludeFromMatching;
 
-	// 추천 시스템 제외 (같은 관심사와 같은 유처 추천 기능이 생기면 사용)
-	private boolean excludeFromRecommendation;
-
-	// 차단 유형 - "MANUAL"(직접 차단), "AFTER_REPORT"(신고 후 차단), "SYSTEM"(시스템 자동 차단)
-	private String blockType;
+	/**
+	 * 차단 유형 (MANUAL, AFTER_REPORT, SYSTEM)
+	 * enum을 직접 사용함으로써 타입 안정성과 오타 방지 효과
+	 */
+	private Block.BlockType blockType;
 }

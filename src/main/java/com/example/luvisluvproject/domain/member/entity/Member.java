@@ -53,6 +53,8 @@ public class Member extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole userRole;
 
+	private String content;
+
 	@Column(nullable = false)
 	private boolean status;
 
@@ -70,8 +72,13 @@ public class Member extends BaseEntity {
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
 
-	@Nullable
-	private String content;
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
 
 	// 일반 유저 생성시 사용하는 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content) {
@@ -84,18 +91,6 @@ public class Member extends BaseEntity {
 		this.likeCount = 0L;
 		this.reportCount = 0;
 		this.content = content;
-	}
-
-	// 가게 사장님, 관리자 생성시 사용하는 생성자
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-		this.status = false;
-		this.likeCount = 0L;
-		this.reportCount = 0;
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
@@ -153,5 +148,17 @@ public class Member extends BaseEntity {
 	// 활동 제한 상태인지 확인
 	public boolean isRestricted() {
 		return this.restrictedUntil != null && this.restrictedUntil.isAfter(LocalDateTime.now());
+	}
+
+	/**
+	 * signupUserSuccess() 테스트용 생성자
+	 */
+	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
 	}
 }

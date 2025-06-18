@@ -1,11 +1,12 @@
-### 일반 유저 회원가입
-POST http://localhost:8080/auth/signup/user
+POST http://localhost:8080/auth/signup
 Content-Type: application/json
 
 {
   "name": "슬이",
   "email": "user@example.com",
   "password": "password1234!",
+  "birthday": "2000-04-15",
+  "userRole": "USER"
   "birthday": "2000-04-15"
 }
 

@@ -5,11 +5,16 @@ import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.domain.tag.entity.Tag;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 
+/**
+ * 사용자와 태그 연결 (MemberTag) 전용 JPA Repository
+ */
 public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, CustomMemberTagRepository {
 
 	/**
@@ -32,4 +37,5 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, Cus
 
 	List<MemberTag> tag(Tag tag);
 
+	Boolean existsByMemberIdAndTagId(Long memberId, Long tagId);
 }

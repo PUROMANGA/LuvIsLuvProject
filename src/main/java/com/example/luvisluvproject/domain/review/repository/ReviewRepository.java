@@ -11,9 +11,7 @@ import com.example.luvisluvproject.domain.store.entity.Store;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
 	Page<Review> findByStoreId(Store store, Pageable pageable);
-
 	// 평균 평점 조회
 	@Query("SELECT AVG(r.rating) FROM Review r WHERE r.storeId = :store")
 	Double findAverageRatingByStore(@Param("store") Store store);
-
 }

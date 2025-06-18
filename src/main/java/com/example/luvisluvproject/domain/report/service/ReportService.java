@@ -17,6 +17,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * ReportService
+ * 신고 처리의 비즈니스 로직을 담당하는 서비스 클래스입니다.
+ */
 @Service
 @RequiredArgsConstructor
 public class ReportService {
@@ -25,14 +29,21 @@ public class ReportService {
 	private final MemberRepository memberRepository;
 	private final BlockService blockService;
 
+	/**
+	 * 신고 요청 처리
+	 *
+	 * @param reporterId 신고를 수행한 사용자 ID
+	 * @param dto        신고 요청 정보
+	 * @return ReportResponseDto 응답
+	 */
 	@Transactional
 	public ReportResponseDto report(Long reporterId, ReportRequestDto dto) {
-		// 1. 중복 신고 방지
+		// 1. 동일한 대상 중복 신고 방지
 		if (reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporterId, dto.getTargetId(), dto.getTargetType())) {
 			throw new CustomRuntimeException(ExceptionCode.ALREADY_REPORTED);
 		}
 
-		// 2. 신고자 조회
+		// 2. 신고자(Member) 조회
 		Member reporter = memberRepository.findById(reporterId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
@@ -44,24 +55,25 @@ public class ReportService {
 			.reason(dto.getReason())
 			.description(dto.getDescription())
 			.build();
+
 		Report savedReport = reportRepository.save(report);
 
-		// 4. 대상이 유저인 경우 추가 처리
+		// 4. 신고 대상이 사용자(USER)일 경우 추가 처리
 		if (dto.getTargetType() == ReportTargetType.USER) {
 			// 4-1. 신고 대상자 조회
 			Member target = memberRepository.findById(dto.getTargetId())
 				.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-			// 4-2. 자동 차단 처리
+			// 4-2. 신고 즉시 자동 차단 처리
 			BlockRequestDto blockRequestDto = BlockRequestDtoFactory.afterReportBlock(dto.getTargetId());
 			blockService.blockUser(reporterId, blockRequestDto);
 
-			// 4-3. 신고 누적 처리 및 활동 제한 적용
+			// 4-3. 신고 누적 처리 및 저장
 			target.increaseReportCount();
 			memberRepository.save(target);
 		}
 
-		// 5. 응답 반환
+		// 5. 신고 완료 응답 반환
 		return new ReportResponseDto("신고가 정상적으로 접수되었습니다.", savedReport.getCreatedAt());
 	}
 }
