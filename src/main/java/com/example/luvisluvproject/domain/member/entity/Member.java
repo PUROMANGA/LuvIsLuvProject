@@ -64,7 +64,6 @@ public class Member extends BaseEntity {
 
 	//호감도
 	@Builder.Default
-	@Column(nullable = false)
 	private Long likeCount = 0L;
 
 	private LocalDateTime restrictedUntil;
