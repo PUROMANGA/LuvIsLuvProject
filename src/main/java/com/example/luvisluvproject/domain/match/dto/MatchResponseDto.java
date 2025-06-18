@@ -5,6 +5,7 @@ import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
 @AllArgsConstructor
@@ -15,10 +16,11 @@ public class MatchResponseDto {
 	private String receiverName;
 	private MatchStatus matchStatus;
 
-	public MatchResponseDto(Match match) {
-		this.senderId = match.getSenderId();
-		this.receiverId = match.getReceiverId();
-		this.matchStatus = match.getMatchStatus();
+	public MatchResponseDto(Long senderId, String senderName, Long receiverId, String receiverName) {
+		this.senderId = senderId;
+		this.senderName = senderName;
+		this.receiverId = receiverId;
+		this.receiverName = receiverName;
 	}
 
 	public MatchResponseDto(Match match, String senderName, String receiverName) {
