@@ -54,4 +54,9 @@ public class StoreResponse {
 		this.latitude = latitude;
 		this.longitude = longitude;
 	}
+
+	public String getStatus(){
+		return this.status.getKoreanName();
+	}
+
 }
