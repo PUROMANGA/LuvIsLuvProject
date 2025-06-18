@@ -58,7 +58,7 @@ public class StompHandler implements ChannelInterceptor {
 			ChatRoom chatRoom = chatRoomRepository.findById(Long.parseLong(roomId))
 				.orElseThrow(() -> new RuntimeException("채팅방이 존재하지 않습니다."));
 
-			//Redis-key
+			//redis-key
 			String key = sessionId + subscriptionId;
 			String value = roomId;
 			//세션과 방 아이디를 저장

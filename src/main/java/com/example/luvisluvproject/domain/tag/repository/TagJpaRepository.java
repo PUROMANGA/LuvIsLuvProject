@@ -10,23 +10,24 @@ import java.util.Optional;
 
 public interface TagJpaRepository extends JpaRepository<Tag, Long> {
 
+	Boolean existsByName(String tagName);
 	/**
-	 * 태그 이름으로 중복 여부를 확인하거나 검색할 때 사용
+	 * 이름으로 태그 조회 (중복 방지, 자동완성 등에서 활용)
 	 */
 	Optional<Tag> findByName(String name);
 
 	/**
-	 * 카테고리별 태그 전체 조회 (활성된 것만)
+	 * 카테고리 + 활성 태그만 우선순위 순으로 조회
 	 */
 	List<Tag> findAllByCategoryAndActiveTrueOrderByPriorityDesc(TagCategory category);
 
 	/**
-	 * 전체 태그 중 활성화된 태그만 (우선순위 높은 순)
+	 * 전체 활성 태그 조회 (우선순위순)
 	 */
 	List<Tag> findAllByActiveTrueOrderByPriorityDesc();
 
 	/**
-	 * 관리자가 전체 태그를 확인할 때 (카테고리 상관없이 모두 가져옴)
+	 * 전체 태그 (카테고리별 + 우선순위) 조회 - 관리자용
 	 */
 	List<Tag> findAllByOrderByCategoryAscPriorityDesc();
 }

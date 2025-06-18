@@ -13,9 +13,11 @@ import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "MemberChatRooms")
@@ -25,15 +27,14 @@ public class MemberChatRoom extends BaseEntity {
 	private Long id;
 
 	private Long memberId;
-	private String chatName;
 
+	private boolean deleted = false;
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "chat_room_id")
 	private ChatRoom chatRoom;
 
-	public MemberChatRoom(Long memberId, String chatName, ChatRoom chatRoom) {
+	public MemberChatRoom(Long memberId, ChatRoom chatRoom) {
 		this.memberId = memberId;
-		this.chatName = chatName;
 		this.chatRoom = chatRoom;
 	}
 }

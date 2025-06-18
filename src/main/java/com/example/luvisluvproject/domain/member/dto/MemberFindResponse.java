@@ -1,8 +1,7 @@
 package com.example.luvisluvproject.domain.member.dto;
 
 import java.time.LocalDate;
-
-import com.example.luvisluvproject.domain.member.entity.Member;
+import java.time.Period;
 
 import lombok.Getter;
 
@@ -13,17 +12,18 @@ public class MemberFindResponse {
 
 	private final String name;
 
-	private final String email;
+	private final int age;
 
-	private final LocalDate birthday;
+	private final String content;
 
-
-	private Member member;
-
-	public MemberFindResponse(Long userId, String name, String email, LocalDate birthday) {
+	public MemberFindResponse(Long userId, String name, LocalDate birthday, String content) {
 		this.userId = userId;
 		this.name = name;
-		this.email = email;
-		this.birthday = birthday;
+		this.age = calculateAge(birthday);
+		this.content = content;
+	}
+
+	private int calculateAge(LocalDate birthday) {
+		return Period.between(birthday, LocalDate.now()).getYears();
 	}
 }

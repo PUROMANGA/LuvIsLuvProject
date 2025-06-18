@@ -19,6 +19,7 @@ public enum ExceptionCode implements ErrorCode {
 	LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 혹은 비밀번호가 올바르지 않습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 	UNDERAGE_USER(HttpStatus.FORBIDDEN, "만 19세 미만은 이용할 수 없습니다."),
+	INVALID_BIRTHDAY_IN_FUTURE(HttpStatus.BAD_REQUEST, "생일은 미래 날짜로 설정할 수 없습니다."),
 
 	//가게
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게를 찾을 수 없습니다."),
@@ -32,9 +33,16 @@ public enum ExceptionCode implements ErrorCode {
 	SAME_PASSWORD(HttpStatus.BAD_REQUEST, "이전과 동일한 비밀번호는 사용이 불가합니다."),
 	PASSWORD_MISMATCH(HttpStatus.BAD_REQUEST, "입력한 비밀번호가 일치하지 않습니다."),
 	SAME_NAME(HttpStatus.BAD_REQUEST, "이전과 동일한 이름은 변경할 수 없습니다."),
+	SAME_CONTENT(HttpStatus.BAD_REQUEST, "이전과 동일한 소개입니다."),
 
 	//매치
 	MATCH_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 매치를 찾을 수 없습니다."),
+
+	//메세지
+	MESSAGE_NOT_FOUNT(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
+
+	//채팅
+	CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
 
 	//차단
 	ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "이미 차단한 사용자입니다."),
@@ -52,7 +60,8 @@ public enum ExceptionCode implements ErrorCode {
 	REVIEW_NOT_FOUND(HttpStatus.NOT_FOUND, "리뷰를 찾을 수 없습니다."),
 	STORE_REVIEW_MISMATCH(HttpStatus.BAD_REQUEST, "해당 가게에 속한 리뷰가 아닙니다."),
 	DELETE_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 삭제할 수 있습니다."),
-	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다.");
+	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다."),
+	MEMBER_NOT_ELIGIBLE_FOR_REVIEW(HttpStatus.FORBIDDEN, "해당 가게를 이용한 사용자만 리뷰를 작성할 수 있습니다.");
 
 	private final HttpStatus httpStatus;
 	private final String message;

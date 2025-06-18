@@ -17,9 +17,11 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor
 @Table(name = "ChatRooms")
 
@@ -27,9 +29,6 @@ public class ChatRoom extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-	private List<MemberChatRoom> memberChatRoomRList;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_a_id")
@@ -39,9 +38,12 @@ public class ChatRoom extends BaseEntity {
 	@JoinColumn(name = "member_b_id")
 	private Member memberB;
 
-	public ChatRoom(Member memberA, Member memberB) {
+	private int deleteCount = 0;
+
+	public ChatRoom(Member memberA, Member memberB, int deleteCount) {
 		this.memberA = memberA;
 		this.memberB = memberB;
+		this.deleteCount = deleteCount;
 	}
 
 	public Member checkMember(Member me) {
@@ -54,16 +56,14 @@ public class ChatRoom extends BaseEntity {
 		return opponent;
 	}
 
-	public ChatRoom(Long id, List<MemberChatRoom> memberChatRoomRList, Member memberA, Member memberB) {
+	public ChatRoom(Long id, Member memberA, Member memberB, int deleteCount) {
 		this.id = id;
-		this.memberChatRoomRList = memberChatRoomRList;
 		this.memberA = memberA;
 		this.memberB = memberB;
+		this.deleteCount = deleteCount;
 	}
 
-	public ChatRoom(List<MemberChatRoom> memberChatRoomRList, Member memberA, Member memberB) {
-		this.memberChatRoomRList = memberChatRoomRList;
-		this.memberA = memberA;
-		this.memberB = memberB;
+	public void plusDeleteCount() {
+		this.deleteCount++;
 	}
 }

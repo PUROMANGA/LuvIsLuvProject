@@ -22,4 +22,12 @@ public class ApiResponse<T> {
 			data
 		);
 	}
+
+	public static <T> ApiResponse<T> of(SuccessCode code) {
+		return new ApiResponse<>(
+			code.getMessage(),
+			code.name(),
+			null
+		);
+	}
 }

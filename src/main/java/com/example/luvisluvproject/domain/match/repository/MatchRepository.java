@@ -8,9 +8,4 @@ import org.springframework.data.jpa.repository.Query;
 import com.example.luvisluvproject.domain.match.entity.Match;
 
 public interface MatchRepository extends JpaRepository<Match, Long> {
-
-	@Query("select m "
-		+ "from Match m "
-		+ "where m.receiverId = : receiverId")
-	Slice<Match> findMatchByReceiverId(Long receiverId, Pageable pageable);
 }

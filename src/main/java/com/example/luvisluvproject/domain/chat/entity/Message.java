@@ -9,6 +9,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.example.luvisluvproject.domain.chat.common.MessageType;
 import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
+import com.example.luvisluvproject.domain.chat.dto.MessageDto;
+
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
 import lombok.Getter;
@@ -26,7 +28,6 @@ public class Message {
 
 	private Long chatRoomId;
 	private Long senderId;
-	private Long receiverId;
 	private String content;
 	private String fileUrl;
 	private MessageType messageType;
@@ -36,12 +37,20 @@ public class Message {
 	@LastModifiedDate
 	private LocalDateTime modifiedTime;
 
-	public Message(String id, Long chatRoomId, Long senderId, Long receiverId, String content, String fileUrl,
+	public Message(MessageDto messageDto) {
+		this.chatRoomId = messageDto.getRoomId();
+		this.senderId = messageDto.getUserId();
+		this.content = messageDto.getContent();
+		this.fileUrl = messageDto.getFileUrl();
+		this.messageType = messageDto.getMessageType();
+		this.isRead = false;
+	}
+
+	public Message(String id, Long chatRoomId, Long senderId, String content, String fileUrl,
 		MessageType messageType, Boolean isRead, LocalDateTime creatTime, LocalDateTime modifiedTime) {
 		this.id = id;
 		this.chatRoomId = chatRoomId;
 		this.senderId = senderId;
-		this.receiverId = receiverId;
 		this.content = content;
 		this.fileUrl = fileUrl;
 		this.messageType = messageType;
@@ -50,11 +59,10 @@ public class Message {
 		this.modifiedTime = modifiedTime;
 	}
 
-	public Message(Long chatRoomId, Long senderId, Long receiverId, RequestMessageDto requestMessageDto,
+	public Message(Long chatRoomId, Long senderId, RequestMessageDto requestMessageDto,
 		Boolean isRead) {
 		this.chatRoomId = chatRoomId;
 		this.senderId = senderId;
-		this.receiverId = receiverId;
 		this.content = requestMessageDto.getContent();
 		this.fileUrl = requestMessageDto.getFileUrl();
 		this.messageType = requestMessageDto.getMessageType();

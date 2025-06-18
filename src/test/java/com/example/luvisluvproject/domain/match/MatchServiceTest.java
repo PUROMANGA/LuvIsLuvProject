@@ -27,7 +27,6 @@ import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -59,10 +58,10 @@ public class MatchServiceTest {
 	private MatchService matchService;
 
 	Member senderMember = new Member(1L, "송진영", "songjinyong@email.com", "test1234", LocalDate.parse("2001-01-01"),
-		UserRole.USER, true, 1L);
+		UserRole.USER, true, 0L);
 
 	Member receiverMember = new Member(2L, "이유리", "leeyuuri@email.com", "test5678", LocalDate.parse("2001-02-01"),
-		UserRole.USER, true, 1L);
+		UserRole.USER, true, 0L);
 
 	Match match = new Match(senderMember.getId(), receiverMember.getId());
 
@@ -79,13 +78,16 @@ public class MatchServiceTest {
 		//given
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(senderMember));
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(receiverMember));
+		receiverMember.plusIsLike();
 
 		//when
 		MatchResponseDto result = matchService.createMatchService(receiverMember.getId(), senderMember.getEmail());
 
 		//then
-		assertThat(result).isNotNull();
-		String expectedKey = senderMember.getId() + ":" + receiverMember.getId();
+		assertThat(result.getReceiverId()).isEqualTo(2L);
+		assertThat(result.getSenderId()).isEqualTo(1L);
+		assertThat(receiverMember.getLikeCount()).isEqualTo(2L);
+		String expectedKey = receiverMember.getId().toString();
 		verify(setOps, times(1)).add(eq(expectedKey), any(Match.class));
 	}
 
@@ -103,11 +105,13 @@ public class MatchServiceTest {
 		given(memberRepository.findById(anyLong())).willReturn(Optional.of(senderMember));
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
 		given(setOps.members(anyString())).willReturn(matchSet);
-		Match newMatch = matchSet.stream().map(obj -> {
-			Match m = (Match)obj;
-			m.updateMatchingStatus(acceptMatchDto);
-			return m;
-		}).findFirst().orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+
+		Match newMatch = matchSet.stream()
+			.map(obj -> (Match) obj)
+			.peek(match -> match.updateMatchingStatus(acceptMatchDto))
+			.filter(match -> match.getSenderId().equals(senderMember.getId()))
+			.findFirst()
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 
 		given(matchRepository.save(any(Match.class))).willReturn(newMatch);
 
@@ -117,7 +121,7 @@ public class MatchServiceTest {
 
 		//then
 		assertThat(result.getMatchStatus()).isEqualTo(MatchStatus.ACCEPTED);
-		String expectedKey = senderMember.getId() + ":" + receiverMember.getId();
+		String expectedKey = receiverMember.getId().toString();
 		verify(applicationEventPublisher, times(1)).publishEvent(any(ChatCreateEvent.class));
 		verify(matchRedisTemplate, times(1)).delete(eq(expectedKey));
 	}
@@ -126,14 +130,21 @@ public class MatchServiceTest {
 	@DisplayName("해당 회원이 받은 매칭 전부를 slice로 가져옵니다.")
 	public void getMatchServiceTest() {
 		//given
-
+		//페이징 설정
 		List<Match> matchList = new ArrayList<>();
 		matchList.add(match);
 		Pageable pageable = PageRequest.of(0, 10);
 		Slice<Match> matches = new SliceImpl<>(matchList, pageable, false);
 
+		//Member찾아주고
 		given(memberRepository.findByEmail(anyString())).willReturn(Optional.of(receiverMember));
-		given(matchRepository.findMatchByReceiverId(anyLong(), any(Pageable.class))).willReturn(matches);
+
+		//Redis 구조 설정
+		setOps = mock(SetOperations.class);
+		given(matchRedisTemplate.opsForSet()).willReturn(setOps);
+
+		Set<Object> matchSet = new HashSet<>();
+		matchSet.add(match);
 
 		//when
 		Slice<MatchResponseDto> matchResponseDtoSlice = matchService.getMatchService(receiverMember.getEmail(),

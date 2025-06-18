@@ -1,15 +1,15 @@
 package com.example.luvisluvproject.domain.chat.event;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import com.example.luvisluvproject.domain.chat.common.MessageType;
 import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.chat.entity.MemberChatRoom;
-import com.example.luvisluvproject.domain.chat.entity.Message;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomRepository;
+import com.example.luvisluvproject.domain.chat.dto.RoomIdDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
@@ -25,7 +25,7 @@ public class ChatCreateEventListener {
 	private final ChatRoomRepository chatRoomRepository;
 	private final MemberRepository memberRepository;
 	private final MemberChatRoomRepository memberChatRoomRepository;
-
+	private final SimpMessageSendingOperations simpMessageSendingOperations;
 
 	@Async
 	@EventListener
@@ -41,16 +41,16 @@ public class ChatCreateEventListener {
 		//chatRoom저장
 		ChatRoom chatRoom = chatRoomRepository.save(new ChatRoom(member, me));
 
-		Member opponent;
-
-		if(me.getId().equals(chatRoom.getMemberA().getId())) {
-			opponent = chatRoom.getMemberB();
-
-		} else {
-			opponent = chatRoom.getMemberA();
-		}
-		String chatName = opponent.getName();
-		MemberChatRoom memberChatRoom = new MemberChatRoom(me.getId(), chatName, chatRoom);
+		MemberChatRoom memberChatRoom = new MemberChatRoom(me.getId(), chatRoom);
+		MemberChatRoom otherSide = new MemberChatRoom(member.getId(), chatRoom);
+		memberChatRoomRepository.save(otherSide);
 		memberChatRoomRepository.save(memberChatRoom);
+
+		//roomId 프론트로 패스하기
+		RoomIdDto SenderRoomIdDto = new RoomIdDto(chatRoom.getId(), me.getName(), "매칭이 성사되었습니다.", member.getId());
+		RoomIdDto MeRoomIdDto = new RoomIdDto(chatRoom.getId(), member.getName(), "매칭이 성사되었습니다.", me.getId());
+
+		simpMessageSendingOperations.convertAndSend("/sub/chat/init/" + senderId, SenderRoomIdDto);
+		simpMessageSendingOperations.convertAndSend("/sub/chat/init/" + myId, MeRoomIdDto);
 	}
 }

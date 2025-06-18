@@ -14,7 +14,6 @@ public class ResponseMessageDto {
 	private String id;
 	private Long chatRoomId;
 	private Long senderId;
-	private Long receiverId;
 	private Boolean isRead;
 	private String content;
 	private String fileUrl;
@@ -26,7 +25,6 @@ public class ResponseMessageDto {
 		this.id = message.getId();
 		this.chatRoomId = message.getChatRoomId();
 		this.senderId = message.getSenderId();
-		this.receiverId = message.getReceiverId();
 		this.isRead = message.getIsRead();
 		this.content = message.getContent();
 		this.fileUrl = message.getFileUrl();

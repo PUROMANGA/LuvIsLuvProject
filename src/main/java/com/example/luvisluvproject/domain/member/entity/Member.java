@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.global.common.BaseEntity;
@@ -51,6 +53,8 @@ public class Member extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private UserRole userRole;
 
+	private String content;
+
 	@Column(nullable = false)
 	private boolean status;
 
@@ -68,12 +72,29 @@ public class Member extends BaseEntity {
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
 
+	// 일반 유저 생성시 사용하는 생성자
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = false;
+		this.likeCount = 0L;
+		this.reportCount = 0;
+		this.content = content;
+	}
+
+	// 가게 사장님, 관리자 생성시 사용하는 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.birthday = birthday;
 		this.userRole = userRole;
+		this.status = false;
+		this.likeCount = 0L;
+		this.reportCount = 0;
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
@@ -97,8 +118,12 @@ public class Member extends BaseEntity {
 		this.likeCount++;
 	}
 
-	public void update(String password) {
+	public void updatePassword(String password) {
 		this.password = password;
+	}
+
+	public void updateContent(String content) {
+		this.content = content;
 	}
 
 	public void softDelete() {
@@ -127,5 +152,17 @@ public class Member extends BaseEntity {
 	// 활동 제한 상태인지 확인
 	public boolean isRestricted() {
 		return this.restrictedUntil != null && this.restrictedUntil.isAfter(LocalDateTime.now());
+	}
+
+	/**
+	 * signupUserSuccess() 테스트용 생성자
+	 */
+	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
 	}
 }

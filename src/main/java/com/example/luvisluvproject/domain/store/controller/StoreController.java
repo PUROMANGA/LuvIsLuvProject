@@ -4,18 +4,21 @@ import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
 import com.example.luvisluvproject.domain.store.dto.response.StoreResponse;
 import com.example.luvisluvproject.domain.store.service.StoreService;
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 /**
  * 가게 관련 요청을 처리하는 REST 컨트롤러
- * 등록, 수정, 삭제 기능을 제공함
+ * 등록, 수정, 삭제, 조회 기능을 제공함
  */
 @RestController
 @RequestMapping("/stores")
@@ -26,16 +29,15 @@ public class StoreController {
 
 	/**
 	 * 가게 등록 요청 처리
-	 * 전달받은 StoreSaveRequest를 통해 가게를 등록하고
-	 * 저장된 정보를 응답으로 반환함
 	 *
 	 * @param request 가게 등록 요청 DTO
-	 * @return ResponseEntity<StoreResponse> 등록된 가게 정보
+	 * @return 등록된 가게 정보 (성공 메시지 포함)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PostMapping
-	public ResponseEntity<StoreResponse> saveStore(@RequestBody @Valid StoreSaveRequest request) {
+	public ResponseEntity<ApiResponse<StoreResponse>> saveStore(@RequestBody @Valid StoreSaveRequest request) {
 		StoreResponse response = storeService.saveStore(request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_CREATED, response));
 	}
 
 	/**
@@ -43,25 +45,29 @@ public class StoreController {
 	 *
 	 * @param id 가게 ID
 	 * @param request 수정 요청 DTO
-	 * @return 수정된 가게 응답 DTO
+	 * @return 수정된 가게 정보 (성공 메시지 포함)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@PutMapping("/{id}")
-	public ResponseEntity<StoreResponse> updateStore(@PathVariable Long id,
-		@RequestBody @Valid StoreUpdateRequest request) {
+	public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
+		@PathVariable Long id,
+		@RequestBody @Valid StoreUpdateRequest request
+	) {
 		StoreResponse response = storeService.updateStore(id, request);
-		return ResponseEntity.ok(response);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_UPDATED, response));
 	}
 
 	/**
 	 * 가게 삭제
 	 *
 	 * @param id 가게 ID
-	 * @return 204 No Content
+	 * @return 삭제 성공 메시지 (body 없음)
 	 */
+	@PreAuthorize("hasRole('MANAGER')")
 	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> deleteStore(@PathVariable Long id) {
+	public ResponseEntity<ApiResponse<Void>> deleteStore(@PathVariable Long id) {
 		storeService.deleteStore(id);
-		return ResponseEntity.noContent().build();
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_DELETED));
 	}
 
 	/**
@@ -70,12 +76,15 @@ public class StoreController {
 	 * @param lat 사용자의 위도
 	 * @param lng 사용자의 경도
 	 * @param radiusMeters 반경 거리 (미터 단위, 기본값: 2000m)
-	 * @return 반경 내 가게 목록
+	 * @return 반경 내 가게 목록 (성공 메시지 포함)
 	 */
 	@GetMapping("/nearby")
-	public List<StoreResponse> getNearbyStores(@RequestParam("lat") double lat, @RequestParam("lng") double lng,
-		@RequestParam(value = "radius", defaultValue = "2000") int radiusMeters) {
-		return storeService.getNearbyStores(lat, lng, radiusMeters);
+	public ResponseEntity<ApiResponse<List<StoreResponse>>> getNearbyStores(
+		@RequestParam("lat") double lat,
+		@RequestParam("lng") double lng,
+		@RequestParam(value = "radius", defaultValue = "2000") int radiusMeters
+	) {
+		List<StoreResponse> stores = storeService.getNearbyStores(lat, lng, radiusMeters);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_LIST_RETRIEVED, stores));
 	}
-
 }

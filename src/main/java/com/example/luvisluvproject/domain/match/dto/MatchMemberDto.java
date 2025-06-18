@@ -15,11 +15,10 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 public class MatchMemberDto {
-
-	private List<Member> memberList = new ArrayList<>();
-
+	private Long memberId;
+	private String name;
 	public MatchMemberDto(Member member) {
-		this.memberList = new ArrayList<>();
-		this.memberList.add(member);
+		this.memberId = member.getId();
+		this.name = member.getName();
 	}
 }
