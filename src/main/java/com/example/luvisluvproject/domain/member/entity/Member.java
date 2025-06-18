@@ -92,9 +92,6 @@ public class Member extends BaseEntity {
 		this.password = password;
 		this.birthday = birthday;
 		this.userRole = userRole;
-		this.status = false;
-		this.likeCount = 0L;
-		this.reportCount = 0;
 	}
 
 	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
