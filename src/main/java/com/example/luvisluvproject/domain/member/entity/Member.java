@@ -72,6 +72,14 @@ public class Member extends BaseEntity {
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
 
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+	}
+
 	// 일반 유저 생성시 사용하는 생성자
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content) {
 		this.name = name;
