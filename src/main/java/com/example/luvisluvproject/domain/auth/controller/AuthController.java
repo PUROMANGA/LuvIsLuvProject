@@ -1,7 +1,6 @@
 package com.example.luvisluvproject.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -9,11 +8,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
-import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
-import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.success.ApiResponse;
@@ -41,7 +38,7 @@ public class AuthController {
 	public ResponseEntity<ApiResponse<SignupResponseDto>> signupUser(
 		@Valid @RequestBody SignupUserRequestDto requestDto) {
 		SignupResponseDto responseDto = authService.signup(requestDto);
-		ApiResponse<SignupUserResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
+		ApiResponse<SignupResponseDto> apiResponse = ApiResponse.of(SuccessCode.SIGNUP_SUCCESS, responseDto);
 		return ResponseEntity.ok(apiResponse);
 	}
 

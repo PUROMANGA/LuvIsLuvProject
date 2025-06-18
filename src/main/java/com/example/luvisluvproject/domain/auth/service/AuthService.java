@@ -11,18 +11,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.auth.common.AuthServiceHelper;
 import com.example.luvisluvproject.domain.auth.dto.request.LoginRequestDto;
-import com.example.luvisluvproject.domain.auth.dto.request.SignupRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
-import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
-
-import lombok.RequiredArgsConstructor;
 
 /**
  * 인증 관련 로직을 처리하는 서비스 클래스입니다.
@@ -44,6 +40,7 @@ public class AuthService {
 		this.jwtUtil = jwtUtil;
 		this.redisTemplate = redisTemplate;
 		this.authServiceHelper = authServiceHelper;
+	}
 
 	/**
 	 * 사용자의 회원가입을 처리합니다.

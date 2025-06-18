@@ -20,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.example.luvisluvproject.domain.auth.common.AuthServiceHelper;
 import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
-import com.example.luvisluvproject.domain.auth.dto.response.SignupUserResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
