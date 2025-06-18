@@ -17,7 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class AuthServiceHelper {
 	private final MemberRepository memberRepository;
 
-	public Member createMember(String email, String name, LocalDate birthday, String encodePassword, String userRole) {
+	public Member createMember(String email, String name, LocalDate birthday, String encodePassword, UserRole userRole) {
 
 		//이름 중복 확인
 		if (memberRepository.existsByName(name)) {
