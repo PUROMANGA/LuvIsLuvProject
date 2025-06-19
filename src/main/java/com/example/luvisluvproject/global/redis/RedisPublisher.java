@@ -17,6 +17,8 @@ public class RedisPublisher {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	public void publish(MessageDto messageDto) {
+		System.out.println("발행합니데이~~~");
 		redisTemplate.convertAndSend(channelTopic.getTopic(), messageDto);
+		System.out.println("messageDto 발행성공! = " + messageDto);
 	}
 }

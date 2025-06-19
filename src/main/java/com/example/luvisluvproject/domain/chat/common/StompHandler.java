@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.chat.common;
 
+import java.security.Principal;
 import java.util.Set;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -8,10 +9,15 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
+import com.example.luvisluvproject.global.common.AuthUser;
+import com.example.luvisluvproject.global.common.UserDetailsServiceImpl;
 import com.example.luvisluvproject.global.config.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -23,30 +29,29 @@ import lombok.extern.slf4j.Slf4j;
 
 public class StompHandler implements ChannelInterceptor {
 
-	private final ChatRoomRepository chatRoomRepository;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final JwtUtil jwtUtil;
+	private final UserDetailsServiceImpl userDetailsService;
 
 	@Override
 	public Message<?> preSend(Message<?> message, MessageChannel channel) {
 		StompHeaderAccessor accessor = StompHeaderAccessor.wrap(message);
 
+		System.out.println("💬 STOMP command: " + accessor.getCommand());
+
 		if (StompCommand.CONNECT == accessor.getCommand()) {
+			System.out.println("연결시작");
 			String authToken = accessor.getFirstNativeHeader("Authorization");
 			String token = authToken.substring(7);
+			System.out.println("token = " + token);
 
-			if (authToken == null || !authToken.startsWith("Bearer ")) {
+			if (!authToken.startsWith("Bearer ")) {
 				throw new IllegalArgumentException("Authorization 헤더가 없거나 형식이 잘못되었습니다.");
 			}
 
 			if (!jwtUtil.validateToken(token)) {
 				throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
 			}
-
-			//사실상 email
-			String username  = jwtUtil.getEmail(authToken);
-			accessor.setUser(() -> username );
-
 		} else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
 
 			String destination = accessor.getDestination();
@@ -58,12 +63,13 @@ public class StompHandler implements ChannelInterceptor {
 			//방 아이디
 			String channelId = destination.substring(destination.lastIndexOf("/") + 1);
 			Long roomId = Long.parseLong(channelId);
-			//접속된 유저 아이디
-			String userEmail = accessor.getUser().getName();
+
+			Principal principal = accessor.getUser();
+			String email = principal.getName();
 
 			//redis-key
 			String key = sessionId + subscriptionId;
-			String value = "유저 아이디 : " + userEmail + "방 아이디 : " + roomId;
+			String value = "유저 : " + email + "방 아이디 : " + roomId;
 			//세션과 방 아이디를 저장
 			redisTemplate.opsForSet().add(key, value);
 

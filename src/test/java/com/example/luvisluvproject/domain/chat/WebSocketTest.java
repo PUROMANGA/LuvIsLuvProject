@@ -1,4 +1,4 @@
-package com.example.luvisluvproject.domain;
+package com.example.luvisluvproject.domain.chat;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 
@@ -31,14 +31,15 @@ import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
 import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
+import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomRepository;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
-import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
 import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
@@ -71,18 +72,25 @@ public class WebSocketTest {
 
 	@Autowired
 	private JwtUtil jwtUtil;
+
 	@Autowired
 	private MatchRepository matchRepository;
 
+	@Autowired
+	private MemberChatRoomRepository memberChatRoomRepository;
+
 	@BeforeAll
 	public void setUp() {
+		memberChatRoomRepository.deleteAll();
 		chatRoomRepository.deleteAll();
 		memberRepository.deleteAll();
 		matchRepository.deleteAll();
 
-		webSocketStompClient = new WebSocketStompClient(
+		this.webSocketStompClient = new WebSocketStompClient(
 			new StandardWebSocketClient()
 		);
+
+		this.webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
 
 		webSocketStompClient = new WebSocketStompClient(new StandardWebSocketClient());
 		webSocketStompClient.setMessageConverter(new MappingJackson2MessageConverter());
@@ -147,6 +155,8 @@ public class WebSocketTest {
 	@Test
 	@DisplayName("실제로 메세지 보내기")
 	public void testWebSocketWhenSub() throws InterruptedException, ExecutionException, JsonProcessingException {
+
+		//큐 구조 설정
 		BlockingQueue<MessageDto> queue = new LinkedBlockingQueue<>();
 
 		//보내는 메세지 정하기
@@ -158,13 +168,15 @@ public class WebSocketTest {
 			"송진영"
 		);
 
-		//실제 구독
+		//매칭 수락하기
 		AcceptMatchDto acceptMatchDto = new AcceptMatchDto(MatchStatus.ACCEPTED);
 
+		//로그인 할 때 정보
 		LoginRequestDto requestDto = new LoginRequestDto(
 			"leeyuuri@email.com",
 			"test5678");
 
+		//로그인 시도
 		LoginResponseDto loginResponseDto = authService.login(requestDto);
 		System.out.println("로그인 성공");
 		matchService.createMatchService(2L, "songjinyong@email.com");
@@ -177,7 +189,7 @@ public class WebSocketTest {
 
 		StompSession receiveSession = connectWebSocket(memberB);
 
-		receiveSession.subscribe("/sub/chats/" + messageDto.getRoomId(), new StompFrameHandler() {
+		receiveSession.subscribe("/sub/chats/" + 1L, new StompFrameHandler() {
 			@Override
 			public Type getPayloadType(StompHeaders headers) {
 				return MessageDto.class;
@@ -190,12 +202,20 @@ public class WebSocketTest {
 				System.out.println("받은 메세지 = " + sendMessageDto);
 			}
 		});
+		System.out.println("구독완료");
 
 		StompHeaders stompHeaders = new StompHeaders();
 		stompHeaders.setDestination("/pub/chats/message");
-		stompHeaders.add("Authorization", loginResponseDto.getAccessToken());
+		// stompHeaders.add("Authorization", loginResponseDto.getAccessToken());
+
+		System.out.println("메세지발송 전");
 		receiveSession.send(stompHeaders, messageDto);
+
+		System.out.println("메세지발송 후");
+		System.out.println("messageDto = " + messageDto);
+
 		MessageDto received = queue.poll(5, TimeUnit.SECONDS);
+		System.out.println("큐 사이즈: " + queue.size());
 		assertThat(received.getContent()).isEqualTo("안녕하세유~");
 	}
 

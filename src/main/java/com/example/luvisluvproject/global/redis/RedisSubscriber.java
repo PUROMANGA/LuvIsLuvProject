@@ -11,7 +11,6 @@ import lombok.extern.slf4j.Slf4j;
 
 @RequiredArgsConstructor
 @Service
-@Slf4j
 public class RedisSubscriber {
 	private final ObjectMapper objectMapper;
 	private final SimpMessageSendingOperations messagingTemplate;
@@ -20,9 +19,10 @@ public class RedisSubscriber {
 		try {
 			MessageDto messageDto = objectMapper.readValue(publishMessage, MessageDto.class);
 			messagingTemplate.convertAndSend("/sub/chats/" + messageDto.getRoomId(), messageDto);
-			log.info("Redis 받은 메시지: {}", messageDto.getContent());
+			System.out.println("Redis 받은 메시지: " + messageDto.getContent());
 		} catch (Exception e) {
-			log.error("RedisSubscriber 메시지 처리 실패", e);
+			System.out.println("RedisSubscriber 메시지 처리 실패: " + e.getMessage());
 		}
 	}
 }
+
