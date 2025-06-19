@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.chat.common;
 
+import java.security.Principal;
 import java.util.Map;
 
 import org.springframework.http.server.ServerHttpRequest;
@@ -26,12 +27,15 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 		Map<String, Object> attributes) {
 
 		if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
-			HttpServletRequest httpServletRequest = (HttpServletRequest)servletServerHttpRequest;
+			HttpServletRequest httpServletRequest = servletServerHttpRequest.getServletRequest();
 
 			String authHeader = httpServletRequest.getHeader("Authorization");
 
 			if (authHeader != null && authHeader.startsWith("Bearer ")) {
 				String token = authHeader.substring(7);
+				String email = jwtUtil.extractClaims(token).getSubject();
+				Principal principal = () -> email;
+				attributes.put("principal", principal);
 
 				if(jwtUtil.validateToken(token)) {
 					attributes.put("token", token);
@@ -52,7 +56,6 @@ public class HttpHandshakeInterceptor implements HandshakeInterceptor {
 		if (request instanceof ServletServerHttpRequest servletServerHttpRequest) {
 			String ip = servletServerHttpRequest.getServletRequest().getRemoteAddr();
 			String userAgent = servletServerHttpRequest.getServletRequest().getHeader("User-Agent");
-
 			log.info("WebSocket 연결됨 - IP: {}, UA: {}", ip, userAgent);
 		}
 	}
