@@ -13,18 +13,7 @@ import java.time.LocalDateTime;
 public class BlockResponseDto {
 
 	/**
-	 * 처리 결과 메시지
-	 * 예: "사용자를 차단했습니다." 또는 "차단을 해제했습니다."
-	 */
-	private String message;
-
-	/**
 	 * 차단 대상 사용자의 ID
 	 */
 	private Long blockedId;
-
-	/**
-	 * 차단이 발생한 시각
-	 */
-	private LocalDateTime blockTime;
 }

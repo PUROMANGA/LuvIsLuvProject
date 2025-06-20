@@ -21,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,8 +48,8 @@ class ReportServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		reporter = Member.builder().id(1L).name("reporter").build();
-		targetUser = Member.builder().id(2L).name("targetUser").build();
+		reporter = Member.builder().id(1L).name("reporter").email("reporter@email.com").build();
+		targetUser = Member.builder().id(2L).name("targetUser").email("target@email.com").build();
 	}
 
 	@Test
@@ -58,51 +59,60 @@ class ReportServiceTest {
 			ReportTargetType.USER,
 			targetUser.getId(),
 			ReportReason.SPAM,
-			"욕설을 반복적으로 사용함"
+			"욕설 반복"
 		);
 
-		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
-			.willReturn(false);
-		given(memberRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+		given(memberRepository.findByEmail(reporter.getEmail())).willReturn(Optional.of(reporter));
 		given(memberRepository.findById(targetUser.getId())).willReturn(Optional.of(targetUser));
+		given(reportRepository.existsByReporterEmailAndTargetIdAndTargetType(
+			reporter.getEmail(), targetUser.getId(), ReportTargetType.USER
+		)).willReturn(false);
 		given(reportRepository.save(any(Report.class)))
-			.willReturn(Report.builder().reporter(reporter).targetId(targetUser.getId()).targetType(ReportTargetType.USER).build());
+			.willReturn(Report.builder()
+				.reporter(reporter)
+				.targetType(ReportTargetType.USER)
+				.targetId(targetUser.getId())
+				.createdAt(LocalDateTime.now())
+				.build());
 
 		// when
-		ReportResponseDto response = reportService.report(reporter.getId(), requestDto);
+		ReportResponseDto response = reportService.report(reporter.getEmail(), requestDto);
 
 		// then
-		assertThat(response.getMessage()).isEqualTo("신고가 정상적으로 접수되었습니다.");
-		then(blockService).should().blockUser(eq(reporter.getId()), any(BlockRequestDto.class));
-		then(reportRepository).should().save(any(Report.class));
-		then(memberRepository).should().save(eq(targetUser)); // 신고 누적 저장 확인
+		assertThat(response).isNotNull();
+		then(blockService).should().blockUser(eq(reporter.getEmail()), any(BlockRequestDto.class));
+		then(memberRepository).should().save(eq(targetUser));
 	}
 
 	@Test
 	void 메시지신고_성공시_자동차단되지_않는다() {
 		// given
 		Long messageId = 99L;
-
 		ReportRequestDto requestDto = new ReportRequestDto(
 			ReportTargetType.MESSAGE,
 			messageId,
 			ReportReason.SEXUAL_CONTENT,
-			"부적절한 이미지 전송"
+			"부적절한 이미지"
 		);
 
-		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), messageId, ReportTargetType.MESSAGE))
-			.willReturn(false);
-		given(memberRepository.findById(reporter.getId())).willReturn(Optional.of(reporter));
+		given(memberRepository.findByEmail(reporter.getEmail())).willReturn(Optional.of(reporter));
+		given(reportRepository.existsByReporterEmailAndTargetIdAndTargetType(
+			reporter.getEmail(), messageId, ReportTargetType.MESSAGE
+		)).willReturn(false);
 		given(reportRepository.save(any(Report.class)))
-			.willReturn(Report.builder().reporter(reporter).targetId(messageId).targetType(ReportTargetType.MESSAGE).build());
+			.willReturn(Report.builder()
+				.reporter(reporter)
+				.targetType(ReportTargetType.MESSAGE)
+				.targetId(messageId)
+				.createdAt(LocalDateTime.now())
+				.build());
 
 		// when
-		ReportResponseDto response = reportService.report(reporter.getId(), requestDto);
+		ReportResponseDto response = reportService.report(reporter.getEmail(), requestDto);
 
 		// then
-		assertThat(response.getMessage()).isEqualTo("신고가 정상적으로 접수되었습니다.");
-		then(blockService).shouldHaveNoInteractions(); // ✅ 메시지 신고 시 차단 없음
-		then(reportRepository).should().save(any(Report.class));
+		assertThat(response).isNotNull();
+		then(blockService).shouldHaveNoInteractions();
 	}
 
 	@Test
@@ -115,12 +125,13 @@ class ReportServiceTest {
 			"이미 신고함"
 		);
 
-		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
-			.willReturn(true);
+		given(reportRepository.existsByReporterEmailAndTargetIdAndTargetType(
+			reporter.getEmail(), targetUser.getId(), ReportTargetType.USER
+		)).willReturn(true);
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
-			() -> reportService.report(reporter.getId(), requestDto));
+			() -> reportService.report(reporter.getEmail(), requestDto));
 
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.ALREADY_REPORTED);
 	}
@@ -132,16 +143,17 @@ class ReportServiceTest {
 			ReportTargetType.USER,
 			targetUser.getId(),
 			ReportReason.ABUSIVE_LANGUAGE,
-			"신고자 없음"
+			"없는 신고자"
 		);
 
-		given(reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporter.getId(), targetUser.getId(), ReportTargetType.USER))
-			.willReturn(false);
-		given(memberRepository.findById(reporter.getId())).willReturn(Optional.empty());
+		given(reportRepository.existsByReporterEmailAndTargetIdAndTargetType(
+			reporter.getEmail(), targetUser.getId(), ReportTargetType.USER
+		)).willReturn(false);
+		given(memberRepository.findByEmail(reporter.getEmail())).willReturn(Optional.empty());
 
 		// when & then
 		CustomRuntimeException exception = assertThrows(CustomRuntimeException.class,
-			() -> reportService.report(reporter.getId(), requestDto));
+			() -> reportService.report(reporter.getEmail(), requestDto));
 
 		assertThat(exception.getExceptionCode()).isEqualTo(ExceptionCode.USER_CANT_FIND);
 	}

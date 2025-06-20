@@ -2,6 +2,9 @@ package com.example.luvisluvproject.domain.block.repository;
 
 import com.example.luvisluvproject.domain.block.entity.Block;
 import com.example.luvisluvproject.domain.member.entity.Member;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
@@ -38,6 +41,7 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 	 *
 	 * @param blocker 차단을 수행한 사용자
 	 * @return 차단한 사용자들의 Block 엔티티 리스트
+	 * unblocked = false 조건 Slice 조회
 	 */
-	List<Block> findAllByBlocker(Member blocker);
+	Slice<Block> findAllByBlocker(Member blocker, Pageable pageable);
 }

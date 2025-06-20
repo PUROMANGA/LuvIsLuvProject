@@ -22,11 +22,6 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, Cus
 	void deleteByMemberId(Long memberId);
 
 	/**
-	 * 특정 태그를 보유한 사용자 수
-	 */
-	long countByTagId(Long tagId);
-
-	/**
 	 * 특정 회원이 보유한 태그 전체 조회
 	 */
 	List<MemberTag> findAllByMemberId(Long memberId);

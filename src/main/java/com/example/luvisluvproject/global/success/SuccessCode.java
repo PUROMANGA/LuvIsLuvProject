@@ -28,6 +28,7 @@ public enum SuccessCode {
 	//TAG
 	CREATE_TAG_REQUEST_SUCCESS(HttpStatus.OK, "태그 임시 저장 요청 성공"),
 	SEARCH_TAGS_SUCCESS(HttpStatus.OK, "태그 자동완성 검색 성공"),
+	CREATE_TAG_SUCCESS(HttpStatus.OK,"태그 생성 성공"),
 	ASSIGN_TAGS_TO_MEMBER_SUCCESS(HttpStatus.OK, "사용자에게 태그 할당 성공"),
 	GET_MEMBER_TAGS_SUCCESS(HttpStatus.OK, "사용자 태그 목록 조회 성공"),
 	UPDATE_TAG_SUCCESS(HttpStatus.OK, "태그 수정 성공"),

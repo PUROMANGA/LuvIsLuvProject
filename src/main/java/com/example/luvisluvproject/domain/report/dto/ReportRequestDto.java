@@ -16,14 +16,14 @@ import lombok.NoArgsConstructor;
 public class ReportRequestDto {
 
 	/**
+	 * 신고 대상의 고유 ID
+	 */
+	private String targetEmail;
+
+	/**
 	 * 신고 대상의 타입 (예: USER, MESSAGE 등)
 	 */
 	private ReportTargetType targetType;
-
-	/**
-	 * 신고 대상의 고유 ID
-	 */
-	private Long targetId;
 
 	/**
 	 * 신고 사유 (Enum 값: ABUSIVE_LANGUAGE, SPAM 등)

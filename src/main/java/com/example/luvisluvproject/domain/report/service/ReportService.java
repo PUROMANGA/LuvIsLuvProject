@@ -1,7 +1,7 @@
 package com.example.luvisluvproject.domain.report.service;
 
 import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
-import com.example.luvisluvproject.domain.block.dto.BlockRequestDtoFactory;
+import com.example.luvisluvproject.domain.block.enums.BlockType;
 import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -32,48 +32,60 @@ public class ReportService {
 	/**
 	 * 신고 요청 처리
 	 *
-	 * @param reporterId 신고를 수행한 사용자 ID
-	 * @param dto        신고 요청 정보
-	 * @return ReportResponseDto 응답
+	 * @param reporterEmail 로그인한 사용자의 이메일
+	 * @param dto           신고 요청 정보
+	 * @return ReportResponseDto 응답 DTO
 	 */
 	@Transactional
-	public ReportResponseDto report(Long reporterId, ReportRequestDto dto) {
-		// 1. 동일한 대상 중복 신고 방지
-		if (reportRepository.existsByReporterIdAndTargetIdAndTargetType(reporterId, dto.getTargetId(), dto.getTargetType())) {
+	public ReportResponseDto report(String reporterEmail, ReportRequestDto dto) {
+
+		// 1. 중복 신고 여부 확인 (이메일 기반)
+		if (reportRepository.existsByReporterEmailAndTargetEmailAndTargetType(
+			reporterEmail, dto.getTargetEmail(), dto.getTargetType())) {
 			throw new CustomRuntimeException(ExceptionCode.ALREADY_REPORTED);
 		}
 
-		// 2. 신고자(Member) 조회
-		Member reporter = memberRepository.findById(reporterId)
+		// 2. 신고자 조회 (이메일은 로그인된 유저 정보)
+		Member reporter = memberRepository.findByEmail(reporterEmail)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		// 2. 신고 대상 조회
+		Member target = memberRepository.findByEmail(dto.getTargetEmail())
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		// 3. 신고 객체 생성 및 저장
 		Report report = Report.builder()
 			.reporter(reporter)
 			.targetType(dto.getTargetType())
-			.targetId(dto.getTargetId())
+			.targetId(target.getId())
+			.targetEmail(dto.getTargetEmail())
 			.reason(dto.getReason())
 			.description(dto.getDescription())
 			.build();
 
+
 		Report savedReport = reportRepository.save(report);
 
-		// 4. 신고 대상이 사용자(USER)일 경우 추가 처리
+		// 4. 신고 대상이 사용자일 경우
 		if (dto.getTargetType() == ReportTargetType.USER) {
-			// 4-1. 신고 대상자 조회
-			Member target = memberRepository.findById(dto.getTargetId())
+
+			Member reportedUser = memberRepository.findByEmail(dto.getTargetEmail())
 				.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-			// 4-2. 신고 즉시 자동 차단 처리
-			BlockRequestDto blockRequestDto = BlockRequestDtoFactory.afterReportBlock(dto.getTargetId());
-			blockService.blockUser(reporterId, blockRequestDto);
+			BlockRequestDto blockRequestDto = new BlockRequestDto(
+				dto.getTargetEmail(),
+				true,
+				true,
+				BlockType.AFTER_REPORT
+			);
+			blockService.blockUser(reporterEmail, blockRequestDto);
 
-			// 4-3. 신고 누적 처리 및 저장
-			target.increaseReportCount();
-			memberRepository.save(target);
+			// 4-3. 신고 누적 횟수 증가
+			reportedUser.increaseReportCount();
+			memberRepository.save(reportedUser);
 		}
 
-		// 5. 신고 완료 응답 반환
-		return new ReportResponseDto("신고가 정상적으로 접수되었습니다.", savedReport.getCreatedAt());
+		// 5. 신고 응답
+		return new ReportResponseDto(savedReport.getCreatedAt());
 	}
 }

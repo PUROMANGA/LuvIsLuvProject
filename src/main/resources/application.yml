@@ -8,9 +8,9 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/${MYSQL_DATABASE}
-    username: ${MYSQL_USERNAME}
-    password: ${MYSQL_PASSWORD}
+    url: jdbc:mysql://localhost:3306/luvisluv
+    username: root
+    password: dkzkfld12#
 
   jpa:
     hibernate:
@@ -52,4 +52,4 @@ logging:
 # 카카오 API Key
 kakao:
   api:
-    key: ${KAKAO_API_KEY}
+    key: "781859a09a11adb97b497246290d70ae"

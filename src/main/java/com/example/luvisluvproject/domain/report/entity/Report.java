@@ -62,4 +62,7 @@ public class Report {
 	 */
 	@Builder.Default
 	private LocalDateTime createdAt = LocalDateTime.now();
+
+	@Column(nullable = true)
+	private String targetEmail;
 }

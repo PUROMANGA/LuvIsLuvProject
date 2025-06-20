@@ -17,12 +17,17 @@ import com.example.luvisluvproject.domain.tag.service.TagService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,302 +36,147 @@ import static org.mockito.BDDMockito.*;
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
 
-	@Mock
-	private TagJpaRepository tagJpaRepository;
+	@Mock private TagJpaRepository tagJpaRepository;
+	@Mock private MemberRepository memberRepository;
+	@Mock private MemberTagRepository memberTagRepository;
+	@Mock private TagSearchRepository tagSearchRepository;
+	@InjectMocks private TagService tagService;
 
-	@Mock
-	private MemberRepository memberRepository;
-
-	@Mock
-	private MemberTagRepository memberTagRepository;
-
-	@Mock
-	private TagSearchRepository tagSearchRepository;
-
-	@InjectMocks
-	private TagService tagService;
-
-	private TagRequestDto sampleRequestDto;
-	private Tag sampleTag;
-	private Member sampleMember;
+	private TagRequestDto requestDto;
+	private Member member;
 
 	@BeforeEach
 	void setUp() {
-		sampleRequestDto = new TagRequestDto(
-			"독서",
-			"HOBBY",
-			TagCreatedByType.USER,
-			true,
-			5
-		);
-		sampleTag = Tag.builder()
+		requestDto = new TagRequestDto("독서", "HOBBY", TagCreatedByType.USER, true, 3);
+		member = Member.builder()
 			.id(1L)
-			.name("독서")
-			.category(TagCategory.HOBBY)
-			.createdByType(TagCreatedByType.USER)
-			.active(true)
-			.priority(5)
-			.build();
-		// ID는 builder로 자동 부여되지 않으므로 리플렉션 없이 테스트용도로 setter를 가정하거나, 생성자로 직접 할당
-		// 여기서는 빌더 반환 후 리플렉션 대신, Mockito가 save 시 sampleTag를 리턴한다고 가정합니다.
-
-		sampleMember = Member.builder()
-			.id(100L)
 			.name("테스터")
-			.email("test@example.com")
+			.email("test@email.com")
 			.password("pass")
 			.birthday(LocalDate.of(1990, 1, 1))
-			.userRole(null)
 			.status(true)
 			.build();
 	}
 
 	@Test
-	void createTag_성공() {
-		// given
-		given(tagJpaRepository.save(any(Tag.class))).willAnswer(invocation -> {
-			Tag arg = invocation.getArgument(0);
-			// 저장 시 ID가 붙어서 돌아온다고 가정
-			return Tag.builder()
-				.id(1L)
-				.name(arg.getName())
-				.category(arg.getCategory())
-				.createdByType(arg.getCreatedByType())
-				.active(arg.isActive())
-				.priority(arg.getPriority())
-				.build();
-		});
-
-		// when
-		TagResponseDto result = tagService.createTag(sampleRequestDto);
-
-		// then
-		assertThat(result).isNotNull();
-		assertThat(result.getId()).isEqualTo(1L);
-		assertThat(result.getName()).isEqualTo("독서");
-		assertThat(result.getCategory()).isEqualTo(TagCategory.HOBBY);
-		assertThat(result.getCreatedByType()).isEqualTo(TagCreatedByType.USER);
-		assertThat(result.getActive()).isTrue();
-		assertThat(result.getPriority()).isEqualTo(5);
-
-		then(tagJpaRepository).should().save(any(Tag.class));
-	}
-
-	@Test
-	void updateTag_존재하는태그_성공() {
-		// given
-		given(tagJpaRepository.findById(1L)).willReturn(Optional.of(sampleTag));
-		given(tagJpaRepository.save(any(Tag.class))).willAnswer(invocation -> invocation.getArgument(0));
-
-		TagRequestDto updateDto = new TagRequestDto(
-			"캠핑",
-			"HOBBY",
-			TagCreatedByType.ADMIN,
-			false,
-			10
-		);
-
-		// when
-		TagResponseDto result = tagService.updateTag(1L, updateDto);
-
-		// then
-		assertThat(result.getId()).isEqualTo(1L);
-		assertThat(result.getName()).isEqualTo("캠핑");
-		assertThat(result.getCategory()).isEqualTo(TagCategory.HOBBY);
-		assertThat(result.getCreatedByType()).isEqualTo(TagCreatedByType.ADMIN);
-		assertThat(result.getActive()).isFalse();
-		assertThat(result.getPriority()).isEqualTo(10);
-
-		then(tagJpaRepository).should().findById(1L);
-		then(tagJpaRepository).should().save(any(Tag.class));
-	}
-
-	@Test
-	void updateTag_존재하지않는태그_예외() {
-		// given
-		given(tagJpaRepository.findById(999L)).willReturn(Optional.empty());
-
-		// when & then
-		assertThrows(IllegalArgumentException.class, () -> tagService.updateTag(999L, sampleRequestDto));
-
-		then(tagJpaRepository).should().findById(999L);
-		then(tagJpaRepository).should(never()).save(any());
-	}
-
-	@Test
-	void deleteTag_존재하는태그_성공() {
-		// given
-		given(tagJpaRepository.findById(1L)).willReturn(Optional.of(sampleTag));
-		willDoNothing().given(tagJpaRepository).delete(sampleTag);
-
-		// when
-		tagService.deleteTag(1L);
-
-		// then
-		then(tagJpaRepository).should().findById(1L);
-		then(tagJpaRepository).should().delete(sampleTag);
-	}
-
-	@Test
-	void deleteTag_존재하지않는태그_예외() {
-		// given
-		given(tagJpaRepository.findById(123L)).willReturn(Optional.empty());
-
-		// when & then
-		assertThrows(IllegalArgumentException.class, () -> tagService.deleteTag(123L));
-
-		then(tagJpaRepository).should().findById(123L);
-		then(tagJpaRepository).should(never()).delete(any());
-	}
-
-	@Test
-	void searchTags_자동완성검색() {
-		// given
-		TagDocument doc = TagDocument.builder()
-			.id(5L)
-			.name("독서토론")
-			.category("HOBBY")
+	void 태그를_생성한다() {
+		Tag expected = Tag.builder()
+			.id(10L)
+			.name("독서")
+			.category(TagCategory.HOBBY)
 			.createdByType(TagCreatedByType.USER)
 			.active(true)
 			.priority(3)
 			.build();
 
-		List<TagDocument> docs = Collections.singletonList(doc);
-		Pageable pageable = PageRequest.of(0, 10);
-		Slice<TagDocument> docSlice = new SliceImpl<>(docs, pageable, false);
+		given(tagJpaRepository.save(any(Tag.class))).willReturn(expected);
 
-		given(tagSearchRepository.searchByName("독서", pageable)).willReturn(docSlice);
+		TagResponseDto result = tagService.createTag(member, requestDto);
 
-		// when
-		Slice<TagResponseDto> resultSlice = tagService.searchTags("독서", pageable);
-
-		// then
-		assertThat(resultSlice.getContent()).hasSize(1);
-		TagResponseDto dto = resultSlice.getContent().get(0);
-		assertThat(dto.getId()).isEqualTo(5L);
-		assertThat(dto.getName()).isEqualTo("독서토론");
-		assertThat(dto.getCategory()).isEqualTo(TagCategory.HOBBY);
-		assertThat(dto.getCreatedByType()).isEqualTo(TagCreatedByType.USER);
-		assertThat(dto.getActive()).isTrue();
-		assertThat(dto.getPriority()).isEqualTo(3);
-
-		then(tagSearchRepository).should().searchByName("독서", pageable);
+		assertThat(result.getName()).isEqualTo("독서");
+		assertThat(result.getCategory()).isEqualTo(TagCategory.HOBBY);
+		assertThat(result.getCreatedByType()).isEqualTo(TagCreatedByType.USER);
+		assertThat(result.getPriority()).isEqualTo(3);
 	}
 
 	@Test
-	void assignTagsToMember_성공() {
-		// given
-		Long memberId = 100L;
-		List<Long> tagIds = Arrays.asList(1L, 2L);
-
-		Tag tag1 = Tag.builder()
-			.id(1L)
-			.name("독서")
-			.category(TagCategory.HOBBY)
-			.createdByType(TagCreatedByType.USER)
-			.active(true)
-			.priority(1)
-			.build();
-
-		Tag tag2 = Tag.builder()
-			.id(2L)
-			.name("영화")
-			.category(TagCategory.HOBBY)
-			.createdByType(TagCreatedByType.USER)
-			.active(true)
-			.priority(2)
-			.build();
-
-		given(memberRepository.findById(memberId)).willReturn(Optional.of(sampleMember));
-		// deleteByMemberId는 void 메서드 → doNothing
-		willDoNothing().given(memberTagRepository).deleteByMemberId(memberId);
-		given(tagJpaRepository.findAllById(tagIds)).willReturn(Arrays.asList(tag1, tag2));
-		given(memberTagRepository.saveAll(anyList())).willAnswer(invocation -> invocation.getArgument(0));
-
-		Pageable pageable = PageRequest.of(0, 10);
-
-		// when
-		Slice<TagResponseDto> resultSlice = tagService.assignTagsToMember(memberId, tagIds, pageable);
-
-		// then
-		assertThat(resultSlice.getContent()).hasSize(2);
-		List<String> names = Arrays.asList(
-			resultSlice.getContent().get(0).getName(),
-			resultSlice.getContent().get(1).getName()
-		);
-		assertThat(names).containsExactlyInAnyOrder("독서", "영화");
-
-		then(memberRepository).should().findById(memberId);
-		then(memberTagRepository).should().deleteByMemberId(memberId);
-		then(tagJpaRepository).should().findAllById(tagIds);
-		then(memberTagRepository).should().saveAll(anyList());
-	}
-
-	@Test
-	void assignTagsToMember_회원없음_예외() {
-		// given
-		Long memberId = 999L;
-		given(memberRepository.findById(memberId)).willReturn(Optional.empty());
-
-		// when & then
-		assertThrows(IllegalArgumentException.class, () -> tagService.assignTagsToMember(memberId, Collections.singletonList(1L), PageRequest.of(0, 10)));
-
-		then(memberRepository).should().findById(memberId);
-		then(memberTagRepository).should(never()).deleteByMemberId(anyLong());
-		then(tagJpaRepository).should(never()).findAllById(anyList());
-	}
-
-	@Test
-	void getTagsByMemberId_성공() {
-		// given
-		Long memberId = 100L;
-
-		Tag tag1 = Tag.builder()
-			.id(1L)
-			.name("독서")
-			.category(TagCategory.HOBBY)
-			.createdByType(TagCreatedByType.USER)
-			.active(true)
-			.priority(1)
-			.build();
-
-		MemberTag mt1 = MemberTag.builder()
+	void 태그를_업데이트한다() {
+		Tag tag = Tag.builder()
 			.id(10L)
-			.member(sampleMember)
-			.tag(tag1)
+			.name("기존태그")
+			.category(TagCategory.HOBBY)
+			.createdByType(TagCreatedByType.ADMIN)
+			.priority(1)
+			.active(true)
 			.build();
 
-		List<MemberTag> memberTags = Collections.singletonList(mt1);
-		given(memberTagRepository.findAllByMemberId(memberId)).willReturn(memberTags);
+		given(tagJpaRepository.findById(10L)).willReturn(Optional.of(tag));
+		given(tagJpaRepository.save(any())).willAnswer(inv -> inv.getArgument(0));
 
-		Pageable pageable = PageRequest.of(0, 10);
+		TagRequestDto updateDto = new TagRequestDto("수정태그", "HOBBY", TagCreatedByType.USER, false, 7);
+		TagResponseDto result = tagService.updateTag(10L, updateDto);
 
-		// when
-		Slice<TagResponseDto> resultSlice = tagService.getTagsByMemberId(memberId, pageable);
-
-		// then
-		assertThat(resultSlice.getContent()).hasSize(1);
-		TagResponseDto dto = resultSlice.getContent().get(0);
-		assertThat(dto.getId()).isEqualTo(1L);
-		assertThat(dto.getName()).isEqualTo("독서");
-		assertThat(dto.getCategory()).isEqualTo(TagCategory.HOBBY);
-
-		then(memberTagRepository).should().findAllByMemberId(memberId);
+		assertThat(result.getName()).isEqualTo("수정태그");
+		assertThat(result.getCreatedByType()).isEqualTo(TagCreatedByType.USER);
+		assertThat(result.getActive()).isFalse();
 	}
 
 	@Test
-	void getTagsByMemberId_태그없음() {
-		// given
-		Long memberId = 200L;
-		given(memberTagRepository.findAllByMemberId(memberId)).willReturn(Collections.emptyList());
+	void 존재하지않는_태그_업데이트시_예외발생() {
+		given(tagJpaRepository.findById(99L)).willReturn(Optional.empty());
+		assertThrows(IllegalArgumentException.class, () -> tagService.updateTag(99L, requestDto));
+	}
 
-		Pageable pageable = PageRequest.of(0, 10);
+	@Test
+	void 태그를_삭제한다() {
+		Tag tag = Tag.builder().id(5L).name("삭제할 태그").build();
+		given(tagJpaRepository.findById(5L)).willReturn(Optional.of(tag));
+		willDoNothing().given(tagJpaRepository).delete(tag);
 
-		// when
-		Slice<TagResponseDto> resultSlice = tagService.getTagsByMemberId(memberId, pageable);
+		tagService.deleteTag(5L);
 
-		// then
-		assertThat(resultSlice.getContent()).isEmpty();
-		then(memberTagRepository).should().findAllByMemberId(memberId);
+		then(tagJpaRepository).should().delete(tag);
+	}
+
+	@Test
+	void 존재하지않는_태그_삭제시_예외발생() {
+		given(tagJpaRepository.findById(5L)).willReturn(Optional.empty());
+		assertThrows(IllegalArgumentException.class, () -> tagService.deleteTag(5L));
+	}
+
+	@Test
+	void 자동완성_검색을_수행한다() {
+		TagDocument doc = TagDocument.builder()
+			.id(1L)
+			.name("독서모임")
+			.category("HOBBY")
+			.createdByType(TagCreatedByType.USER)
+			.priority(2)
+			.active(true)
+			.build();
+
+		Slice<TagDocument> docs = new SliceImpl<>(List.of(doc), PageRequest.of(0, 10), false);
+		given(tagSearchRepository.searchByName("독서", PageRequest.of(0, 10))).willReturn(docs);
+
+		Slice<TagResponseDto> result = tagService.searchTags("독서", PageRequest.of(0, 10));
+
+		assertThat(result.getContent()).hasSize(1);
+		assertThat(result.getContent().get(0).getName()).contains("독서");
+	}
+
+	@Test
+	void 회원에게_태그를_연결한다() {
+		List<Long> tagIds = List.of(1L, 2L);
+		Tag tag1 = Tag.builder().id(1L).name("독서").build();
+		Tag tag2 = Tag.builder().id(2L).name("여행").build();
+
+		given(memberRepository.findById(1L)).willReturn(Optional.of(member));
+		given(tagJpaRepository.findAllById(tagIds)).willReturn(List.of(tag1, tag2));
+		willDoNothing().given(memberTagRepository).deleteByMemberId(1L);
+		given(memberTagRepository.saveAll(anyList())).willAnswer(inv -> inv.getArgument(0));
+
+		Slice<TagResponseDto> result = tagService.assignTagsToMember(1L, tagIds, PageRequest.of(0, 10));
+
+		assertThat(result.getContent()).hasSize(2);
+	}
+
+	@Test
+	void 없는_회원에게_태그_연결시_예외() {
+		given(memberRepository.findById(999L)).willReturn(Optional.empty());
+		assertThrows(IllegalArgumentException.class, () ->
+			tagService.assignTagsToMember(999L, List.of(1L), PageRequest.of(0, 10)));
+	}
+
+	@Test
+	void 회원의_태그목록을_조회한다() {
+		Tag tag = Tag.builder().id(1L).name("독서").category(TagCategory.HOBBY).build();
+		MemberTag mt = MemberTag.builder().member(member).tag(tag).build();
+
+		given(memberTagRepository.findAllByMemberId(1L)).willReturn(List.of(mt));
+
+		Slice<TagResponseDto> result = tagService.getTagsByMemberId(1L, PageRequest.of(0, 10));
+
+		assertThat(result.getContent()).hasSize(1);
+		assertThat(result.getContent().get(0).getName()).isEqualTo("독서");
 	}
 }

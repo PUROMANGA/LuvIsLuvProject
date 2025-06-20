@@ -203,6 +203,12 @@ public class AuthService {
 			throw new CustomRuntimeException(ExceptionCode.LOGIN_FAILED);
 		}
 
+		// 활동 제한 여부 확인
+		// restrictedUntil이 현재 시간 이후이면 활동이 제한된 상태로 간주
+		if (member.isRestricted()) {
+			throw new CustomRuntimeException(ExceptionCode.RESTRICTED_MEMBER);
+		}
+
 		// 맞으면 토큰 발급
 		String accessToken = jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
 		String refreshToken = jwtUtil.createRefreshToken(member.getEmail());

@@ -1,16 +1,16 @@
 package com.example.luvisluvproject.domain.report.controller;
 
-import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.report.dto.ReportRequestDto;
 import com.example.luvisluvproject.domain.report.dto.ReportResponseDto;
 import com.example.luvisluvproject.domain.report.service.ReportService;
+import com.example.luvisluvproject.global.common.AuthUser;
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import com.example.luvisluvproject.global.success.ApiResponse;
-import com.example.luvisluvproject.global.success.SuccessCode;
 
 /**
  * ReportController
@@ -27,16 +27,16 @@ public class ReportController {
 	 * [POST] /reports
 	 * 신고를 생성합니다.
 	 *
-	 * @param member 로그인한 사용자
-	 * @param dto 신고 요청 정보
-	 * @return 신고 응답 정보
+	 * - 로그인한 사용자 정보는 AuthUser로부터 추출
+	 * - 이메일 기반으로 내부 로직 처리
+	 * - 성공 응답은 SuccessCode만 포함된 ApiResponse 형식
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<ReportResponseDto>> report(
-		@AuthenticationPrincipal Member member,
+		@AuthenticationPrincipal AuthUser authUser,
 		@RequestBody ReportRequestDto dto
 	) {
-		ReportResponseDto response = reportService.report(member.getId(), dto);
-		return ResponseEntity.status(201).body(ApiResponse.of(SuccessCode.CREATE_REPORT_SUCCESS, response));
+		ReportResponseDto response = reportService.report(authUser.getMember().getEmail(), dto);
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.CREATE_REPORT_SUCCESS, response));
 	}
 }

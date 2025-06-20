@@ -3,7 +3,6 @@ package com.example.luvisluvproject.domain.tag.service;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.tag.document.TagDocument;
-import com.example.luvisluvproject.domain.tag.dto.CachedTagDto;
 import com.example.luvisluvproject.domain.tag.dto.TagRequestDto;
 import com.example.luvisluvproject.domain.tag.dto.TagResponseDto;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
@@ -20,15 +19,11 @@ import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-/**
- * 태그 관련 비즈니스 로직을 처리하는 서비스 클래스
- */
 @Service
 @RequiredArgsConstructor
 public class TagService {
@@ -38,27 +33,25 @@ public class TagService {
 	private final MemberTagRepository memberTagRepository;
 	private final TagSearchRepository tagSearchRepository;
 
-	private final RedisTemplate<String, CachedTagDto> cachedTagRedisTemplate;
-	private static final String REDIS_TAG_QUEUE = "pending:tags";
-
 	/**
-	 * 유저가 태그 생성 시, 태그 정보를 Redis에 임시 저장
+	 * 유저가 태그 생성 시, 바로 DB 저장
 	 */
-	public void cacheTagRequest(Member member, TagRequestDto dto) {
-		CachedTagDto cached = CachedTagDto.builder()
+	@Transactional
+	public TagResponseDto createTag(Member member, TagRequestDto dto) {
+		Tag tag = Tag.builder()
 			.name(dto.getName())
-			.category(dto.getCategory())
-			.createdByType(dto.getCreatedByType().name())
+			.category(TagCategory.from(dto.getCategory()))
+			.createdByType(dto.getCreatedByType())
 			.active(dto.isActive())
 			.priority(dto.getPriority())
-			.memberId(member.getId())
 			.build();
 
-		cachedTagRedisTemplate.opsForList().rightPush(REDIS_TAG_QUEUE, cached);
+		Tag saved = tagJpaRepository.save(tag);
+		return TagResponseDto.from(saved);
 	}
 
 	/**
-	 * 태그 정보 수정
+	 * 태그 수정
 	 */
 	@Transactional
 	public TagResponseDto updateTag(Long tagId, TagRequestDto requestDto) {
@@ -79,6 +72,7 @@ public class TagService {
 	/**
 	 * 태그 삭제
 	 */
+	@Transactional
 	public void deleteTag(Long tagId) {
 		Tag tag = tagJpaRepository.findById(tagId)
 			.orElseThrow(() -> new IllegalArgumentException("해당 태그를 찾을 수 없습니다."));
@@ -88,6 +82,7 @@ public class TagService {
 	/**
 	 * 자동완성 태그 검색 (Elasticsearch prefix 기반)
 	 */
+	@Transactional(readOnly = true)
 	public Slice<TagResponseDto> searchTags(String keyword, Pageable pageable) {
 		Slice<TagDocument> documents = tagSearchRepository.searchByName(keyword, pageable);
 		List<TagResponseDto> tagDtos = documents.stream()
@@ -131,6 +126,7 @@ public class TagService {
 	/**
 	 * 특정 사용자가 선택한 태그 목록 조회
 	 */
+	@Transactional(readOnly = true)
 	public Slice<TagResponseDto> getTagsByMemberId(Long memberId, Pageable pageable) {
 		Page<MemberTag> page = memberTagRepository.findByMemberId(memberId, pageable);
 
@@ -140,18 +136,4 @@ public class TagService {
 
 		return new SliceImpl<>(dtoList, pageable, page.hasNext());
 	}
-
-	public TagResponseDto createTag(TagRequestDto requestDto) {
-		Tag tag = Tag.builder()
-			.name(requestDto.getName())
-			.category(TagCategory.from(requestDto.getCategory()))
-			.createdByType(requestDto.getCreatedByType())
-			.active(requestDto.isActive())
-			.priority(requestDto.getPriority())
-			.build();
-
-		Tag saved = tagJpaRepository.save(tag);
-		return TagResponseDto.from(saved);
-	}
-
 }

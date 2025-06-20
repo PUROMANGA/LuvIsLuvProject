@@ -81,6 +81,13 @@ public class MemberService {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
+		// ================= [외부 도메인 호출 주의] =================
+		// 아래 로직은 BlockService의 차단 여부 검사 메서드를 호출합니다.
+		// 'viewer'가 보고자 하는 'targetMember'의 프로필에 접근할 수 있는지 확인합니다.
+		// 이때 BlockService는 "targetMember가 viewer를 차단했는가?"를 기준으로 판단합니다.
+		// 즉, viewer 입장에서는 본인이 target에게 차단당했는지를 검사하는 구조입니다.
+		// 만약 차단 상태(blockUserAccess == true)라면 접근을 차단하고 예외를 발생시킵니다.
+		// ==========================================================
 		if (blockService.isProfileBlocked(viewer, targetMember)) {
 			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
 		}

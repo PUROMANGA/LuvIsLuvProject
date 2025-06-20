@@ -15,9 +15,4 @@ public class UnblockResponseDto {
 	 * 차단 해제된 사용자 ID
 	 */
 	private Long unblockedUserId;
-
-	/**
-	 * 결과 메시지 (예: "차단을 해제했습니다.")
-	 */
-	private String message;
 }

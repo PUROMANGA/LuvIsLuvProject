@@ -20,6 +20,7 @@ public enum ExceptionCode implements ErrorCode {
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
 	UNDERAGE_USER(HttpStatus.FORBIDDEN, "만 19세 미만은 이용할 수 없습니다."),
 	INVALID_BIRTHDAY_IN_FUTURE(HttpStatus.BAD_REQUEST, "생일은 미래 날짜로 설정할 수 없습니다."),
+	RESTRICTED_MEMBER(HttpStatus.FORBIDDEN, "해당 사용자는 현재 활동이 제한되어 있습니다."),
 
 	//가게
 	STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 가게를 찾을 수 없습니다."),
