@@ -16,4 +16,6 @@ public class SignupResponseDto {
 	private final String email;
 	private final LocalDate birthday;
 	private final UserRole userRole;
+
+
 }

@@ -3,6 +3,8 @@ package com.example.luvisluvproject.domain.member.dto;
 import java.time.LocalDate;
 import java.time.Period;
 
+import com.example.luvisluvproject.domain.member.entity.Member;
+
 import lombok.Getter;
 
 @Getter
@@ -25,5 +27,12 @@ public class MemberFindResponse {
 
 	private int calculateAge(LocalDate birthday) {
 		return Period.between(birthday, LocalDate.now()).getYears();
+	}
+
+	public MemberFindResponse(Member member) {
+		this.userId = member.getId();
+		this.name = member.getName();
+		this.age = calculateAge(member.getBirthday());
+		this.content = member.getContent();
 	}
 }

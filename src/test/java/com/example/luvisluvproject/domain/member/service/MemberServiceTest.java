@@ -16,8 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberMyProfileResponse;
-import com.example.luvisluvproject.domain.member.dto.MemberUpdateContentRequest;
-import com.example.luvisluvproject.domain.member.dto.MemberUpdatePasswordRequest;
+import com.example.luvisluvproject.domain.member.dto.MemberUpdateProfile;
+import com.example.luvisluvproject.domain.member.dto.MemberPasswordRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.enums.UserRole;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -106,7 +106,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("비밀번호 변경 성공")
 	void updatePasswordMember_Success() {
-		MemberUpdatePasswordRequest request = new MemberUpdatePasswordRequest("oldPassword", "newPassword");
+		MemberPasswordRequest request = new MemberPasswordRequest("oldPassword", "newPassword");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
 		when(passwordEncoder.matches("oldPassword", activeMember.getPassword())).thenReturn(true);
@@ -120,7 +120,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("비밀번호 변경 실패 - 회원 없음")
 	void updatePasswordMember_MemberNotFound() {
-		MemberUpdatePasswordRequest request = new MemberUpdatePasswordRequest("oldPassword", "newPassword");
+		MemberPasswordRequest request = new MemberPasswordRequest("oldPassword", "newPassword");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -133,7 +133,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("비밀번호 변경 실패 - 탈퇴 회원")
 	void updatePasswordMember_MemberDeleted() {
-		MemberUpdatePasswordRequest request = new MemberUpdatePasswordRequest("oldPassword", "newPassword");
+		MemberPasswordRequest request = new MemberPasswordRequest("oldPassword", "newPassword");
 
 		when(memberRepository.findById(2L)).thenReturn(Optional.of(deletedMember));
 
@@ -146,7 +146,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("비밀번호 변경 실패 - 이전 비밀번호 불일치")
 	void updatePasswordMember_PasswordMismatch() {
-		MemberUpdatePasswordRequest request = new MemberUpdatePasswordRequest("wrongOldPassword", "newPassword");
+		MemberPasswordRequest request = new MemberPasswordRequest("wrongOldPassword", "newPassword");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
 		when(passwordEncoder.matches("wrongOldPassword", activeMember.getPassword())).thenReturn(false);
@@ -160,7 +160,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("비밀번호 변경 실패 - 새 비밀번호가 이전과 동일")
 	void updatePasswordMember_SamePassword() {
-		MemberUpdatePasswordRequest request = new MemberUpdatePasswordRequest("samePassword", "samePassword");
+		MemberPasswordRequest request = new MemberPasswordRequest("samePassword", "samePassword");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
 		when(passwordEncoder.matches("samePassword", activeMember.getPassword())).thenReturn(true);
@@ -227,7 +227,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("자기소개 수정 성공")
 	void updateContentMember_Success() {
-		MemberUpdateContentRequest request = new MemberUpdateContentRequest("새 자기소개");
+		MemberUpdateProfile request = new MemberUpdateProfile("새 자기소개");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
 
@@ -239,7 +239,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("자기소개 수정 실패 - 회원 없음")
 	void updateContentMember_MemberNotFound() {
-		MemberUpdateContentRequest request = new MemberUpdateContentRequest("자기소개");
+		MemberUpdateProfile request = new MemberUpdateProfile("자기소개");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -252,7 +252,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("자기소개 수정 실패 - 탈퇴 회원")
 	void updateContentMember_MemberDeleted() {
-		MemberUpdateContentRequest request = new MemberUpdateContentRequest("자기소개");
+		MemberUpdateProfile request = new MemberUpdateProfile("자기소개");
 
 		when(memberRepository.findById(2L)).thenReturn(Optional.of(deletedMember));
 
@@ -265,7 +265,7 @@ class MemberServiceTest {
 	@Test
 	@DisplayName("자기소개 수정 실패 - 동일한 내용")
 	void updateContentMember_SameContent() {
-		MemberUpdateContentRequest request = new MemberUpdateContentRequest("기존 자기소개");
+		MemberUpdateProfile request = new MemberUpdateProfile("기존 자기소개");
 
 		when(memberRepository.findById(1L)).thenReturn(Optional.of(activeMember));
 

@@ -6,8 +6,6 @@ import com.example.luvisluvproject.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 /**
  * Block
  * 사용자 간 차단 관계를 나타내는 엔티티
@@ -17,6 +15,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "blocks")
 public class Block extends BaseEntity {
 
 	@Id

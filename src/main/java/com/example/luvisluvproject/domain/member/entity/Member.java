@@ -30,7 +30,6 @@ import lombok.ToString;
 @Table(name = "members")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString(of = {"name", "email"})
 public class Member extends BaseEntity {
 	@Id
@@ -79,16 +78,10 @@ public class Member extends BaseEntity {
 	}
 
 	/**
-	 * 비밀번호 수정
+	 * 회원정보수정
 	 */
-	public void updatePassword(String password) {
+	public void updateProfile(String password, String content) {
 		this.password = password;
-	}
-
-	/**
-	 * 내용 수정
-	 */
-	public void updateContent(String content) {
 		this.content = content;
 	}
 
