@@ -1,6 +1,8 @@
 package com.example.luvisluvproject.domain.report.entity;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.global.common.BaseEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,10 +14,9 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class Report {
+public class Report extends BaseEntity {
 
 	/**
 	 * 신고 고유 ID (PK)
@@ -32,17 +33,11 @@ public class Report {
 	private Member reporter;
 
 	/**
-	 * 신고 대상 타입 (USER 또는 MESSAGE)
+	 * 신고 대상자 (Member 엔티티와 연관)
 	 */
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private ReportTargetType targetType;
-
-	/**
-	 * 신고 대상의 ID (사용자 ID 또는 메시지 ID 등)
-	 */
-	@Column(nullable = false)
-	private Long targetId;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "reported_id", nullable = false)
+	private Member reported;
 
 	/**
 	 * 신고 사유 (욕설, 스팸 등)
@@ -57,9 +52,10 @@ public class Report {
 	@Column(columnDefinition = "TEXT")
 	private String description;
 
-	/**
-	 * 신고 생성 시간
-	 */
-	@Builder.Default
-	private LocalDateTime createdAt = LocalDateTime.now();
+	public Report(Member reporter, Member reported, ReportReason reason, String description) {
+		this.reporter = reporter;
+		this.reported = reported;
+		this.reason = reason;
+		this.description = description;
+	}
 }

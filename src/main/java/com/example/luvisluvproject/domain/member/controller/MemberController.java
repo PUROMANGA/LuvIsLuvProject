@@ -45,9 +45,8 @@ public class MemberController {
 	 */
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<MemberMyProfileResponse>> findMyInfo(
-		@AuthenticationPrincipal AuthUser authUser
-	) {
-		MemberMyProfileResponse profileResponse = memberService.getMyProfile(authUser.getId());
+		@AuthenticationPrincipal AuthUser authUser) {
+		MemberMyProfileResponse profileResponse = memberService.getMyProfile(authUser.getUsername());
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profileResponse));
 	}
 
@@ -63,11 +62,8 @@ public class MemberController {
 	@GetMapping("/{memberId}/profile")
 	public ResponseEntity<ApiResponse<MemberFindResponse>> getProfile(
 		@AuthenticationPrincipal AuthUser authUser,
-		@PathVariable Long memberId
-	) {
-		Member viewer = authUser.getMember();
-		MemberFindResponse profile = memberService.getMemberProfile(memberId, viewer);
-
+		@PathVariable Long memberId) {
+		MemberFindResponse profile = memberService.getMemberProfile(authUser.getUsername(), memberId);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.FIND_MEMBER_SUCCESS, profile));
 	}
 

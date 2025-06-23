@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.block.repository.BlockRepository;
 import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
@@ -35,6 +36,7 @@ public class MemberService {
 	private final TagJpaRepository tagJpaRepository;
 	private final MemberTagRepository memberTagRepository;
 	private final BlockService blockService;
+	private final BlockRepository blockRepository;
 
 	/**
 	 * 회원 자신의 프로필 정보를 조회합니다.
@@ -45,21 +47,15 @@ public class MemberService {
 	 * @throws CustomRuntimeException 회원이 존재하지 않거나 탈퇴한 경우
 	 */
 	@Transactional(readOnly = true)
-	public MemberMyProfileResponse getMyProfile(Long memberId) {
-		Member member = memberRepository.findById(memberId)
+	public MemberMyProfileResponse getMyProfile(String email) {
+		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
 		if (member.isStatus()) {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
-		return new MemberMyProfileResponse(
-			member.getId(),
-			member.getName(),
-			member.getEmail(),
-			member.getBirthday(),
-			member.getContent()
-		);
+		return new MemberMyProfileResponse(member);
 	}
 
 	/**
@@ -73,15 +69,18 @@ public class MemberService {
 	 * @throws CustomRuntimeException 회원이 존재하지 않거나 탈퇴했거나, 차단된 경우
 	 */
 	@Transactional(readOnly = true)
-	public MemberFindResponse getMemberProfile(Long targetMemberId, Member viewer) {
-		Member targetMember = memberRepository.findById(targetMemberId)
+	public MemberFindResponse getMemberProfile(String email, Long userId) {
+		Member member = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
+
+		Member targetMember = memberRepository.findById(userId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
 		if (targetMember.isStatus()) {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
-		if (blockService.isProfileBlocked(viewer, targetMember)) {
+		if (blockRepository.existsByBlockerAndBlocked(member, targetMember)) {
 			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
 		}
 

@@ -5,8 +5,13 @@ import java.util.Base64;
 import java.util.Date;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+
+import com.example.luvisluvproject.global.common.UserDetailsServiceImpl;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -24,7 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 @RequiredArgsConstructor
 public class JwtUtil {
-
+	private final UserDetailsServiceImpl userDetailsService;
 	private static final String BEARER_PREFIX = "Bearer ";
 
 	@Value("${jwt.accessToken.time}")
@@ -114,5 +119,14 @@ public class JwtUtil {
 		token = token.substring(7);
 		Claims claims = extractClaims(token);
 		return claims.getSubject();
+	}
+
+	public Authentication getAuthentication(String token) {
+		String email = getEmail(token); // = subject
+		UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+		return new UsernamePasswordAuthenticationToken(
+			userDetails, null, userDetails.getAuthorities()
+		);
 	}
 }

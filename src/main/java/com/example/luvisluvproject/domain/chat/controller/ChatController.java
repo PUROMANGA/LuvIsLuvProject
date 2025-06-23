@@ -2,21 +2,20 @@ package com.example.luvisluvproject.domain.chat.controller;
 
 import static org.springframework.data.domain.Sort.Direction.*;
 
+import java.security.Principal;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoom;
-import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoomCount;
 import com.example.luvisluvproject.domain.chat.dto.ResponseMessageDto;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
 import com.example.luvisluvproject.domain.chat.dto.MessageDto;
@@ -39,8 +38,10 @@ public class ChatController {
 	 */
 	@MessageMapping("/chats/message")
 	public void handleMessage(MessageDto messageDto,
-		@Header("Authorization") String token) {
-		chatService.sendMessage(messageDto, token);
+		Principal principal) {
+		// @Header("Authorization") String token) {
+		System.out.println("📥 메시지 핸들러 진입! = " + messageDto);
+		chatService.sendMessage(messageDto, principal.getName());
 	}
 
 	/**
@@ -53,7 +54,8 @@ public class ChatController {
 	public ResponseEntity<ApiResponse<Slice<ResponseChatRoom>>> getAllChatRoom(
 		@AuthenticationPrincipal AuthUser member,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
-		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK, chatService.getAllChatRoomService(member.getUsername(), pageable));
+		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
+			chatService.getAllChatRoomService(member.getUsername(), pageable));
 		return ResponseEntity.ok(apiResponse);
 	}
 
@@ -70,7 +72,8 @@ public class ChatController {
 		@AuthenticationPrincipal AuthUser member,
 		@PathVariable Long chatId,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
-		return ResponseEntity.ok(ApiResponse.of(SuccessCode.SUCCESS_OK, chatService.getAndCheckMessage(member.getUsername(), chatId, pageable)));
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.SUCCESS_OK,
+			chatService.getAndCheckMessage(member.getUsername(), chatId, pageable)));
 	}
 
 	/**

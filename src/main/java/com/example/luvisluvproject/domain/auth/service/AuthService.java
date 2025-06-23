@@ -84,7 +84,7 @@ public class AuthService {
 		long expiration = jwtUtil.getExpiration(refreshToken);
 
 		redisTemplate.opsForValue().set(member.getEmail(), refreshToken, expiration, TimeUnit.MILLISECONDS);
-		return new LoginResponseDto("Bearer " + accessToken, "Bearer " + refreshToken);
+		return new LoginResponseDto(member.getId(), "Bearer " + accessToken, "Bearer " + refreshToken);
 	}
 
 	/**

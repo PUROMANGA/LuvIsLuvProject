@@ -23,7 +23,7 @@ import com.example.luvisluvproject.global.success.SuccessCode;
  * 사용자용 태그 기능 API
  */
 @RestController
-@RequestMapping("/tags")
+@RequestMapping
 @RequiredArgsConstructor
 public class TagController {
 

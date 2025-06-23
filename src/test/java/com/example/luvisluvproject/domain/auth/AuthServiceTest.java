@@ -59,7 +59,7 @@ public class AuthServiceTest {
 			"park1@email.com",
 			"Test1234!",
 			LocalDate.of(2000, 1, 1),
-			"USER");
+			UserRole.USER);
 
 		Member member = new Member(
 			1L,

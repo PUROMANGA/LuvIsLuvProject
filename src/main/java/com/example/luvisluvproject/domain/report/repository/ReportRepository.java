@@ -1,7 +1,7 @@
 package com.example.luvisluvproject.domain.report.repository;
 
 import com.example.luvisluvproject.domain.report.entity.Report;
-import com.example.luvisluvproject.domain.report.entity.ReportTargetType;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

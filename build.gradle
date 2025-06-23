@@ -78,6 +78,12 @@ dependencies {
     // 엘라스틱서치
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'co.elastic.clients:elasticsearch-java:8.12.1'
+
+    //스프링부트actuator
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    //프로메테우스
+    implementation 'io.micrometer:micrometer-registry-prometheus'
 }
 
 tasks.named('test') {

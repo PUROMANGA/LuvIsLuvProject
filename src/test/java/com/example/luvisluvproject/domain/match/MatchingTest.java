@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
+import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomRepository;
 import com.example.luvisluvproject.domain.match.dto.MatchMemberDto;
 import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
 import com.example.luvisluvproject.domain.match.service.MatchService;
@@ -50,9 +51,12 @@ public class MatchingTest {
 
 	@Autowired
 	private ChatRoomRepository chatRoomRepository;
+	@Autowired
+	private MemberChatRoomRepository memberChatRoomRepository;
 
 	@BeforeEach
 	public void setUp() {
+		memberChatRoomRepository.deleteAll();
 		chatRoomRepository.deleteAll();
 		memberRepository.deleteAll();
 		tagJpaRepository.deleteAll();
@@ -136,7 +140,7 @@ public class MatchingTest {
 
 		assertThat(matches).isNotNull();
 		long end = System.currentTimeMillis();
-		log.info("매칭 된 사람들: {}", matches.toString());
+		log.info("매칭 된 사람들: {}", matches);
 		log.info("실행 시간: {} ms", (end - start));
 	}
 

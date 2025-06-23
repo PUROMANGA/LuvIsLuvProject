@@ -34,6 +34,7 @@ public class TagService {
 	/**
 	 * 태그 등록
 	 */
+	@Transactional
 	public void createTag(List<TagRequestDto> requestDtos, String email) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));

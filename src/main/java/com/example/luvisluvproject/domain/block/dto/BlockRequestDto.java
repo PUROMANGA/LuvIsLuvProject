@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.block.dto;
 
+import com.example.luvisluvproject.domain.block.common.BlockType;
 import com.example.luvisluvproject.domain.block.entity.Block;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,18 +21,8 @@ public class BlockRequestDto {
 	private Long blockedId;
 
 	/**
-	 * 프로필 접근 차단 여부
-	 */
-	private boolean blockUserAccess;
-
-	/**
-	 * 매칭 시스템에서 제외 여부
-	 */
-	private boolean excludeFromMatching;
-
-	/**
 	 * 차단 유형 (MANUAL, AFTER_REPORT, SYSTEM)
 	 * enum을 직접 사용함으로써 타입 안정성과 오타 방지 효과
 	 */
-	private Block.BlockType blockType;
+	private BlockType blockType;
 }

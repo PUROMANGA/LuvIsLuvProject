@@ -2,10 +2,12 @@ package com.example.luvisluvproject.domain.chat.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,23 +42,30 @@ public class ChatService {
 	private final MessageRepository messageRepository;
 	private final MemberChatRoomRepository memberChatRoomRepository;
 	private final RedisPublisher redisPublisher;
-	private final JwtUtil jwtUtil;
+	private final Map<String, String> stompToWebSocketMap;
+	private final RedisTemplate<String, Object> redisTemplate;
 
 	/**
 	 * chats/message에 프론트에서 입력된 메세지를 발행
 	 * @param messageDto
 	 */
 	@Transactional
-	public void sendMessage(MessageDto messageDto, String token) {
-		String email = jwtUtil.getEmail(token);
+	public void sendMessage(MessageDto messageDto, String email) {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
 		messageDto.setUserId(me.getId());
 		messageDto.setSenderName(me.getName());
 		Message message = new Message(messageDto);
 		Message saved = messageRepository.save(message);
+
+		String webSocketSessionId = stompToWebSocketMap.get(email);
+		if(redisTemplate.opsForSet().members(webSocketSessionId) == null) {
+			messageRepository.save(saved);
+		}
+
 		System.out.println("✅ 저장된 메시지 ID: " + saved.getId());
-		System.out.println("🕒 생성 시간: " + saved.getCreatTime()); // 또는 createdTime
+		System.out.println("🕒 생성 시간: " + saved.getCreatTime());
 		redisPublisher.publish(messageDto);
 	}
 

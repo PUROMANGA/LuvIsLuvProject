@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.block.dto;
 
-import lombok.AllArgsConstructor;
+import com.example.luvisluvproject.domain.block.entity.Block;
+
 import lombok.Getter;
 
 /**
@@ -8,21 +9,26 @@ import lombok.Getter;
  * 사용자가 차단한 사용자 정보를 응답으로 제공할 때 사용하는 DTO
  */
 @Getter
-@AllArgsConstructor
 public class BlockUserDto {
 
 	/**
 	 * 차단된 사용자의 ID
 	 */
-	private Long id;
+	private Long blockedId;
 
 	/**
 	 * 차단된 사용자의 이름
 	 */
-	private String name;
+	private String blockedUserName;
 
 	/**
 	 * 차단된 사용자의 이메일
 	 */
-	private String email;
+	private String blockedUserEmail;
+
+	public BlockUserDto(Block block) {
+		this.blockedId = block.getBlocked().getId();
+		this.blockedUserName = block.getBlocked().getName();
+		this.blockedUserEmail = block.getBlocked().getEmail();
+	}
 }

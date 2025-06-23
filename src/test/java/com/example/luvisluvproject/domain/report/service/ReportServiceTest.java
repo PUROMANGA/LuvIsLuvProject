@@ -8,7 +8,6 @@ import com.example.luvisluvproject.domain.report.dto.ReportRequestDto;
 import com.example.luvisluvproject.domain.report.dto.ReportResponseDto;
 import com.example.luvisluvproject.domain.report.entity.Report;
 import com.example.luvisluvproject.domain.report.entity.ReportReason;
-import com.example.luvisluvproject.domain.report.entity.ReportTargetType;
 import com.example.luvisluvproject.domain.report.repository.ReportRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;

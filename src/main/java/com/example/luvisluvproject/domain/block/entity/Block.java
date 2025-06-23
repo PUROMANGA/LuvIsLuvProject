@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.block.entity;
 
+import com.example.luvisluvproject.domain.block.common.BlockType;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 import jakarta.persistence.*;
@@ -14,12 +15,9 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Block extends BaseEntity {
-
-	private boolean excludeFromMatching;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,31 +50,25 @@ public class Block extends BaseEntity {
 	private boolean blockUserAccess;
 
 	/**
-	 * 차단 해제 여부 (Soft delete 방식)
+	 * 매칭 차단 여부
 	 */
-	@Builder.Default
-	private boolean unblocked = false;
+	private boolean excludeFromMatching;
 
-	/**
-	 * 차단 해제된 시각 (null이면 해제되지 않음)
-	 */
-	private LocalDateTime unblockedAt;
-
-	/**
-	 * 차단 해제 처리 메서드
-	 * unblocked → true, 해제 시각 기록
-	 */
-	public void unblock() {
-		this.unblocked = true;
-		this.unblockedAt = LocalDateTime.now();
+	public Block(Member blocker, Member blocked, BlockType blockType, boolean blockUserAccess,
+		boolean excludeFromMatching) {
+		this.blocker = blocker;
+		this.blocked = blocked;
+		this.blockType = blockType;
+		this.blockUserAccess = blockUserAccess;
+		this.excludeFromMatching = excludeFromMatching;
 	}
 
-	/**
-	 * 차단 유형 enum
-	 */
-	public enum BlockType {
-		MANUAL,        // 사용자가 직접 차단
-		AFTER_REPORT,  // 신고 후 자동 차단
-		SYSTEM         // 시스템/관리자 차단
-	}
+	// /**
+	//  * 차단 해제 처리 메서드
+	//  * unblocked → true, 해제 시각 기록
+	//  */
+	// public void unblock() {
+	// 	this.unblocked = true;
+	// 	this.unblockedAt = LocalDateTime.now();
+	// }
 }

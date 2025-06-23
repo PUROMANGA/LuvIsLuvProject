@@ -5,6 +5,8 @@ import lombok.Getter;
 
 import java.time.LocalDateTime;
 
+import com.example.luvisluvproject.domain.report.entity.Report;
+
 /**
  * ReportResponseDto
  * 신고 처리 완료 후 클라이언트에게 반환하는 응답 DTO
@@ -12,14 +14,11 @@ import java.time.LocalDateTime;
 @Getter
 @AllArgsConstructor
 public class ReportResponseDto {
+	private Long reportedId;
+	private String reportedName;
 
-	/**
-	 * 처리 결과 메시지 (예: "신고가 정상적으로 접수되었습니다.")
-	 */
-	private String message;
-
-	/**
-	 * 신고가 접수된 시각
-	 */
-	private LocalDateTime createdAt;
+	public ReportResponseDto(Report report) {
+		this.reportedId = report.getReported().getId();
+		this.reportedName = report.getReported().getName();
+	}
 }

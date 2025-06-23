@@ -14,7 +14,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -48,6 +48,17 @@ logging:
     root: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  server:
+    port: 9292
+  health:
+    elasticsearch:
+      enabled: false
 
 # 카카오 API Key
 kakao:
