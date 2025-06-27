@@ -1,5 +1,22 @@
 package com.example.luvisluvproject.domain.store.service;
 
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.BDDMockito.anyString;
+import static org.mockito.BDDMockito.*;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
 import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
 import com.example.luvisluvproject.domain.store.dto.response.StoreResponse;
@@ -11,19 +28,6 @@ import com.example.luvisluvproject.domain.store.infra.dto.KakaoAddressResponse;
 import com.example.luvisluvproject.domain.store.repository.StoreRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
-
-import org.junit.jupiter.api.*;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.*;
 
 class StoreServiceTest {
 
@@ -154,7 +158,8 @@ class StoreServiceTest {
 
 			given(storeRepository.findById(invalidId)).willReturn(Optional.empty());
 
-			assertThatThrownBy(() -> storeService.updateStore(invalidId, request)).isInstanceOf(CustomRuntimeException.class)
+			assertThatThrownBy(() -> storeService.updateStore(invalidId, request)).isInstanceOf(
+					CustomRuntimeException.class)
 				.hasMessage(ExceptionCode.STORE_NOT_FOUND.getMessage());
 
 			verify(storeRepository).findById(invalidId);

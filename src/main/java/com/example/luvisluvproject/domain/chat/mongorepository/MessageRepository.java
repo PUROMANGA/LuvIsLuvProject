@@ -10,6 +10,8 @@ import com.example.luvisluvproject.domain.chat.entity.Message;
 
 public interface MessageRepository extends MongoRepository<Message, Long> {
 	Slice<Message> findAllByChatRoomId(Long chatId, Pageable pageable);
+
 	Optional<Message> findFirstByChatRoomIdOrderByCreatTimeDesc(Long chatRoomId);
+
 	Boolean existsByChatRoomId(Long chatRoomId);
 }

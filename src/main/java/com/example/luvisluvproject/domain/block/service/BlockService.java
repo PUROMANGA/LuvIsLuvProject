@@ -1,6 +1,10 @@
 package com.example.luvisluvproject.domain.block.service;
 
-import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.luvisluvproject.domain.block.dto.BlockResponseDto;
 import com.example.luvisluvproject.domain.block.dto.BlockUserDto;
 import com.example.luvisluvproject.domain.block.entity.Block;
@@ -11,11 +15,6 @@ import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -28,26 +27,24 @@ public class BlockService {
 	 * 사용자 차단
 	 */
 	@Transactional
-	public BlockResponseDto blockUser(String email, BlockRequestDto dto) {
+	public BlockResponseDto blockUser(String email, Long userId) {
 
 		Member blocker = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		if (blocker.getId().equals(dto.getBlockedId())) {
+		if (blocker.getId().equals(userId)) {
 			throw new CustomRuntimeException(ExceptionCode.CANNOT_BLOCK_SELF);
 		}
 
-		Member blocked = memberRepository.findById(dto.getBlockedId())
+		Member blocked = memberRepository.findById(userId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
 			throw new CustomRuntimeException(ExceptionCode.ALREADY_BLOCKED);
 		}
 
-		Block block = new Block(blocker, blocked, dto.getBlockType(), true, true);
-
+		Block block = new Block(blocker, blocked);
 		blockRepository.save(block);
-
 		return new BlockResponseDto(block);
 	}
 
@@ -76,6 +73,12 @@ public class BlockService {
 		Member blocker = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		return blockRepository.findAllByBlocker(blocker, pageable).map(BlockUserDto::new);
+		Slice<BlockUserDto> blockUserDtos = blockRepository.findAllByBlocker(blocker, pageable).map(BlockUserDto::new);
+
+		if (blockUserDtos.isEmpty()) {
+			throw new CustomRuntimeException(ExceptionCode.BLOCK_NOT_FOUND);
+		}
+
+		return blockUserDtos;
 	}
 }

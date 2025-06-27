@@ -1,17 +1,20 @@
 package com.example.luvisluvproject.domain.report.controller;
 
-import com.example.luvisluvproject.domain.member.entity.Member;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.luvisluvproject.domain.report.dto.ReportRequestDto;
 import com.example.luvisluvproject.domain.report.dto.ReportResponseDto;
 import com.example.luvisluvproject.domain.report.service.ReportService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
 import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * ReportController

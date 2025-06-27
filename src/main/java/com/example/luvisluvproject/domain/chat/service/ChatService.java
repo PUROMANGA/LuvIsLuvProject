@@ -1,30 +1,30 @@
 package com.example.luvisluvproject.domain.chat.service;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.luvisluvproject.domain.chat.common.ChatHandler;
+import com.example.luvisluvproject.domain.chat.dto.ChatEnterRequest;
+import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoom;
-import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoomCount;
 import com.example.luvisluvproject.domain.chat.dto.ResponseMessageDto;
 import com.example.luvisluvproject.domain.chat.entity.ChatRoom;
 import com.example.luvisluvproject.domain.chat.entity.MemberChatRoom;
 import com.example.luvisluvproject.domain.chat.entity.Message;
+import com.example.luvisluvproject.domain.chat.mongorepository.MessageRepository;
 import com.example.luvisluvproject.domain.chat.repository.ChatRoomRepository;
 import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomRepository;
-import com.example.luvisluvproject.domain.chat.mongorepository.MessageRepository;
-import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
-import com.example.luvisluvproject.global.config.JwtUtil;
+import com.example.luvisluvproject.domain.notify.event.NotifyChatEvent;
+import com.example.luvisluvproject.domain.notify.repository.NotifyRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.example.luvisluvproject.global.redis.RedisPublisher;
@@ -44,6 +44,9 @@ public class ChatService {
 	private final RedisPublisher redisPublisher;
 	private final Map<String, String> stompToWebSocketMap;
 	private final RedisTemplate<String, Object> redisTemplate;
+	private final NotifyRepository notifyRepository;
+	private final ApplicationEventPublisher applicationEventPublisher;
+	private final ChatHandler chatHandler;
 
 	/**
 	 * chats/message에 프론트에서 입력된 메세지를 발행
@@ -54,18 +57,19 @@ public class ChatService {
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		messageDto.setUserId(me.getId());
-		messageDto.setSenderName(me.getName());
+		ChatRoom chatRoom = chatRoomRepository.findById(messageDto.getRoomId())
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.CHAT_ROOM_NOT_FOUND));
+
+		Member opponent = chatRoom.checkMember(me);
 		Message message = new Message(messageDto);
-		Message saved = messageRepository.save(message);
+		messageRepository.save(message);
 
 		String webSocketSessionId = stompToWebSocketMap.get(email);
-		if(redisTemplate.opsForSet().members(webSocketSessionId) == null) {
-			messageRepository.save(saved);
+
+		if (redisTemplate.opsForSet().members(webSocketSessionId) == null) {
+			applicationEventPublisher.publishEvent(new NotifyChatEvent(this, me, opponent));
 		}
 
-		System.out.println("✅ 저장된 메시지 ID: " + saved.getId());
-		System.out.println("🕒 생성 시간: " + saved.getCreatTime());
 		redisPublisher.publish(messageDto);
 	}
 
@@ -80,19 +84,10 @@ public class ChatService {
 		//나를 찾고
 		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-		Slice<ResponseChatRoom> memberChatRoomList = memberChatRoomRepository.findAllByMemberIdAndDeletedFalse(
-				me.getId(), pageable)
-			.map(memberChatRoom -> {
-				Member findMe = memberRepository.findById(memberChatRoom.getMemberId())
-					.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-				ChatRoom chatRoom = memberChatRoom.getChatRoom();
-				Member opponent = chatRoom.checkMember(findMe);
-				Message message = messageRepository.findFirstByChatRoomIdOrderByCreatTimeDesc(chatRoom.getId())
-					.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MESSAGE_NOT_FOUNT));
-				return new ResponseChatRoom(chatRoom.getId(), opponent.getName(), message.getContent());
-			});
 
-		return memberChatRoomList;
+		return chatHandler.mapResponseChatRoom(
+			memberChatRoomRepository.findAllByMemberIdAndDeletedFalse(
+				me.getId(), pageable));
 	}
 
 	/**
@@ -136,21 +131,12 @@ public class ChatService {
 		}
 	}
 
-	// /**
-	//  * 내가 메세지를 봤는데 내가 보낸 게 아니라면 읽음 표시를 합니다.
-	//  * @param messageId
-	//  * @param member
-	//  */
-	//
-	// @Transactional
-	// public void updateIsReadService(Long messageId, String email) {
-	// 	Message message = messageRepository.findById(messageId).orElseThrow(() -> new RuntimeException("메세지가 없습니다."));
-	// 	Member me = memberRepository.findByEmail(email)
-	// 		.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-	//
-	// 	if (!message.getSenderId().equals(me.getId())) {
-	// 		message.updateIsRead();
-	// 		messageRepository.save(message);
-	// 	}
-	// }
+	@Transactional
+	public void markMessagesAsRead(ChatEnterRequest chatEnterRequest, String email) {
+		Long messageId = chatEnterRequest.getMessageId();
+		Message message = messageRepository.findById(messageId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MESSAGE_NOT_FOUNT));
+		message.updateIsRead();
+		messageRepository.save(message);
+	}
 }

@@ -1,6 +1,8 @@
 package com.example.luvisluvproject.domain.report.service;
 
-import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.luvisluvproject.domain.block.service.BlockService;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
@@ -11,11 +13,7 @@ import com.example.luvisluvproject.domain.report.repository.ReportRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
-
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * ReportService

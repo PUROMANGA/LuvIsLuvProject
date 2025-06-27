@@ -15,10 +15,11 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.luvisluvproject.domain.chat.dto.ChatEnterRequest;
+import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.domain.chat.dto.ResponseChatRoom;
 import com.example.luvisluvproject.domain.chat.dto.ResponseMessageDto;
 import com.example.luvisluvproject.domain.chat.service.ChatService;
-import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
@@ -91,19 +92,12 @@ public class ChatController {
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_OK));
 	}
 
-	//
-	// /**
-	//  * 내가 메세지를 봤는데 내가 보낸 게 아니라면 읽음 표시를 합니다.
-	//  * @param messageId
-	//  * @param member
-	//  * @return
-	//  */
-	//
-	// @PatchMapping("/messages/{messageId}")
-	// public ResponseEntity<String> updateIsRead(
-	// 	@PathVariable Long messageId,
-	// 	@AuthenticationPrincipal AuthUser member) {
-	// 	chatService.updateIsReadService(messageId, member.getUsername());
-	// 	return ResponseEntity.ok("읽음 처리 완료");
-	// }
+	/**
+	 *  읽음 처리
+	 */
+	@MessageMapping("/chat/enter")
+	public void enterRoom(ChatEnterRequest chatEnterRequest,
+		Principal principal) {
+		chatService.markMessagesAsRead(chatEnterRequest, principal.getName());
+	}
 }

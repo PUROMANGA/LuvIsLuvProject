@@ -1,17 +1,28 @@
 package com.example.luvisluvproject.domain.tag.entity;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
-import jakarta.persistence.*;
-import lombok.*;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Table(
-	name = "member_tag",
-	uniqueConstraints = @UniqueConstraint(columnNames = {"member_id", "tag_id"})
+	name = "member_tags",
+	uniqueConstraints = {
+		@UniqueConstraint(columnNames = {"member_id", "tag_id"})
+	}
 )
 public class MemberTag {
 
@@ -19,16 +30,15 @@ public class MemberTag {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "member_id", nullable = false)
-	private Member member;
+	private Long memberId;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "tag_id", nullable = false)
-	private Tag tag;
+	private String tagName;
 
-	public MemberTag(Member member, Tag tag) {
-		this.member = member;
-		this.tag = tag;
+	private TagCategory category;
+
+	public MemberTag(Long memberId, String tagName, TagCategory category) {
+		this.memberId = memberId;
+		this.tagName = tagName;
+		this.category = category;
 	}
 }

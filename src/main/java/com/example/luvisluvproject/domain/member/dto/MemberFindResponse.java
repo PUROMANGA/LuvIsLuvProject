@@ -25,14 +25,14 @@ public class MemberFindResponse {
 		this.content = content;
 	}
 
-	private int calculateAge(LocalDate birthday) {
-		return Period.between(birthday, LocalDate.now()).getYears();
-	}
-
 	public MemberFindResponse(Member member) {
 		this.userId = member.getId();
 		this.name = member.getName();
 		this.age = calculateAge(member.getBirthday());
 		this.content = member.getContent();
+	}
+
+	private int calculateAge(LocalDate birthday) {
+		return Period.between(birthday, LocalDate.now()).getYears();
 	}
 }

@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.chat.dto;
 
+import java.time.LocalDateTime;
+
 import com.example.luvisluvproject.domain.chat.common.MessageType;
 
 import lombok.Getter;
@@ -18,10 +20,12 @@ public class MessageDto {
 	private Long userId;
 	private Long roomId;
 	private String senderName;
+	private LocalDateTime creatTime;
+	private boolean isRead;
 
-	public MessageDto(String content, String fileUrl, Long userId, Long roomId, String senderName) {
+	public MessageDto(String content, String fileUrl, Long userId, Long roomId, String senderName, boolean isRead) {
 		this.content = content;
-		if(fileUrl != null) {
+		if (fileUrl != null) {
 			this.fileUrl = fileUrl;
 			this.messageType = MessageType.IMAGE;
 		} else {
@@ -31,6 +35,8 @@ public class MessageDto {
 		this.userId = userId;
 		this.roomId = roomId;
 		this.senderName = senderName;
+		this.creatTime = LocalDateTime.now();
+		this.isRead = isRead;
 	}
 }
 

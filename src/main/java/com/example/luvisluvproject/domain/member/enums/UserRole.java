@@ -1,10 +1,5 @@
 package com.example.luvisluvproject.domain.member.enums;
 
-import java.util.Arrays;
-
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -21,6 +16,5 @@ public enum UserRole {
 		}
 		throw new CustomRuntimeException(ExceptionCode.USER_ROLE_NOT_FOUND);
 	}
-
 
 }

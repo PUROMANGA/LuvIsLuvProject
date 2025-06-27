@@ -25,20 +25,6 @@ public class StoreResponse {
 	private Double latitude;   // OpenAPI로 변환된 위도
 	private Double longitude; // OpenAPI로 변환된 경도
 
-	public static StoreResponse from(Store store) {
-		return StoreResponse.builder()
-			.id(store.getId())
-			.name(store.getName())
-			.businessNumber(store.getBusinessNumber())
-			.contactNumber(store.getContactNumber())
-			.address(store.getAddress())
-			.status(store.getStatus())
-			.storeType(store.getStoreType())
-			.latitude(store.getLatitude())
-			.longitude(store.getLongitude())
-			.build();
-	}
-
 	/**
 	 * 테스트용 생성자
 	 */
@@ -53,5 +39,19 @@ public class StoreResponse {
 		this.storeType = storeType;
 		this.latitude = latitude;
 		this.longitude = longitude;
+	}
+
+	public static StoreResponse from(Store store) {
+		return StoreResponse.builder()
+			.id(store.getId())
+			.name(store.getName())
+			.businessNumber(store.getBusinessNumber())
+			.contactNumber(store.getContactNumber())
+			.address(store.getAddress())
+			.status(store.getStatus())
+			.storeType(store.getStoreType())
+			.latitude(store.getLatitude())
+			.longitude(store.getLongitude())
+			.build();
 	}
 }

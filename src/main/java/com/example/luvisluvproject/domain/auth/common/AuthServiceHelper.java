@@ -17,7 +17,8 @@ import lombok.RequiredArgsConstructor;
 public class AuthServiceHelper {
 	private final MemberRepository memberRepository;
 
-	public Member createMember(String email, String name, LocalDate birthday, String encodePassword, UserRole userRole) {
+	public Member createMember(String email, String name, LocalDate birthday, String encodePassword,
+		UserRole userRole) {
 
 		//이름 중복 확인
 		if (memberRepository.existsByName(name)) {
@@ -40,12 +41,12 @@ public class AuthServiceHelper {
 			throw new CustomRuntimeException(ExceptionCode.UNDERAGE_USER);
 		}
 
-		if(userRole.equals(UserRole.USER)) {
-			Member member = new Member(name, email, encodePassword, birthday, UserRole.USER);
+		if (userRole.equals(UserRole.USER)) {
+			Member member = new Member(name, email, encodePassword, birthday, UserRole.USER, "기본 소개입니다.", false, 0, 0L, 0);
 			memberRepository.save(member);
 			return member;
 		} else if (userRole.equals(UserRole.MANAGER)) {
-			Member member = new Member(name, email, encodePassword, birthday, UserRole.MANAGER);
+			Member member = new Member(name, email, encodePassword, birthday, UserRole.MANAGER, "기본 소개입니다.", false, 0, 0L, 0);
 			memberRepository.save(member);
 			return member;
 		} else {

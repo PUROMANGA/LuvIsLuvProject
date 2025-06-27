@@ -1,13 +1,13 @@
 package com.example.luvisluvproject.domain.block.repository;
 
-import com.example.luvisluvproject.domain.block.entity.Block;
-import com.example.luvisluvproject.domain.member.entity.Member;
+import java.util.Optional;
 
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Optional;
+import com.example.luvisluvproject.domain.block.entity.Block;
+import com.example.luvisluvproject.domain.member.entity.Member;
 
 /**
  * BlockRepository
@@ -19,10 +19,6 @@ public interface BlockRepository extends JpaRepository<Block, Long> {
 
 	/**
 	 * 특정 사용자가 다른 사용자를 차단했는지 여부 확인
-	 *
-	 * @param blocker 차단을 수행한 사용자
-	 * @param blocked 차단당한 사용자
-	 * @return 차단 관계가 존재하면 true, 없으면 false
 	 */
 	boolean existsByBlockerAndBlocked(Member blocker, Member blocked);
 

@@ -3,8 +3,21 @@ package com.example.luvisluvproject.domain.block.entity;
 import com.example.luvisluvproject.domain.block.common.BlockType;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * Block
@@ -36,38 +49,8 @@ public class Block extends BaseEntity {
 	@JoinColumn(name = "blocked_id", nullable = false)
 	private Member blocked;
 
-	/**
-	 * 차단 유형 (직접 차단, 신고 후 차단, 시스템 차단 등)
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private BlockType blockType;
-
-	/**
-	 * 프로필 접근 차단 여부
-	 */
-	private boolean blockUserAccess;
-
-	/**
-	 * 매칭 차단 여부
-	 */
-	private boolean excludeFromMatching;
-
-	public Block(Member blocker, Member blocked, BlockType blockType, boolean blockUserAccess,
-		boolean excludeFromMatching) {
+	public Block(Member blocker, Member blocked) {
 		this.blocker = blocker;
 		this.blocked = blocked;
-		this.blockType = blockType;
-		this.blockUserAccess = blockUserAccess;
-		this.excludeFromMatching = excludeFromMatching;
 	}
-
-	// /**
-	//  * 차단 해제 처리 메서드
-	//  * unblocked → true, 해제 시각 기록
-	//  */
-	// public void unblock() {
-	// 	this.unblocked = true;
-	// 	this.unblockedAt = LocalDateTime.now();
-	// }
 }

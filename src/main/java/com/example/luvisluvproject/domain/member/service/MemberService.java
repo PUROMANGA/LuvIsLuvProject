@@ -10,7 +10,6 @@ import com.example.luvisluvproject.domain.member.dto.MemberDeleteRequest;
 import com.example.luvisluvproject.domain.member.dto.MemberFindResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberMyProfileResponse;
 import com.example.luvisluvproject.domain.member.dto.MemberUpdateProfile;
-import com.example.luvisluvproject.domain.member.dto.MemberPasswordRequest;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
@@ -18,7 +17,6 @@ import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
-import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,20 +37,11 @@ public class MemberService {
 	/**
 	 * 회원 자신의 프로필 정보를 조회합니다.
 	 * 회원이 존재하지 않거나 탈퇴 상태인 경우 예외가 발생합니다.
-	 *
-	 * @param memberId 조회할 회원의 ID
-	 * @return 회원의 프로필 정보를 담은 {@link MemberMyProfileResponse}
-	 * @throws CustomRuntimeException 회원이 존재하지 않거나 탈퇴한 경우
 	 */
 	@Transactional(readOnly = true)
 	public MemberMyProfileResponse getMyProfile(String email) {
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
-
-		if (member.isStatus()) {
-			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
-		}
-
 		return new MemberMyProfileResponse(member);
 	}
 
@@ -60,7 +49,6 @@ public class MemberService {
 	 * 다른 회원의 프로필 정보를 조회합니다.
 	 * 대상 회원이 존재하지 않거나 탈퇴 상태일 경우,
 	 * 혹은 차단된 회원일 경우 예외가 발생합니다.
-	 *
 	 */
 	@Transactional(readOnly = true)
 	public MemberFindResponse getMemberProfile(String email, Long memberId) {
@@ -74,31 +62,13 @@ public class MemberService {
 			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
 		}
 
-		if (blockRepository.existsByBlockerAndBlocked(member, targetMember)) {
+		boolean isBlocked = blockRepository.existsByBlockerAndBlocked(member, targetMember);
+
+		if (isBlocked) {
 			throw new CustomRuntimeException(ExceptionCode.PROFILE_ACCESS_DENIED);
 		}
 
 		return new MemberFindResponse(targetMember);
-	}
-
-	/**
-	 * 주어진 회원 ID의 회원 비밀번호를 변경합니다.
-	 * 이전 비밀번호가 일치하지 않거나 새 비밀번호가 이전 비밀번호와 같으면 예외를 발생시킵니다.
-	 * 회원이 존재하지 않거나 소프트 삭제된 경우도 예외가 발생합니다.
-	 */
-	@Transactional
-	public void checkPasswordMember(String email, MemberPasswordRequest request) {
-
-		Member member = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
-
-		if (member.isStatus()) {
-			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
-		}
-
-		if (!passwordEncoder.matches(request.getOldPassword(), member.getPassword())) {
-			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
-		}
 	}
 
 	/**
@@ -111,11 +81,11 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
-		if (member.isStatus()) {
-			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
+		if (!passwordEncoder.matches(request.getOldPassword(), member.getPassword())) {
+			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
 		}
 
-		String newPassword = passwordEncoder.encode(request.getNewPassword(););
+		String newPassword = passwordEncoder.encode(request.getNewPassword());
 		member.updateProfile(newPassword, request.getContent());
 		memberRepository.save(member);
 	}
@@ -131,13 +101,10 @@ public class MemberService {
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
-		if (member.isStatus()) {
-			throw new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND);
-		}
-
 		if (!passwordEncoder.matches(request.getPassword(), member.getPassword())) {
 			throw new CustomRuntimeException(ExceptionCode.PASSWORD_MISMATCH);
 		}
+
 		member.softDelete();
 	}
 }

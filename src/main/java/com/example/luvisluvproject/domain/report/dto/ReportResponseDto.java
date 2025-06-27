@@ -1,11 +1,9 @@
 package com.example.luvisluvproject.domain.report.dto;
 
+import com.example.luvisluvproject.domain.report.entity.Report;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.time.LocalDateTime;
-
-import com.example.luvisluvproject.domain.report.entity.Report;
 
 /**
  * ReportResponseDto

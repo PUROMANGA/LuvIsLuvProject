@@ -14,17 +14,17 @@ public class BlockUserDto {
 	/**
 	 * 차단된 사용자의 ID
 	 */
-	private Long blockedId;
+	private final Long blockedId;
 
 	/**
 	 * 차단된 사용자의 이름
 	 */
-	private String blockedUserName;
+	private final String blockedUserName;
 
 	/**
 	 * 차단된 사용자의 이메일
 	 */
-	private String blockedUserEmail;
+	private final String blockedUserEmail;
 
 	public BlockUserDto(Block block) {
 		this.blockedId = block.getBlocked().getId();

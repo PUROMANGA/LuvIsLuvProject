@@ -12,6 +12,8 @@ import org.springframework.data.redis.listener.adapter.MessageListenerAdapter;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import com.example.luvisluvproject.domain.tag.entity.Tag;
+
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -39,8 +41,22 @@ public class RedisConfig {
 	}
 
 	@Bean
+	public RedisTemplate<String, Tag> tagRedisTemplate(RedisConnectionFactory connectionFactory) {
+		RedisTemplate<String, Tag> template = new RedisTemplate<>();
+		template.setConnectionFactory(connectionFactory);
+		template.setKeySerializer(new StringRedisSerializer());
+		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
+		return template;
+	}
+
+	@Bean
 	public ChannelTopic channelTopic() {
 		return new ChannelTopic("chatroom");
+	}
+
+	@Bean
+	public ChannelTopic notifyChannelTopic() {
+		return new ChannelTopic("notify");
 	}
 
 	@Bean
@@ -54,16 +70,23 @@ public class RedisConfig {
 
 	@Bean
 	public RedisMessageListenerContainer redisMessageListener(MessageListenerAdapter listenerAdapterChatMessage,
-		ChannelTopic channelTopic) {
+		MessageListenerAdapter listenerAdapterChatNotify,
+		ChannelTopic channelTopic, ChannelTopic notifyChannelTopic) {
 		RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 		container.setConnectionFactory(redisConnectionFactory());
 		container.addMessageListener(listenerAdapterChatMessage, channelTopic);
+		container.addMessageListener(listenerAdapterChatNotify, notifyChannelTopic);
 		return container;
 	}
 
 	@Bean
 	public MessageListenerAdapter listenerAdapterChatMessage(RedisSubscriber subscriber) {
 		return new MessageListenerAdapter(subscriber, "sendMessage");
+	}
+
+	@Bean
+	public MessageListenerAdapter listenerAdapterChatNotify(RedisSubscriber subscriber) {
+		return new MessageListenerAdapter(subscriber, "sendNotify");
 	}
 
 	@Bean

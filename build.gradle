@@ -51,6 +51,7 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.springframework.batch:spring-batch-test'
 
     //Websocket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
@@ -75,17 +76,29 @@ dependencies {
     //H2
     testImplementation 'com.h2database:h2'
 
-    // 엘라스틱서치
-    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
-    implementation 'co.elastic.clients:elasticsearch-java:8.12.1'
-
     //스프링부트actuator
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     //프로메테우스
     implementation 'io.micrometer:micrometer-registry-prometheus'
+
+    //스프링배치
+    implementation 'org.springframework.boot:spring-boot-starter-batch'
 }
 
 tasks.named('test') {
     useJUnitPlatform()
+}
+
+test {
+    environment "KAKAO_API_KEY", "f4dd8f03d858d6575d9fc68a6756e349"
+    environment "MYSQL_DATABASE", "luvisluvprojectdb"
+    environment "MYSQL_PASSWORD", "1111"
+    environment "MYSQL_USERNAME", "root"
+    environment "REDIS_PASSWORD", "1234"
+
+    systemProperty "spring.datasource.name", "luvisluvprojectdb"
+    systemProperty "spring.datasource.username", "root"
+    systemProperty "spring.datasource.password", "1111"
+    systemProperty "spring.redis.password", "1234"
 }

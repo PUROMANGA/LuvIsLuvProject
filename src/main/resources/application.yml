@@ -5,6 +5,9 @@ server:
 spring:
   application:
     name: LuvIsLuvProject
+  batch:
+    job:
+      enabled: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -32,10 +35,6 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/luvisluv
 
-  elasticsearch:
-    rest:
-      uris: http://localhost:9200
-
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
   accessToken:
@@ -56,9 +55,6 @@ management:
         include: health, metrics, prometheus
   server:
     port: 9292
-  health:
-    elasticsearch:
-      enabled: false
 
 # 카카오 API Key
 kakao:

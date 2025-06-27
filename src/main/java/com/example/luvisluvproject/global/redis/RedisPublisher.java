@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import com.example.luvisluvproject.domain.chat.dto.MessageDto;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.notify.dto.NotifyDto;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -20,6 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class RedisPublisher {
 
 	private final ChannelTopic channelTopic;
+	private final ChannelTopic notifyChannelTopic;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final Map<String, String> stompToWebSocketMap;
 	private final MemberRepository memberRepository;
@@ -34,9 +36,12 @@ public class RedisPublisher {
 			redisTemplate.opsForSet().add(webSocketSessionId, value);
 			System.out.println("메세지 발행");
 			redisTemplate.convertAndSend(channelTopic.getTopic(), messageDto);
-			System.out.println("messageDto 발행성공! = " + messageDto);
 		}
 
 		redisTemplate.convertAndSend(channelTopic.getTopic(), messageDto);
+	}
+
+	public void publishNotify(NotifyDto notifyDto) {
+		redisTemplate.convertAndSend(notifyChannelTopic.getTopic(), notifyDto);
 	}
 }

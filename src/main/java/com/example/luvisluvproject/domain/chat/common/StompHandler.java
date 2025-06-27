@@ -88,7 +88,7 @@ public class StompHandler implements ChannelInterceptor {
 			if (principal != null) {
 				String email = principal.getName();
 				String destination = accessor.getDestination();
-				String webSocketSessionId = (String) accessor.getSessionAttributes().get("webSocketSessionId");
+				String webSocketSessionId = (String)accessor.getSessionAttributes().get("webSocketSessionId");
 				System.out.println("webSocketSessionId = " + webSocketSessionId);
 				stompToWebSocketMap.put(email, webSocketSessionId);
 
@@ -110,7 +110,7 @@ public class StompHandler implements ChannelInterceptor {
 			}
 
 		} else if (StompCommand.UNSUBSCRIBE == command) {
-			String webSocketSessionId = (String) accessor.getSessionAttributes().get("webSocketSessionId");
+			String webSocketSessionId = (String)accessor.getSessionAttributes().get("webSocketSessionId");
 			// String sessionId = accessor.getSessionId();
 			String key = webSocketSessionId;
 
@@ -118,7 +118,7 @@ public class StompHandler implements ChannelInterceptor {
 			System.out.println("🗑️ UNSUBSCRIBE 요청 처리 → Redis 삭제 key: " + key);
 
 		} else if (StompCommand.DISCONNECT == command) {
-			String webSocketSessionId = (String) accessor.getSessionAttributes().get("webSocketSessionId");
+			String webSocketSessionId = (String)accessor.getSessionAttributes().get("webSocketSessionId");
 			// String sessionId = accessor.getSessionId();
 			Set<String> keys = redisTemplate.keys(webSocketSessionId);
 

@@ -1,5 +1,19 @@
 package com.example.luvisluvproject.domain.store.controller;
 
+import java.util.List;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
 import com.example.luvisluvproject.domain.store.dto.response.StoreResponse;
@@ -9,12 +23,6 @@ import com.example.luvisluvproject.global.success.SuccessCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 /**
  * 가게 관련 요청을 처리하는 REST 컨트롤러

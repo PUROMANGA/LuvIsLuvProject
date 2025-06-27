@@ -19,10 +19,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
-import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.domain.match.dto.AcceptMatchDto;
 import com.example.luvisluvproject.domain.match.dto.MatchResponseDto;
+import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
+import com.example.luvisluvproject.domain.match.service.MatchService;
 import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
@@ -43,7 +43,6 @@ public class MatchController {
 	/**
 	 * 매칭을 해줍니다
 	 */
-
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<ResponseMatchMemberDto>>> getMatchMemberList(
 		@AuthenticationPrincipal AuthUser member) {
@@ -58,13 +57,10 @@ public class MatchController {
 	 * @param member
 	 * @return
 	 */
-
 	@PostMapping
 	public ResponseEntity<ApiResponse<MatchResponseDto>> createMatch(
 		@RequestParam Long receiverId,
 		@AuthenticationPrincipal AuthUser member) {
-		log.info("[매칭 요청] receiverId: {}, 요청자 email: {}", receiverId, member.getUsername());
-		System.out.println("[DEBUG] 매칭 요청 도착 - " + receiverId + ", " + member.getUsername());
 		ApiResponse apiResponse = ApiResponse.of(SuccessCode.SUCCESS_OK,
 			matchService.createMatchService(receiverId, member.getUsername()));
 		return ResponseEntity.ok(apiResponse);

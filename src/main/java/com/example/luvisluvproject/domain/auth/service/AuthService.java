@@ -3,7 +3,6 @@ package com.example.luvisluvproject.domain.auth.service;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,8 @@ public class AuthService {
 	private final AuthServiceHelper authServiceHelper;
 
 	public AuthService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate, AuthServiceHelper authServiceHelper) {
+		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate,
+		AuthServiceHelper authServiceHelper) {
 		this.memberRepository = memberRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
@@ -44,9 +44,8 @@ public class AuthService {
 
 	/**
 	 * 사용자의 회원가입을 처리합니다.
-	 *
-	 * @param requestDto 회원가입 요청 데이터
-	 * @return 회원가입 결과 응답 DTO
+	 * @param requestDto
+	 * @return
 	 */
 	@Transactional
 	public SignupResponseDto signup(SignupUserRequestDto requestDto) {
@@ -54,21 +53,11 @@ public class AuthService {
 		Member member = authServiceHelper.createMember(
 			requestDto.getEmail(), requestDto.getName(),
 			requestDto.getBirthday(), encodePassword, requestDto.getUserRole());
-
-		return new SignupResponseDto(
-			member.getId(),
-			member.getName(),
-			member.getEmail(),
-			member.getBirthday(),
-			member.getUserRole()
-		);
+		return new SignupResponseDto(member);
 	}
 
 	/**
 	 * 사용자의 로그인을 처리하고 AccessToken과 RefreshToken을 발급합니다.
-	 *
-	 * @param requestDto 로그인 요청 데이터
-	 * @return 로그인 결과 응답 DTO (액세스 토큰, 리프레시 토큰)
 	 */
 	@Transactional
 	public LoginResponseDto login(LoginRequestDto requestDto) {
@@ -104,7 +93,6 @@ public class AuthService {
 
 	/**
 	 * 유효한 RefreshToken으로 새로운 AccessToken을 발급합니다.
-	 *
 	 * @param refreshToken 클라이언트로부터 전달받은 리프레시 토큰
 	 * @return 새로운 액세스 토큰
 	 */
@@ -121,6 +109,6 @@ public class AuthService {
 			throw new RuntimeException("부정된 접근입니다.");
 		}
 
-		return jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
+		return "Bearer " + jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
 	}
 }

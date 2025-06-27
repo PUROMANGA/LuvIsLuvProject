@@ -1,11 +1,11 @@
 package com.example.luvisluvproject.domain.tag.dto;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
