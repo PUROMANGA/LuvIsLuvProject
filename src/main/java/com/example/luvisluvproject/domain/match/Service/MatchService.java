@@ -73,7 +73,11 @@ public class MatchService {
 		//match를 저장합니다.
 		String redisKey = receiverMember.getId().toString();
 		matchRedisTemplate.opsForSet().add(redisKey, match);
-		return new MatchResponseDto(match);
+		return new MatchResponseDto(
+			match.getSenderId(),
+			me.getName(),
+			match.getReceiverId(),
+			receiverMember.getName());
 	}
 
 	/**
@@ -102,7 +106,14 @@ public class MatchService {
 				.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
 			matchRedisTemplate.delete(me.getId().toString());
 			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, sender.getId(), me.getId()));
-			return new MatchResponseDto(matchRepository.save(newMatch));
+			matchRepository.save(newMatch);
+			return new MatchResponseDto(
+				newMatch.getSenderId(),
+				sender.getName(),
+				newMatch.getReceiverId(),
+				me.getName(),
+				MatchStatus.ACCEPTED
+			);
 		} else {
 			//나 들고오기
 			matchRedisTemplate.delete(me.getId().toString());

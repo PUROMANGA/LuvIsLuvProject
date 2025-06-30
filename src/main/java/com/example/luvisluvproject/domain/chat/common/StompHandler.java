@@ -1,5 +1,7 @@
 package com.example.luvisluvproject.domain.chat.common;
 
+import java.util.Set;
+
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -41,8 +43,9 @@ public class StompHandler implements ChannelInterceptor {
 				throw new IllegalArgumentException("유효하지 않은 토큰입니다.");
 			}
 
-			String username = jwtUtil.extractClaims(token).getSubject();
-			accessor.setUser(() -> username);
+			//사실상 email
+			String username  = jwtUtil.getEmail(authToken);
+			accessor.setUser(() -> username );
 
 		} else if (StompCommand.SUBSCRIBE == accessor.getCommand()) {
 
@@ -50,17 +53,17 @@ public class StompHandler implements ChannelInterceptor {
 
 			//세션아이디
 			String sessionId = accessor.getSessionId();
-
+			//구독 아이디
 			String subscriptionId = accessor.getSubscriptionId();
-
 			//방 아이디
-			String roomId = destination.substring(destination.lastIndexOf("/") + 1);
-			ChatRoom chatRoom = chatRoomRepository.findById(Long.parseLong(roomId))
-				.orElseThrow(() -> new RuntimeException("채팅방이 존재하지 않습니다."));
+			String channelId = destination.substring(destination.lastIndexOf("/") + 1);
+			Long roomId = Long.parseLong(channelId);
+			//접속된 유저 아이디
+			String userEmail = accessor.getUser().getName();
 
 			//redis-key
 			String key = sessionId + subscriptionId;
-			String value = roomId;
+			String value = "유저 아이디 : " + userEmail + "방 아이디 : " + roomId;
 			//세션과 방 아이디를 저장
 			redisTemplate.opsForSet().add(key, value);
 
@@ -68,6 +71,10 @@ public class StompHandler implements ChannelInterceptor {
 			String sessionId = accessor.getSessionId();
 			String subscriptionId = accessor.getSubscriptionId();
 			redisTemplate.delete(sessionId + subscriptionId);
+		} else if (StompCommand.DISCONNECT == accessor.getCommand()) {
+			String sessionId = accessor.getSessionId();
+			Set<String> keys = redisTemplate.keys(sessionId + "*");
+			redisTemplate.delete(keys);
 		}
 		return message;
 	}

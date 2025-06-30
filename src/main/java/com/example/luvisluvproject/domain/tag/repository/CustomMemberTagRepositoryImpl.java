@@ -22,7 +22,7 @@ public class CustomMemberTagRepositoryImpl  implements CustomMemberTagRepository
 
 		return jpaQueryFactory
 			.select(Projections.constructor(ResponseMatchMemberDto.class,
-				mt2.member.id, mt2.member.name))
+				mt2.member.id, mt2.member.name, mt2.member.content))
 			.from(mt2)
 			.join(mt1).on(mt1.tag.eq(mt2.tag))
 			.where(mt1.member.email.eq(email)
