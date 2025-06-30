@@ -31,17 +31,10 @@ public class TagBatchScheduler {
 	public void runJob() {
 		Map<String, JobParameter<?>> parameterMap = new HashMap<>();
 		parameterMap.put("time", new JobParameter<>(System.currentTimeMillis(), Long.class));
-
-
-		parameterMap.put("time", new JobParameter(Long.valueOf(System.currentTimeMillis())));
-
 		JobParameters jobParameters = new JobParameters(parameterMap);
-
-
 		// JobParameters jobParameters = new JobParametersBuilder()
 		// 	.addLong("time", System.currentTimeMillis())
 		// 	.toJobParameters();
-
 		try {
 			jobLauncher.run(footballJob, jobParameters);
 
