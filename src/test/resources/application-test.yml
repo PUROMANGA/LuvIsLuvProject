@@ -1,4 +1,7 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
+    # 기존 bean overriding
   datasource:
     url: jdbc:h2:mem:testdb
     driver-class-name: org.h2.Driver

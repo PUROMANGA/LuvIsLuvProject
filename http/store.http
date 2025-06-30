@@ -1,15 +1,16 @@
 ### 1. 가게 등록 (MANAGER 권한 필요)
 POST http://localhost:8080/stores
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMDQ0Njc4LCJleHAiOjE3NTAwNDgyNzh9.6IdbUJsrTA0thfsgsKGfy3k7pKbik8jkK13TKY0BMpc
+
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMTM5Njk1LCJleHAiOjE3NTAxNDAwNTV9.83NALWQlGXIN12sxmL59wyJttWoRx6j2a6F0Nlh6r3k
 
 {
-  "name": "이슬펍",
+  "name": "인생비빔밥",
   "businessNumber": 1234567890,
   "contactNumber": "010-1234-5678",
-  "address": "서울 강남구 논현로 63길",
+  "address": "서울 구로구 디지털로27길 116",
   "status": "OPEN",
-  "storeType": "BAR"
+  "storeType": "CAFE"
 }
 
 
@@ -33,5 +34,4 @@ Authorization: Bearer {{MANAGER_TOKEN}}
 
 
 ### 4. 내 주변 가게 조회 (권한 필요 없음)
-GET http://localhost:8080/stores/nearby?lat=37.5665&lng=126.9780&radius=3000
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMDQyOTI4LCJleHAiOjE3NTAwNDMyODh9.PAbc8FGl3grDq0VSSI2f_la56uqtYoTUkfBuzJmzN5A
+GET http://localhost:8080/stores/nearby?lat=37.4848784332703&lng=126.8879955701&radius=2000
