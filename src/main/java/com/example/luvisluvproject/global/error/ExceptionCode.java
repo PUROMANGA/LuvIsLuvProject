@@ -61,8 +61,10 @@ public enum ExceptionCode implements ErrorCode {
 	STORE_REVIEW_MISMATCH(HttpStatus.BAD_REQUEST, "해당 가게에 속한 리뷰가 아닙니다."),
 	DELETE_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 삭제할 수 있습니다."),
 	EDIT_REVIEW_WRITER_ONLY(HttpStatus.BAD_REQUEST, "리뷰를 작성한 사용자만 수정할 수 있습니다."),
-	MEMBER_NOT_ELIGIBLE_FOR_REVIEW(HttpStatus.FORBIDDEN, "해당 가게를 이용한 사용자만 리뷰를 작성할 수 있습니다.");
+	MEMBER_NOT_ELIGIBLE_FOR_REVIEW(HttpStatus.FORBIDDEN, "해당 가게를 이용한 사용자만 리뷰를 작성할 수 있습니다."),
 
+	// 이미지
+	S3_UPLOAD_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "S3 이미지 업로드에 실패했습니다.");
 	private final HttpStatus httpStatus;
 	private final String message;
 

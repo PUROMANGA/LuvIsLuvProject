@@ -1,7 +1,7 @@
 ### 1. 가게 등록 (MANAGER 권한 필요)
 POST http://localhost:8080/stores
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dkBleGFtcGxlLmNvbSIsInVzZXJSb2xlIjoiTUFOQUdFUiIsImlhdCI6MTc1MDIzMzQ5MCwiZXhwIjoxNzUwMjMzODUwfQ.ALPb2dQhmrrqsGW7btaObNs2CfDWLUbm4fu2QCGs94k
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dkBleGFtcGxlLmNvbSIsInVzZXJSb2xlIjoiTUFOQUdFUiIsImlhdCI6MTc1MDc0NDI3NiwiZXhwIjoxNzUwNzQ0NjM2fQ.pJE6hZ8jy8HWE-5uHH3M-EgNN0itIKuDoCeaFOZHYnk
 
 {
   "name": "인생비빔밥2",

@@ -78,6 +78,9 @@ dependencies {
     // 엘라스틱서치
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
     implementation 'co.elastic.clients:elasticsearch-java:8.12.1'
+
+    // S3 이미지 업로드
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 }
 
 tasks.named('test') {

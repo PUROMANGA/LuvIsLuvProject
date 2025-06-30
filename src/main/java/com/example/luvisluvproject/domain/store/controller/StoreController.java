@@ -10,9 +10,11 @@ import com.example.luvisluvproject.global.success.SuccessCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -28,32 +30,43 @@ public class StoreController {
 	private final StoreService storeService;
 
 	/**
-	 * 가게 등록 요청 처리
+	 * 가게 등록 요청
+	 * - multipart/form-data 형식으로 JSON 데이터(`request`)와 이미지 파일을 함께 받음
+	 * - 이미지가 존재할 경우 S3에 업로드 -> Image 테이블에 저장
 	 *
-	 * @param request 가게 등록 요청 DTO
-	 * @return 등록된 가게 정보 (성공 메시지 포함)
+	 * @param request 가게 등록 요청 정보
+	 * @param images 업로드할 이미지 파일 리스트 (선택, null 또는 비어있을 수 있음)
+	 * @return 등록된 가게 정보
 	 */
 	@PreAuthorize("hasRole('MANAGER')")
-	@PostMapping
-	public ResponseEntity<ApiResponse<StoreResponse>> saveStore(@RequestBody @Valid StoreSaveRequest request) {
-		StoreResponse response = storeService.saveStore(request);
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public ResponseEntity<ApiResponse<StoreResponse>> saveStore(
+		@RequestPart("request") @Valid StoreSaveRequest request,
+		@RequestPart(value = "images", required = false) List<MultipartFile> images
+	) {
+		StoreResponse response = storeService.saveStore(request, images);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_CREATED, response));
 	}
 
 	/**
-	 * 가게 정보 수정
+	 * 가게 정보 및 이미지 수정 요청 처리
+	 * - multipart/form-data 형식으로 request + images 동시 수신
+	 * - 주소가 변경되면 위도/경도 갱신
+	 * - 이미지가 첨부되면 기존 이미지 삭제 후 새 이미지로 교체
 	 *
-	 * @param id 가게 ID
-	 * @param request 수정 요청 DTO
-	 * @return 수정된 가게 정보 (성공 메시지 포함)
+	 * @param id 수정할 가게의 ID
+	 * @param request 수정 요청 정보 (JSON 형식)
+	 * @param images 새로 업로드할 이미지 파일 목록 (선택 null 이여도 도;ㅁ)
+	 * @return 수정된 가게 정보 (ApiResponse로 감싼 응답)
 	 */
 	@PreAuthorize("hasRole('MANAGER')")
-	@PutMapping("/{id}")
+	@PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<StoreResponse>> updateStore(
 		@PathVariable Long id,
-		@RequestBody @Valid StoreUpdateRequest request
+		@RequestPart("request") @Valid StoreUpdateRequest request,
+		@RequestPart(value = "images", required = false) List<MultipartFile> images
 	) {
-		StoreResponse response = storeService.updateStore(id, request);
+		StoreResponse response = storeService.updateStore(id, request, images);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_UPDATED, response));
 	}
 

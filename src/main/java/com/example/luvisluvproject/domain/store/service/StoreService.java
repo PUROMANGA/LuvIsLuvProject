@@ -2,6 +2,7 @@ package com.example.luvisluvproject.domain.store.service;
 
 import java.util.List;
 
+import com.example.luvisluvproject.domain.image.service.ImageService;
 import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
 import com.example.luvisluvproject.domain.store.dto.response.StoreResponse;
@@ -11,9 +12,9 @@ import com.example.luvisluvproject.domain.store.infra.dto.KakaoAddressResponse;
 import com.example.luvisluvproject.domain.store.repository.StoreRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
-
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
 
 /**
@@ -26,25 +27,29 @@ public class StoreService {
 
 	private final StoreRepository storeRepository;
 	private final KakaoAddressClient kakaoAddressClient;
+	private final ImageService imageService;
 
 	/**
-	 * 사용자의 등록 요청 정보를 바탕으로 Store 엔티티를 생성하고 저장
-	 * Kakao API를 통해 주소 → 위도/경도 좌표 변환 수행
+	 * 사용자의 등록 요청 정보를 바탕으로 Store 엔티티를 생성하고 저장함
+	 * 첨부된 이미지가 있을 경우 S3에 업로드 -> Image 테이블에 저장
+	 * Kakao API를 통해 주소 → 위도/경도 좌표 변환
 	 *
 	 * @param request 가게 등록 요청 DTO
+	 * @param images 업로드할 이미지 리스트 (null 또는 비어있을 수 있음)
 	 * @return StoreResponse 응답 DTO
+	 * @throws CustomRuntimeException Kakao API 결과가 없을 경우 예외 발생
 	 */
-	public StoreResponse saveStore(StoreSaveRequest request) {
+	public StoreResponse saveStore(StoreSaveRequest request, List<MultipartFile> images) {
+
 		// 1. Kakao API 호출
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
 
-		// 2. 위도/경도 Optional 추출 및 예외 처리
 		Double latitude = kakaoResponse.getLatitude()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 		Double longitude = kakaoResponse.getLongitude()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
-		// 3. Store 생성 및 저장
+		// 2. Store 생성 및 저장
 		Store store = Store.builder()
 			.name(request.getName())
 			.businessNumber(request.getBusinessNumber())
@@ -58,7 +63,12 @@ public class StoreService {
 
 		Store saved = storeRepository.save(store);
 
-		// 사업자 번호 검증 api ?
+		// 3. 이미지 업로드 (nullable 처리)
+		if (images != null && !images.isEmpty()) {
+			imageService.uploadImages(saved, images);
+		}
+
+		// 4. 응답 반환
 		return StoreResponse.builder()
 			.id(saved.getId())
 			.name(saved.getName())
@@ -72,33 +82,29 @@ public class StoreService {
 			.build();
 	}
 
-
 	/**
-	 * 가게 정보 수정
-	 * 주소가 변경되었을 경우, Kakao API를 통해 위도/경도 좌표 갱신
+	 * 가게 정보 및 이미지 수정
+	 * - 주소 변경 시 위도/경도 갱신
+	 * - 새 이미지가 첨부되면 기존 이미지를 제거하고 교체
 	 *
 	 * @param storeId 수정할 가게의 ID
 	 * @param request 수정 요청 DTO
+	 * @param images 새로 업로드할 이미지 리스트 (선택)
 	 * @return 수정된 가게 정보 응답 DTO
 	 */
-	public StoreResponse updateStore(Long storeId, StoreUpdateRequest request) {
+	public StoreResponse updateStore(Long storeId, StoreUpdateRequest request, List<MultipartFile> images) {
 		// 1. 기존 가게 조회
 		Store store = storeRepository.findById(storeId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.STORE_NOT_FOUND));
 
-		// 2. Kakao API 호출
-		// 카카오 종속
+		// 2. Kakao API 호출 (주소 → 좌표)
 		KakaoAddressResponse kakaoResponse = kakaoAddressClient.fetchCoordinates(request.getAddress());
-
-		// 같음
-		// 위도 경도 한묶음
-		// dto 따로?
 		Double latitude = kakaoResponse.getLatitude()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 		Double longitude = kakaoResponse.getLongitude()
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.KAKAO_API_EMPTY_RESULT));
 
-		// 3. 기존 Store 정보 업데이트
+		// 3. 기존 필드 업데이트
 		store.update(
 			request.getName(),
 			request.getContactNumber(),
@@ -109,21 +115,15 @@ public class StoreService {
 			request.getStoreType()
 		);
 
-		Store updated = storeRepository.save(store);
+		// 4. 이미지가 전달된 경우, 기존 이미지 삭제 + 새 이미지 업로드
+		if (images != null && !images.isEmpty()) {
+			imageService.deleteImagesByStore(store);       // 기존 이미지 삭제 로직
+			imageService.uploadImages(store, images);      // 새 이미지 업로드
+		}
 
-		return StoreResponse.builder()
-			.id(updated.getId())
-			.name(updated.getName())
-			.businessNumber(updated.getBusinessNumber())
-			.contactNumber(updated.getContactNumber())
-			.address(updated.getAddress())
-			.status(updated.getStatus())
-			.storeType(updated.getStoreType())
-			.latitude(updated.getLatitude())
-			.longitude(updated.getLongitude())
-			.build();
+		// 5. 응답 DTO 반환
+		return StoreResponse.from(store);
 	}
-
 
 	/**
 	 * 가게 삭제 - Hard delete 방식

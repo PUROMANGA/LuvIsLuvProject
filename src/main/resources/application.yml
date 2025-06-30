@@ -53,3 +53,15 @@ logging:
 kakao:
   api:
     key: ${KAKAO_API_KEY}
+
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    s3:
+      bucket: luvisluv
+    region:
+      static: ap-northeast-2  # 서울 리전
+    stack:
+      auto: false
