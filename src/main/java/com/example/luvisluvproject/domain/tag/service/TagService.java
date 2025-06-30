@@ -20,6 +20,7 @@ import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.domain.tag.event.MemberTagCreateEvent;
 import com.example.luvisluvproject.domain.tag.event.MemberTagDeleteEvent;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
+import com.example.luvisluvproject.global.textCleaner.TextValidator;
 
 @Service
 public class TagService {
@@ -28,16 +29,19 @@ public class TagService {
 	private final RedisTemplate<String, Tag> tagRedisTemplate;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final TagHandler tagHandler;
+	private final TextValidator textValidator;
+
 
 	public TagService(MemberRepository memberRepository,
 		MemberTagRepository memberTagRepository,
 		@Qualifier("tagRedisTemplate") RedisTemplate<String, Tag> tagRedisTemplate,
-		ApplicationEventPublisher applicationEventPublisher, TagHandler tagHandler) {
+		ApplicationEventPublisher applicationEventPublisher, TagHandler tagHandler, TextValidator textValidator) {
 		this.memberRepository = memberRepository;
 		this.memberTagRepository = memberTagRepository;
 		this.tagRedisTemplate = tagRedisTemplate;
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.tagHandler = tagHandler;
+		this.textValidator = textValidator;
 	}
 
 	/**
@@ -71,6 +75,12 @@ public class TagService {
 
 		//로직
 		if (countingMemberTag < 30) {
+
+			Set<String> analyzerTagName = textValidator.analyzerName(requestTagNames);
+			if(!textValidator.analyzerText(analyzerTagName)) {
+				throw new RuntimeException("금지단어가 포함되어 있습니다.");
+			}
+
 			Set<Tag> deleteTags = savedTags.stream()
 				.filter(t -> !requestTagNames.contains(t.getName()))
 				.collect(Collectors.toSet());

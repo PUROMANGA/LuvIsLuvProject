@@ -21,6 +21,10 @@ configurations {
 
 repositories {
     mavenCentral()
+
+    //komoran
+    maven { url 'https://jitpack.io' }
+
 }
 
 dependencies {
@@ -84,6 +88,14 @@ dependencies {
 
     //스프링배치
     implementation 'org.springframework.boot:spring-boot-starter-batch'
+
+    //flyway
+    implementation 'org.flywaydb:flyway-core'
+    implementation 'org.flywaydb:flyway-mysql'
+
+    //Komoran
+    implementation 'com.github.shin285:KOMORAN:3.3.9'
+
 }
 
 tasks.named('test') {
