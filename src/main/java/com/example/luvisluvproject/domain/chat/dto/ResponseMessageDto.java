@@ -11,15 +11,15 @@ import lombok.Getter;
 
 public class ResponseMessageDto {
 
-	private String id;
-	private Long chatRoomId;
-	private Long senderId;
-	private Boolean isRead;
-	private String content;
-	private String fileUrl;
-	private MessageType messageType;
-	private LocalDateTime creatTime;
-	private LocalDateTime modifiedTime;
+	private final String id;
+	private final Long chatRoomId;
+	private final Long senderId;
+	private final Boolean isRead;
+	private final String content;
+	private final String fileUrl;
+	private final MessageType messageType;
+	private final LocalDateTime creatTime;
+	private final LocalDateTime modifiedTime;
 
 	public ResponseMessageDto(Message message) {
 		this.id = message.getId();

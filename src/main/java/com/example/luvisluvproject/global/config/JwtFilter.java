@@ -49,13 +49,14 @@ public class JwtFilter extends OncePerRequestFilter {
 		List<String> whitelist = List.of(
 			"/auth/login",
 			"/auth/signup/**",
-			"/ws/**"
+			"/ws/**",
+			"/actuator/**"
 		);
 
 		String requestUri = request.getRequestURI();
 
 		for (String pattern : whitelist) {
-			if (pathMatcher.match(pattern, requestUri)) {
+			if (pathMatcher.matchStart(pattern, requestUri)) {
 				filterChain.doFilter(request, response);
 				return;
 			}

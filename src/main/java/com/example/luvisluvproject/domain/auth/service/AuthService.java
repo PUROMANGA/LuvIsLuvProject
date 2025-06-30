@@ -3,7 +3,6 @@ package com.example.luvisluvproject.domain.auth.service;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -34,7 +33,8 @@ public class AuthService {
 	private final AuthServiceHelper authServiceHelper;
 
 	public AuthService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate, AuthServiceHelper authServiceHelper) {
+		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate,
+		AuthServiceHelper authServiceHelper) {
 		this.memberRepository = memberRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.jwtUtil = jwtUtil;
@@ -44,9 +44,8 @@ public class AuthService {
 
 	/**
 	 * 사용자의 회원가입을 처리합니다.
-	 *
-	 * @param requestDto 회원가입 요청 데이터
-	 * @return 회원가입 결과 응답 DTO
+	 * @param requestDto
+	 * @return
 	 */
 	@Transactional
 	public SignupResponseDto signup(SignupUserRequestDto requestDto) {
@@ -54,21 +53,11 @@ public class AuthService {
 		Member member = authServiceHelper.createMember(
 			requestDto.getEmail(), requestDto.getName(),
 			requestDto.getBirthday(), encodePassword, requestDto.getUserRole());
-
-		return new SignupResponseDto(
-			member.getId(),
-			member.getName(),
-			member.getEmail(),
-			member.getBirthday(),
-			member.getUserRole()
-		);
+		return new SignupResponseDto(member);
 	}
 
 	/**
 	 * 사용자의 로그인을 처리하고 AccessToken과 RefreshToken을 발급합니다.
-	 *
-	 * @param requestDto 로그인 요청 데이터
-	 * @return 로그인 결과 응답 DTO (액세스 토큰, 리프레시 토큰)
 	 */
 	@Transactional
 	public LoginResponseDto login(LoginRequestDto requestDto) {
@@ -84,7 +73,7 @@ public class AuthService {
 		long expiration = jwtUtil.getExpiration(refreshToken);
 
 		redisTemplate.opsForValue().set(member.getEmail(), refreshToken, expiration, TimeUnit.MILLISECONDS);
-		return new LoginResponseDto("Bearer " + accessToken, "Bearer " + refreshToken);
+		return new LoginResponseDto(member.getId(), "Bearer " + accessToken, "Bearer " + refreshToken);
 	}
 
 	/**
@@ -93,7 +82,12 @@ public class AuthService {
 	 * @param accessToken 로그아웃할 액세스 토큰
 	 */
 	@Transactional
-	public void logout(String accessToken) {
+	public void logout(String accessToken, String email) {
+
+		if (!jwtUtil.extractClaims(accessToken).getSubject().equals(email)) {
+			throw new RuntimeException("권한이 없습니다");
+		}
+
 		if (!jwtUtil.validateToken(accessToken)) {
 			throw new CustomRuntimeException(ExceptionCode.INVALID_TOKEN);
 		}
@@ -104,23 +98,27 @@ public class AuthService {
 
 	/**
 	 * 유효한 RefreshToken으로 새로운 AccessToken을 발급합니다.
-	 *
 	 * @param refreshToken 클라이언트로부터 전달받은 리프레시 토큰
 	 * @return 새로운 액세스 토큰
 	 */
 	@Transactional
-	public String refreshService(String refreshToken) {
+	public String refreshService(String refreshToken, String email) {
+
 		jwtUtil.validateToken(refreshToken);
-		String email = jwtUtil.extractClaims(refreshToken).getSubject();
+
+		if (!jwtUtil.extractClaims(refreshToken).getSubject().equals(email)) {
+			throw new RuntimeException("권한이 없습니다");
+		}
 
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
 		String savedRefreshToken = redisTemplate.opsForValue().get(email);
+
 		if (!refreshToken.equals(savedRefreshToken)) {
 			throw new RuntimeException("부정된 접근입니다.");
 		}
 
-		return jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
+		return "Bearer " + jwtUtil.createAccessToken(member.getEmail(), member.getUserRole().name());
 	}
 }

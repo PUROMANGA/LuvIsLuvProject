@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 
 public class ResponseChatRoom {
-	private Long chatRoomId;
-	private String memberName;
-	private String messageContent;
+	private final Long chatRoomId;
+	private final String memberName;
+	private final String messageContent;
 
 	public ResponseChatRoom(Long chatRoomId, String memberName, String messageContent) {
 		this.chatRoomId = chatRoomId;

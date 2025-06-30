@@ -1,13 +1,8 @@
 package com.example.luvisluvproject.domain.member.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import javax.annotation.Nullable;
 
 import com.example.luvisluvproject.domain.member.enums.UserRole;
-import com.example.luvisluvproject.domain.tag.entity.MemberTag;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
 import jakarta.persistence.Column;
@@ -17,10 +12,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -30,7 +23,6 @@ import lombok.ToString;
 @Table(name = "members")
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @ToString(of = {"name", "email"})
 public class Member extends BaseEntity {
 	@Id
@@ -58,73 +50,38 @@ public class Member extends BaseEntity {
 	@Column(nullable = false)
 	private boolean status;
 
-	@Builder.Default
+	//신고횟수
+
 	@Column(nullable = false)
 	private int reportCount = 0;
 
 	//호감도
-	@Builder.Default
 	private Long likeCount = 0L;
 
-	private LocalDateTime restrictedUntil;
-
-	@OneToMany(mappedBy = "member")
-	private List<MemberTag> memberTagList;
+	//태그 소지 개수
+	private int tagCount = 0;
 
 	/**
-	 * 호감도 업!
+	 * 일반 생성자
 	 */
-	public void plusIsLike() {
-		this.likeCount++;
-	}
-
-	/**
-	 * 비밀번호 수정
-	 */
-	public void updatePassword(String password) {
-		this.password = password;
-	}
-
-	/**
-	 * 내용 수정
-	 */
-	public void updateContent(String content) {
-		this.content = content;
-	}
-
-	/**
-	 * 소프트 딜리트
-	 */
-	public void softDelete() {
-		this.status = true;
-	}
-
-
-	// 신고 횟수 증가 및 제한 설정
-	public void increaseReportCount() {
-		this.reportCount++;
-		if (this.reportCount >= 3 && this.restrictedUntil == null) {
-			this.restrictedUntil = LocalDateTime.now().plusDays(30);
-		}
-	}
-
-	// 활동 제한 상태인지 확인
-	public boolean isRestricted() {
-		return this.restrictedUntil != null && this.restrictedUntil.isAfter(LocalDateTime.now());
-	}
-
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content,
+		boolean status, int reportCount, Long likeCount, Integer tagCount) {
 		this.name = name;
 		this.email = email;
 		this.password = password;
 		this.birthday = birthday;
 		this.userRole = userRole;
-		this.likeCount = 0L;
+		this.content = content;
+		this.status = status;
+		this.reportCount = reportCount;
+		this.likeCount = likeCount;
+		this.tagCount = tagCount;
 	}
 
 	/**
 	 * 테스트용 생성자
 	 */
+
 	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
 		Long likeCount) {
 		this.name = name;
@@ -137,31 +94,32 @@ public class Member extends BaseEntity {
 	}
 
 	/**
-	 * 테스트용 생성자
+	 * 호감도 업!
 	 */
-
-	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
-		boolean status,
-		Long likeCount) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-		this.status = status;
-		this.likeCount = likeCount;
+	public void plusIsLike() {
+		this.likeCount++;
 	}
 
 	/**
-	 * signupUserSuccess() 테스트용 생성자
+	 * 회원정보수정
 	 */
-	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
+	public void updateProfile(String password, String content) {
 		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
+		this.content = content;
+	}
+
+	public void plusTagCount(int number) {
+		this.tagCount += number;
+	}
+
+	public void subTagCount(int number) {
+		this.tagCount -= number;
+	}
+
+	/**
+	 * 소프트 딜리트
+	 */
+	public void softDelete() {
+		this.status = true;
 	}
 }

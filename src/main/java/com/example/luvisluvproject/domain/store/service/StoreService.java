@@ -2,6 +2,8 @@ package com.example.luvisluvproject.domain.store.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
 import com.example.luvisluvproject.domain.store.dto.response.StoreResponse;
@@ -13,8 +15,6 @@ import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
 import lombok.RequiredArgsConstructor;
-
-import org.springframework.stereotype.Service;
 
 /**
  * 가게 등록/수정/삭제 등 비즈니스 로직 처리 서비스
@@ -72,7 +72,6 @@ public class StoreService {
 			.build();
 	}
 
-
 	/**
 	 * 가게 정보 수정
 	 * 주소가 변경되었을 경우, Kakao API를 통해 위도/경도 좌표 갱신
@@ -123,7 +122,6 @@ public class StoreService {
 			.longitude(updated.getLongitude())
 			.build();
 	}
-
 
 	/**
 	 * 가게 삭제 - Hard delete 방식

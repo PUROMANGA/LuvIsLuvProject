@@ -1,11 +1,8 @@
 package com.example.luvisluvproject.domain.chat.entity;
 
-import java.util.List;
-
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.global.common.BaseEntity;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -13,7 +10,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -46,6 +42,11 @@ public class ChatRoom extends BaseEntity {
 		this.deleteCount = deleteCount;
 	}
 
+	public ChatRoom(Member memberB, Member memberA) {
+		this.memberB = memberB;
+		this.memberA = memberA;
+	}
+
 	public Member checkMember(Member me) {
 		Member opponent;
 		if (me.getId().equals(memberA.getId())) {
@@ -56,19 +57,7 @@ public class ChatRoom extends BaseEntity {
 		return opponent;
 	}
 
-	public ChatRoom(Long id, Member memberA, Member memberB, int deleteCount) {
-		this.id = id;
-		this.memberA = memberA;
-		this.memberB = memberB;
-		this.deleteCount = deleteCount;
-	}
-
 	public void plusDeleteCount() {
 		this.deleteCount++;
-	}
-
-	public ChatRoom(Member memberB, Member memberA) {
-		this.memberB = memberB;
-		this.memberA = memberA;
 	}
 }

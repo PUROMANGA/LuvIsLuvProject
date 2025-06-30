@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.auth.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,6 +13,7 @@ import com.example.luvisluvproject.domain.auth.dto.request.SignupUserRequestDto;
 import com.example.luvisluvproject.domain.auth.dto.response.LoginResponseDto;
 import com.example.luvisluvproject.domain.auth.dto.response.SignupResponseDto;
 import com.example.luvisluvproject.domain.auth.service.AuthService;
+import com.example.luvisluvproject.global.common.AuthUser;
 import com.example.luvisluvproject.global.config.JwtUtil;
 import com.example.luvisluvproject.global.success.ApiResponse;
 import com.example.luvisluvproject.global.success.SuccessCode;
@@ -64,9 +66,10 @@ public class AuthController {
 	 */
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<Void>> logout(
-		HttpServletRequest request) {
+		HttpServletRequest request,
+		@AuthenticationPrincipal AuthUser member) {
 		String accessToken = jwtUtil.resolveToken(request);
-		authService.logout(accessToken);
+		authService.logout(accessToken, member.getUsername());
 		ApiResponse<Void> apiResponse = ApiResponse.of(SuccessCode.LOGOUT_SUCCESS, null);
 		return ResponseEntity.ok(apiResponse);
 	}
@@ -77,9 +80,10 @@ public class AuthController {
 	 * @return
 	 */
 	@GetMapping("/refresh")
-	public ResponseEntity<ApiResponse<String>> refresh(HttpServletRequest request) {
+	public ResponseEntity<ApiResponse<String>> refresh(HttpServletRequest request,
+		@AuthenticationPrincipal AuthUser member) {
 		String refreshToken = jwtUtil.resolveToken(request);
-		String accessToken = authService.refreshService(refreshToken);
+		String accessToken = authService.refreshService(refreshToken, member.getUsername());
 		ApiResponse<String> apiResponse = ApiResponse.of(SuccessCode.REFRESH_TOKEN, accessToken);
 		return ResponseEntity.ok(apiResponse);
 	}

@@ -1,13 +1,13 @@
 package com.example.luvisluvproject.domain.store.repository;
 
-import com.example.luvisluvproject.domain.store.entity.Store;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.example.luvisluvproject.domain.store.entity.Store;
 
 /**
  * Store 엔티티에 대한 데이터베이스 접근을 처리하는 JPA Repository 인터페이스
