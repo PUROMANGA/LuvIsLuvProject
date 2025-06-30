@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# Kakao API Key 환경변수 파일 (절대 커밋 금지)
+src/main/resources/static/env.js

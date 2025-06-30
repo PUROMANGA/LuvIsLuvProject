@@ -1,49 +1,37 @@
+### 🙋‍♀️ [회원가입] 일반 유저 회원가입
 POST http://localhost:8080/auth/signup
 Content-Type: application/json
 
 {
   "name": "슬이",
-  "email": "user@example.com",
-  "password": "password1234!",
-  "birthday": "2000-04-15",
-  "userRole": "USER"
-  "birthday": "2000-04-15"
+  "email": "testv@example.com",
+  "password": "TestPassword123!",
+  "birthday": "1998-06-16",
+  "userRole": "MANAGER"
 }
 
+###
 
-### 사장(MANAGER) 회원가입
-POST http://localhost:8080/auth/signup/manager
-Content-Type: application/json
-
-{
-  "name": "매니저",
-  "email": "manager@example.com",
-  "password": "password1234!",
-  "birthday": "2000-04-26"
-}
-
-
-### 관리자(ADMIN) 회원가입
-POST http://localhost:8080/auth/signup/admin
-Content-Type: application/json
-
-{
-  "name": "관리자",
-  "email": "admin@example.com",
-  "password": "password1234!",
-  "birthday": "2000-11-24"
-}
-
-
-### 로그인 요청 (JWT 발급)
+### [로그인] access & refresh 토큰 발급
+# 👉 로그인 후 응답 body에서 accessToken / refreshToken 복사해서 아래에 붙여넣기
 POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-  "email": "manager@example.com",
-  "password": "password1234!"
+  "email": "testv@example.com",
+  "password": "TestPassword123!"
 }
 
-### 로그아웃 요청 (헤더에 토큰 포함)
+###
+
+### [로그아웃] accessToken 필요
 POST http://localhost:8080/auth/logout
-Authorization: Bearer {{YOUR_ACCESS_TOKEN_HERE}}
+Authorization: Bearer {{accessToken}}
+
+###
+
+### [토큰 재발급] refreshToken 필요
+GET http://localhost:8080/auth/refresh
+Authorization: Bearer {{refreshToken}}
+
+###

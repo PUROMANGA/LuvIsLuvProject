@@ -1,6 +1,7 @@
 ### 1. 가게 등록 (MANAGER 권한 필요)
 POST http://localhost:8080/stores
 Content-Type: application/json
+
 Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tIiwidXNlclJvbGUiOiJNQU5BR0VSIiwiaWF0IjoxNzUwMTM5Njk1LCJleHAiOjE3NTAxNDAwNTV9.83NALWQlGXIN12sxmL59wyJttWoRx6j2a6F0Nlh6r3k
 
 {
@@ -9,7 +10,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYW5hZ2VyQGV4YW1wbGUuY29tI
   "contactNumber": "010-1234-5678",
   "address": "서울 구로구 디지털로27길 116",
   "status": "OPEN",
-  "storeType": "BAR"
+  "storeType": "CAFE"
 }
 
 
