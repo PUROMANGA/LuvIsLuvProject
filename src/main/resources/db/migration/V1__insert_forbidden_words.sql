@@ -1,8 +1,4 @@
-CREATE TABLE IF NOT EXISTS "forbidden_words" (
-  "slang" text
-);
-
-INSERT INTO "forbidden_words" ("slang")
+INSERT INTO forbidden_words (word)
 VALUES
 ('ng'),
 ('bitch'),
