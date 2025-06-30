@@ -1,0 +1,24 @@
+### 가게 등록 (multipart/form-data 방식)
+POST http://localhost:8080/stores
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dkBleGFtcGxlLmNvbSIsInVzZXJSb2xlIjoiTUFOQUdFUiIsImlhdCI6MTc1MDc0NTk2MCwiZXhwIjoxNzUwNzQ2MzIwfQ.G-VUk1buFsqpr53XJgxF26xgrNcg4M4zzoQ0AIQIATI
+Content-Type: multipart/form-data; boundary=boundary123
+
+--boundary123
+Content-Disposition: form-data; name="request"
+Content-Type: application/json
+
+{
+  "name": "인생비빔밥2",
+  "businessNumber": 1234567888,
+  "contactNumber": "010-1233-5678",
+  "address": "서울 구로구 디지털로27길 115",
+  "status": "OPEN",
+  "storeType": "CAFE"
+}
+
+--boundary123
+Content-Disposition: form-data; name="images"; filename="test.png"
+Content-Type: image/png
+
+< test.png
+--boundary123--
