@@ -121,6 +121,8 @@ public class JwtUtil {
 		return claims.getSubject();
 	}
 
+
+
 	public Authentication getAuthentication(String token) {
 		String email = getEmail(token); // = subject
 		UserDetails userDetails = userDetailsService.loadUserByUsername(email);

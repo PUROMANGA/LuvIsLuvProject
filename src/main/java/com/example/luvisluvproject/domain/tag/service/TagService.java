@@ -31,7 +31,6 @@ public class TagService {
 	private final TagHandler tagHandler;
 	private final TextValidator textValidator;
 
-
 	public TagService(MemberRepository memberRepository,
 		MemberTagRepository memberTagRepository,
 		@Qualifier("tagRedisTemplate") RedisTemplate<String, Tag> tagRedisTemplate,
@@ -77,7 +76,7 @@ public class TagService {
 		if (countingMemberTag < 30) {
 
 			Set<String> analyzerTagName = textValidator.analyzerName(requestTagNames);
-			if(!textValidator.analyzerText(analyzerTagName)) {
+			if (!textValidator.analyzerText(analyzerTagName)) {
 				throw new RuntimeException("금지단어가 포함되어 있습니다.");
 			}
 

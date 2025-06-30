@@ -59,7 +59,7 @@ public class LogoutTest {
 		LoginRequestDto loginRequestDto = new LoginRequestDto(
 			member.getEmail(), "test1234");
 		loginResponseDto = authService.login(loginRequestDto);
-		authService.logout(loginResponseDto.getAccessToken().substring(7));
+		authService.logout(loginResponseDto.getAccessToken().substring(7), "test@naver.com");
 
 	}
 

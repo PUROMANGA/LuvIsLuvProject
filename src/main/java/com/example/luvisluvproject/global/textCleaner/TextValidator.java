@@ -42,7 +42,7 @@ public class TextValidator {
 
 	public boolean analyzerText(Set<String> filterNames) {
 		for(String tagName : filterNames) {
-			if(Boolean.FALSE.equals(redisTemplate.opsForSet().isMember("banwords", tagName))) {
+			if(Boolean.TRUE.equals(redisTemplate.opsForSet().isMember("banwords", tagName))) {
 				return false;
 			}
 		}

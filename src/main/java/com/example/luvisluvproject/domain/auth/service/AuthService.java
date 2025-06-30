@@ -82,7 +82,12 @@ public class AuthService {
 	 * @param accessToken 로그아웃할 액세스 토큰
 	 */
 	@Transactional
-	public void logout(String accessToken) {
+	public void logout(String accessToken, String email) {
+
+		if (!jwtUtil.extractClaims(accessToken).getSubject().equals(email)) {
+			throw new RuntimeException("권한이 없습니다");
+		}
+
 		if (!jwtUtil.validateToken(accessToken)) {
 			throw new CustomRuntimeException(ExceptionCode.INVALID_TOKEN);
 		}
@@ -97,14 +102,19 @@ public class AuthService {
 	 * @return 새로운 액세스 토큰
 	 */
 	@Transactional
-	public String refreshService(String refreshToken) {
+	public String refreshService(String refreshToken, String email) {
+
 		jwtUtil.validateToken(refreshToken);
-		String email = jwtUtil.extractClaims(refreshToken).getSubject();
+
+		if (!jwtUtil.extractClaims(refreshToken).getSubject().equals(email)) {
+			throw new RuntimeException("권한이 없습니다");
+		}
 
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
 
 		String savedRefreshToken = redisTemplate.opsForValue().get(email);
+
 		if (!refreshToken.equals(savedRefreshToken)) {
 			throw new RuntimeException("부정된 접근입니다.");
 		}

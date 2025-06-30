@@ -89,7 +89,6 @@ public class MatchController {
 	 * @param pageable
 	 * @return
 	 */
-
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<Slice<MatchResponseDto>>> getMatch(
 		@AuthenticationPrincipal AuthUser member,
