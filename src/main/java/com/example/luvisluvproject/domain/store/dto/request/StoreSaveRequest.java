@@ -6,6 +6,7 @@ import com.example.luvisluvproject.domain.store.enums.StoreType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * 가게 등록 요청 DTO
