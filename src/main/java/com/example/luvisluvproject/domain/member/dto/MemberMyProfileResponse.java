@@ -3,6 +3,8 @@ package com.example.luvisluvproject.domain.member.dto;
 import java.time.LocalDate;
 import java.time.Period;
 
+import com.example.luvisluvproject.domain.member.entity.Member;
+
 import lombok.Getter;
 
 @Getter
@@ -20,13 +22,13 @@ public class MemberMyProfileResponse {
 
 	private final String content;
 
-	public MemberMyProfileResponse(Long userId, String name, String email, LocalDate birthday, String content) {
-		this.userId = userId;
-		this.name = name;
-		this.email = email;
-		this.birthday = birthday;
+	public MemberMyProfileResponse(Member member) {
+		this.userId = member.getId();
+		this.name = member.getName();
+		this.email = member.getEmail();
+		this.birthday = member.getBirthday();
 		this.age = calculateAge(birthday);
-		this.content = content;
+		this.content = member.getContent();
 	}
 
 	private int calculateAge(LocalDate birthday) {

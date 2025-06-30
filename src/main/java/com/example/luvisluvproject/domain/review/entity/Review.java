@@ -31,12 +31,12 @@ public class Review extends BaseEntity {
 	// 외래 키 매핑 (Store)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "store_id", nullable = false)
-	private Store storeId;
+	private Store store;
 
 	// 외래 키 매핑 (Member)
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "member_id", nullable = false)
-	private Member memberId;
+	private Member member;
 
 	@Min(1)
 	@Max(5)
@@ -46,18 +46,14 @@ public class Review extends BaseEntity {
 	@Column(nullable = false)
 	private String content;
 
-	public void updateContent(String content) {
+	public Review(Store store, Member member, int rating, String content) {
+		this.store = store;
+		this.member = member;
+		this.rating = rating;
 		this.content = content;
 	}
 
-	public void updateRating(int rating) {
-		this.rating = rating;
-	}
-
-	public Review(Store storeId, Member memberId, int rating, String content) {
-		this.storeId = storeId;
-		this.memberId = memberId;
-		this.rating = rating;
+	public void updateContent(String content) {
 		this.content = content;
 	}
 }

@@ -1,19 +1,24 @@
 package com.example.luvisluvproject.domain.tag.entity;
 
+import java.util.Objects;
+
+import com.example.luvisluvproject.domain.tag.dto.TagRequestDto;
 import com.example.luvisluvproject.domain.tag.enums.TagCategory;
-import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
 import com.example.luvisluvproject.global.common.BaseEntity;
-import jakarta.persistence.*;
-import lombok.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
-@Builder
-@Table(name = "tags", uniqueConstraints = {
-	@UniqueConstraint(columnNames = {"name"})
-})
+@NoArgsConstructor
+@Table(name = "tags")
 public class Tag extends BaseEntity {
 
 	@Id
@@ -21,50 +26,44 @@ public class Tag extends BaseEntity {
 	private Long id;
 
 	/**
-	 * 태그 이름 (예: 캠핑, 고양이, 독서)
+	 * 태그 이름
 	 */
 	@Column(nullable = false, unique = true, length = 50)
 	private String name;
 
 	/**
-	 * 태그 카테고리 (예: 취미, 성격 등)
+	 * 태그 카테고리
 	 */
 	@Column(length = 30)
 	private TagCategory category;
 
-	/**
-	 * 생성 출처: USER 또는 ADMIN
-	 */
-	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
-	private TagCreatedByType createdByType;
-
-	/**
-	 * 사용 여부 (false면 숨김)
-	 */
-	@Builder.Default
-	private boolean active = true;
-
-	/**
-	 * 노출 우선순위 (높을수록 우선 추천)
-	 */
-	@Builder.Default
-	private int priority = 0;
-
-	// name만 수정하는 경우에도 이 메서드를 사용할 수 있음
-	public void update(Tag updated) {
-		this.name = updated.getName();
-		this.category = updated.getCategory();
-		this.createdByType = updated.getCreatedByType();
-		this.active = updated.isActive();
-		this.priority = updated.getPriority();
-	}
-
-	public Tag(String name, TagCategory category, TagCreatedByType createdByType, boolean active) {
+	public Tag(String name, TagCategory category) {
 		this.name = name;
 		this.category = category;
-		this.createdByType = createdByType;
-		this.active = active;
 	}
 
+	public Tag(TagRequestDto tagRequestDto) {
+		this.name = tagRequestDto.getName();
+		this.category = tagRequestDto.getCategory();
+	}
+
+	public Tag(MemberTag memberTag) {
+		this.name = memberTag.getTagName();
+		this.category = memberTag.getCategory();
+	}
+
+	@Override
+	public boolean equals(Object o) {
+		if (this == o)
+			return true;
+		if (!(o instanceof Tag))
+			return false;
+		Tag tag = (Tag)o;
+		return Objects.equals(this.name, tag.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name);
+	}
 }

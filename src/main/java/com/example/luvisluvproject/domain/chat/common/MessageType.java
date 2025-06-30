@@ -6,5 +6,5 @@ import lombok.Getter;
 public enum MessageType {
 	TEXT,
 	IMAGE,
-	ENTER;
+	ENTER
 }

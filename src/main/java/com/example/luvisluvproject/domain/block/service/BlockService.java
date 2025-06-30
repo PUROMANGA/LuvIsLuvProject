@@ -1,9 +1,12 @@
 package com.example.luvisluvproject.domain.block.service;
 
-import com.example.luvisluvproject.domain.block.dto.BlockRequestDto;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.luvisluvproject.domain.block.dto.BlockResponseDto;
 import com.example.luvisluvproject.domain.block.dto.BlockUserDto;
-import com.example.luvisluvproject.domain.block.dto.UnblockResponseDto;
 import com.example.luvisluvproject.domain.block.entity.Block;
 import com.example.luvisluvproject.domain.block.repository.BlockRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
@@ -11,19 +14,10 @@ import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
 public class BlockService {
 
 	private final BlockRepository blockRepository;
@@ -33,76 +27,58 @@ public class BlockService {
 	 * 사용자 차단
 	 */
 	@Transactional
-	public BlockResponseDto blockUser(Long userId, BlockRequestDto dto) {
-		if (userId.equals(dto.getBlockedId())) {
+	public BlockResponseDto blockUser(String email, Long userId) {
+
+		Member blocker = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		if (blocker.getId().equals(userId)) {
 			throw new CustomRuntimeException(ExceptionCode.CANNOT_BLOCK_SELF);
 		}
 
-		Member blocker = memberRepository.findById(userId)
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-
-		Member blocked = memberRepository.findById(dto.getBlockedId())
+		Member blocked = memberRepository.findById(userId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		if (blockRepository.existsByBlockerAndBlocked(blocker, blocked)) {
 			throw new CustomRuntimeException(ExceptionCode.ALREADY_BLOCKED);
 		}
 
-		Block block = Block.builder()
-			.blocker(blocker)
-			.blocked(blocked)
-			.blockUserAccess(dto.isBlockUserAccess())
-			.blockType(dto.getBlockType())
-			.build();
-
+		Block block = new Block(blocker, blocked);
 		blockRepository.save(block);
-
-		return new BlockResponseDto("사용자를 차단했습니다.", blocked.getId(), LocalDateTime.now());
+		return new BlockResponseDto(block);
 	}
 
 	/**
 	 * 사용자 차단 해제
 	 */
 	@Transactional
-	public UnblockResponseDto unblockUser(Long userId, Long blockedId) {
-		Member blocker = memberRepository.findById(userId)
+	public void unblockUser(String email, Long userId) {
+		Member blocker = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		Member blocked = memberRepository.findById(blockedId)
+		Member blocked = memberRepository.findById(userId)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
 		Block block = blockRepository.findByBlockerAndBlocked(blocker, blocked)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.BLOCK_NOT_FOUND));
 
-		block.unblock();
-
-		return new UnblockResponseDto(blocked.getId(), "차단을 해제했습니다.");
+		blockRepository.delete(block);
 	}
 
 	/**
 	 * 차단한 사용자 목록 조회
 	 */
-	@Transactional
-	@PreAuthorize("hasRole('ADMIN')")
-	public List<BlockUserDto> getBlockedUsers(Long userId) {
-		Member blocker = memberRepository.findById(userId)
+	@Transactional(readOnly = true)
+	public Slice<BlockUserDto> getBlockedUsers(String email, Pageable pageable) {
+		Member blocker = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 
-		return blockRepository.findAllByBlocker(blocker).stream()
-			.filter(block -> !block.isUnblocked())
-			.map(block -> {
-				Member target = block.getBlocked();
-				return new BlockUserDto(target.getId(), target.getName(), target.getEmail());
-			})
-			.collect(Collectors.toList());
-	}
+		Slice<BlockUserDto> blockUserDtos = blockRepository.findAllByBlocker(blocker, pageable).map(BlockUserDto::new);
 
-	/**
-	 * 상대방이 나를 차단했는지 여부 확인 (캐싱 적용)
-	 */
-	@Cacheable(value = "profileBlock", key = "#viewer.id + ':' + #target.id")
-	public boolean isProfileBlocked(Member viewer, Member target) {
-		Block block = blockRepository.findByBlockerAndBlocked(target, viewer).orElse(null);
-		return block != null && !block.isUnblocked() && block.isBlockUserAccess();
+		if (blockUserDtos.isEmpty()) {
+			throw new CustomRuntimeException(ExceptionCode.BLOCK_NOT_FOUND);
+		}
+
+		return blockUserDtos;
 	}
 }

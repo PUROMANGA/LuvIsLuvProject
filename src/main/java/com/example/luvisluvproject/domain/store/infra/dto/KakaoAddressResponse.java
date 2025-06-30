@@ -1,11 +1,12 @@
 package com.example.luvisluvproject.domain.store.infra.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-
 import java.util.List;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import lombok.Getter;
 
 /**
  * Kakao 주소 검색 API 응답 구조를 담는 클래스
@@ -16,16 +17,6 @@ public class KakaoAddressResponse {
 
 	@JsonProperty("documents")
 	private List<Document> documents;
-
-	@Getter
-	@JsonIgnoreProperties(ignoreUnknown = true)
-	public static class Document {
-		@JsonProperty("x")
-		private String longitude; // 경도
-
-		@JsonProperty("y")
-		private String latitude; // 위도
-	}
 
 	/**
 	 * 첫 번째 문서의 위도를 Optional로 반환
@@ -52,5 +43,15 @@ public class KakaoAddressResponse {
 			.map(Document::getLongitude)
 			.map(Double::parseDouble)
 			: Optional.empty();
+	}
+
+	@Getter
+	@JsonIgnoreProperties(ignoreUnknown = true)
+	public static class Document {
+		@JsonProperty("x")
+		private String longitude; // 경도
+
+		@JsonProperty("y")
+		private String latitude; // 위도
 	}
 }

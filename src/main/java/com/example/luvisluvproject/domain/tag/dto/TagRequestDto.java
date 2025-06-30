@@ -1,8 +1,10 @@
 package com.example.luvisluvproject.domain.tag.dto;
 
-import com.example.luvisluvproject.domain.tag.enums.TagCreatedByType;
+import com.example.luvisluvproject.domain.tag.entity.Tag;
+import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,28 +15,14 @@ import lombok.NoArgsConstructor;
 public class TagRequestDto {
 
 	/**
-	 * 태그 이름 (예: "캠핑", "독서", "고양이")
+	 * 태그 이름
 	 */
 	@NotBlank(message = "태그 이름은 공백일 수 없습니다.")
 	private String name;
 
 	/**
-	 * 태그 카테고리 (예: "취미", "성격", "라이프스타일")
+	 * 태그 카테고리
 	 */
-	private String category;
-
-	/**
-	 * 생성 출처: 사용자(User), 관리자(Admin)
-	 */
-	private TagCreatedByType createdByType;
-
-	/**
-	 * 태그 활성 상태 (false인 경우 추천, 노출 등 제외)
-	 */
-	private boolean active = true;
-
-	/**
-	 * 노출 우선순위 (높을수록 상단에 추천됨)
-	 */
-	private int priority = 0;
+	@NotNull(message = "태그 카테고리는 공백일 수 없습니다.")
+	private TagCategory category;
 }

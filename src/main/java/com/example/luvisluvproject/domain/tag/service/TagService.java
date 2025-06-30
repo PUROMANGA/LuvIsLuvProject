@@ -1,157 +1,99 @@
 package com.example.luvisluvproject.domain.tag.service;
 
-import com.example.luvisluvproject.domain.member.entity.Member;
-import com.example.luvisluvproject.domain.member.repository.MemberRepository;
-import com.example.luvisluvproject.domain.tag.document.TagDocument;
-import com.example.luvisluvproject.domain.tag.dto.TagRequestDto;
-import com.example.luvisluvproject.domain.tag.dto.TagResponseDto;
-import com.example.luvisluvproject.domain.tag.entity.MemberTag;
-import com.example.luvisluvproject.domain.tag.entity.Tag;
-import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
-import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
-import com.example.luvisluvproject.domain.tag.repository.TagSearchRepository;
-import com.example.luvisluvproject.domain.tag.enums.TagCategory;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
-import org.springframework.data.domain.SliceImpl;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.tag.common.TagHandler;
+import com.example.luvisluvproject.domain.tag.dto.TagRequestDto;
+import com.example.luvisluvproject.domain.tag.entity.MemberTag;
+import com.example.luvisluvproject.domain.tag.entity.Tag;
+import com.example.luvisluvproject.domain.tag.event.MemberTagCreateEvent;
+import com.example.luvisluvproject.domain.tag.event.MemberTagDeleteEvent;
+import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
+import com.example.luvisluvproject.global.textCleaner.TextValidator;
 
 @Service
-@RequiredArgsConstructor
 public class TagService {
-
-	private final TagJpaRepository tagJpaRepository;
 	private final MemberRepository memberRepository;
 	private final MemberTagRepository memberTagRepository;
-	private final TagSearchRepository tagSearchRepository;
+	private final RedisTemplate<String, Tag> tagRedisTemplate;
+	private final ApplicationEventPublisher applicationEventPublisher;
+	private final TagHandler tagHandler;
+	private final TextValidator textValidator;
 
-	/**
-	 * 태그 등록
-	 */
-	public void createTag(List<TagRequestDto> requestDtos, String email) {
-		Member me = memberRepository.findByEmail(email)
-			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		for (TagRequestDto requestDto : requestDtos) {
-			Tag tag = Tag.builder()
-				.name(requestDto.getName())
-				.category(TagCategory.from(requestDto.getCategory()))
-				.createdByType(requestDto.getCreatedByType())
-				.active(requestDto.isActive())
-				.priority(requestDto.getPriority())
-				.build();
-			if (!tagJpaRepository.existsByName(tag.getName())) {
-				tagJpaRepository.save(tag);
-				MemberTag memberTag = new MemberTag(me, tag);
-				memberTagRepository.save(memberTag);
-			} else {
-				Tag savedTag = tagJpaRepository.findByName(tag.getName())
-					.orElseThrow(() -> new RuntimeException("태그가 없습니다."));
-				if (!memberTagRepository.existsByMemberIdAndTagId(me.getId(), savedTag.getId())) {
-					MemberTag memberTag = new MemberTag(me, savedTag);
-					memberTagRepository.save(memberTag);
-				}
-			}
-		}
+	public TagService(MemberRepository memberRepository,
+		MemberTagRepository memberTagRepository,
+		@Qualifier("tagRedisTemplate") RedisTemplate<String, Tag> tagRedisTemplate,
+		ApplicationEventPublisher applicationEventPublisher, TagHandler tagHandler, TextValidator textValidator) {
+		this.memberRepository = memberRepository;
+		this.memberTagRepository = memberTagRepository;
+		this.tagRedisTemplate = tagRedisTemplate;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.tagHandler = tagHandler;
+		this.textValidator = textValidator;
 	}
 
 	/**
-	 * 태그 수정
-	 */
-	public TagResponseDto updateTag(Long tagId, TagRequestDto requestDto) {
-		Tag tag = tagJpaRepository.findById(tagId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 태그가 존재하지 않습니다."));
-
-		tag.update(Tag.builder()
-			.name(requestDto.getName())
-			.category(TagCategory.from(requestDto.getCategory()))
-			.createdByType(requestDto.getCreatedByType())
-			.active(requestDto.isActive())
-			.priority(requestDto.getPriority())
-			.build()
-		);
-
-		Tag updated = tagJpaRepository.save(tag);
-		return TagResponseDto.from(updated);
-	}
-
-	/**
-	 * 태그 삭제
-	 */
-	public void deleteTag(Long tagId) {
-		Tag tag = tagJpaRepository.findById(tagId)
-			.orElseThrow(() -> new IllegalArgumentException("해당 태그를 찾을 수 없습니다."));
-		tagJpaRepository.delete(tag);
-	}
-
-	/**
-	 * 자동완성 검색 - Slice 적용
-	 */
-	public Slice<TagResponseDto> searchTags(String keyword, Pageable pageable) {
-		Slice<TagDocument> documents = tagSearchRepository.searchByName(keyword, pageable);
-
-		List<TagResponseDto> tagDtos = documents.stream()
-			.map(tag -> TagResponseDto.builder()
-				.id(tag.getId())
-				.name(tag.getName())
-				.category(TagCategory.from(tag.getCategory()))
-				.createdByType(tag.getCreatedByType())
-				.active(tag.isActive())
-				.priority(tag.getPriority())
-				.build())
-			.collect(Collectors.toList());
-
-		return new SliceImpl<>(tagDtos, pageable, documents.hasNext());
-	}
-
-	/**
-	 * 사용자에게 태그 할당 - Slice 반환
+	 * 태그 등록, 수정, 삭제
 	 */
 	@Transactional
-	public Slice<TagResponseDto> assignTagsToMember(Long memberId, List<Long> tagIds, Pageable pageable) {
-		Member member = memberRepository.findById(memberId)
+	public void syncTags(List<TagRequestDto> requestDtos, String email) {
+
+		//setUp
+		Member me = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
 
-		memberTagRepository.deleteByMemberId(memberId);
+		//멤버가 소지하고 있는 태그 수
+		int countingMemberTag = memberRepository.findTagCountById(me.getId());
 
-		List<Tag> tags = tagJpaRepository.findAllById(tagIds);
-		List<MemberTag> memberTags = tags.stream()
-			.map(tag -> MemberTag.builder()
-				.member(member)
-				.tag(tag)
-				.build())
-			.collect(Collectors.toList());
+		//태그로 매핑해준 값
+		Set<Tag> requestTags = requestDtos.stream().map(Tag::new).collect(Collectors.toSet());
 
-		memberTagRepository.saveAll(memberTags);
+		//요청으로 들어온 태그 이름들
+		Set<String> requestTagNames = tagHandler.mapSetTagName(requestTags);
 
-		List<TagResponseDto> dtoList = tags.stream()
-			.map(TagResponseDto::from)
-			.collect(Collectors.toList());
+		//레디스의 태그
+		Set<Tag> redisTags = tagRedisTemplate.opsForSet().members("Tag");
 
-		boolean hasNext = dtoList.size() > pageable.getPageSize();
-		List<TagResponseDto> content = hasNext ? dtoList.subList(0, pageable.getPageSize()) : dtoList;
+		//db의 태그
+		Set<MemberTag> dbTags = new HashSet<>(memberTagRepository.findAllByMemberId(me.getId()));
 
-		return new SliceImpl<>(content, pageable, hasNext);
-	}
+		//레디스, db의 태그로 만든 현재 서비스 내 저장된 모든 태그
+		Set<Tag> savedTags = tagHandler.creatTagSet(redisTags, dbTags);
+		savedTags.addAll(requestTags);
 
-	/**
-	 * 사용자 ID로 태그 조회 - Slice 반환
-	 */
-	public Slice<TagResponseDto> getTagsByMemberId(Long memberId, Pageable pageable) {
-		List<MemberTag> memberTags = memberTagRepository.findAllByMemberId(memberId);
+		//로직
+		if (countingMemberTag < 30) {
 
-		List<TagResponseDto> dtoList = memberTags.stream()
-			.map(mt -> TagResponseDto.from(mt.getTag()))
-			.collect(Collectors.toList());
+			Set<String> analyzerTagName = textValidator.analyzerName(requestTagNames);
+			if (!textValidator.analyzerText(analyzerTagName)) {
+				throw new RuntimeException("금지단어가 포함되어 있습니다.");
+			}
 
-		boolean hasNext = dtoList.size() > pageable.getPageSize();
-		List<TagResponseDto> content = hasNext ? dtoList.subList(0, pageable.getPageSize()) : dtoList;
+			Set<Tag> deleteTags = savedTags.stream()
+				.filter(t -> !requestTagNames.contains(t.getName()))
+				.collect(Collectors.toSet());
 
-		return new SliceImpl<>(content, pageable, hasNext);
+			applicationEventPublisher.publishEvent(new MemberTagDeleteEvent(this, me.getId(), deleteTags));
+			applicationEventPublisher.publishEvent(new MemberTagCreateEvent(this, me.getId(), savedTags));
+
+			int countingAfterSavedMemberTag = memberRepository.findTagCountById(me.getId());
+
+			if (countingAfterSavedMemberTag > 30) {
+				throw new RuntimeException("태그는 30개 이상 가질 수 없습니다.");
+			}
+
+			tagRedisTemplate.opsForSet().add("Tag", savedTags.toArray(new Tag[0]));
+		}
 	}
 }

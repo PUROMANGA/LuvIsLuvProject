@@ -14,7 +14,7 @@ public class RequestMessageDto {
 
 	public RequestMessageDto(String content, String fileUrl) {
 		this.content = content;
-		if(fileUrl != null) {
+		if (fileUrl != null) {
 			this.fileUrl = fileUrl;
 			this.messageType = MessageType.IMAGE;
 		} else {

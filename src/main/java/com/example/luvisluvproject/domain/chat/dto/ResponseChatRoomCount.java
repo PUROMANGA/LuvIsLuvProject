@@ -5,7 +5,7 @@ import lombok.Getter;
 @Getter
 
 public class ResponseChatRoomCount {
-	private int chatCount;
+	private final int chatCount;
 
 	public ResponseChatRoomCount(int chatCount) {
 		this.chatCount = chatCount;

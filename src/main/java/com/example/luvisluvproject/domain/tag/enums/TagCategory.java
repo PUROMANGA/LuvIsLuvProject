@@ -1,9 +1,5 @@
 package com.example.luvisluvproject.domain.tag.enums;
 
-/**
- * 태그 카테고리 열거형
- * 예: 취미, 성 정체성, 성적 지향 등
- */
 public enum TagCategory {
 	HOBBY,
 	GENDER_IDENTITY,

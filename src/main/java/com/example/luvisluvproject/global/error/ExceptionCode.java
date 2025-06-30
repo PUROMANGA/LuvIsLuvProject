@@ -41,8 +41,14 @@ public enum ExceptionCode implements ErrorCode {
 	//메세지
 	MESSAGE_NOT_FOUNT(HttpStatus.NOT_FOUND, "메세지를 찾을 수 없습니다."),
 
+	//알람
+	NOTIFY_NOT_FOUNT(HttpStatus.NOT_FOUND, "알람을 찾을 수 없습니다."),
+
 	//채팅
 	CHAT_ROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "채팅방을 찾을 수 없습니다."),
+
+	//멤버태그
+	MEMBER_TAG_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 한 쌍의 멤버 태그가 존재합니다"),
 
 	//차단
 	ALREADY_BLOCKED(HttpStatus.BAD_REQUEST, "이미 차단한 사용자입니다."),

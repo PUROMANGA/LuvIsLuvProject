@@ -5,5 +5,5 @@ import lombok.Getter;
 @Getter
 
 public enum MatchStatus {
-	REJECTED, ACCEPTED;
+	REJECTED, ACCEPTED
 }

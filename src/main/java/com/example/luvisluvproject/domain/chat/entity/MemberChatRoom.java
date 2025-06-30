@@ -29,12 +29,14 @@ public class MemberChatRoom extends BaseEntity {
 	private Long memberId;
 
 	private boolean deleted = false;
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "chat_room_id")
 	private ChatRoom chatRoom;
 
-	public MemberChatRoom(Long memberId, ChatRoom chatRoom) {
+	public MemberChatRoom(Long memberId, boolean deleted, ChatRoom chatRoom) {
 		this.memberId = memberId;
+		this.deleted = deleted;
 		this.chatRoom = chatRoom;
 	}
 }

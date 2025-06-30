@@ -82,6 +82,7 @@ public class StoreService {
 			.build();
 	}
 
+
 	/**
 	 * 가게 정보 및 이미지 수정
 	 * - 주소 변경 시 위도/경도 갱신

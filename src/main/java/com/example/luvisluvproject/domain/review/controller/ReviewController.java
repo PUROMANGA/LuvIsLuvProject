@@ -1,9 +1,10 @@
 package com.example.luvisluvproject.domain.review.controller;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import static org.springframework.data.domain.Sort.Direction.*;
+
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -13,12 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.luvisluvproject.domain.review.dto.ReviewCreateRequestDto;
 import com.example.luvisluvproject.domain.review.dto.ReviewCreateResponseDto;
-import com.example.luvisluvproject.domain.review.dto.ReviewDetailResponseDto;
 import com.example.luvisluvproject.domain.review.dto.ReviewListResponseDto;
 import com.example.luvisluvproject.domain.review.dto.ReviewUpdateRequestDto;
 import com.example.luvisluvproject.domain.review.dto.ReviewUpdateResponseDto;
@@ -39,88 +38,43 @@ public class ReviewController {
 
 	/**
 	 * 리뷰를 생성합니다.
-	 *
-	 * @param authUser     인증된 사용자 정보
-	 * @param storeId      리뷰를 작성할 가게의 ID
-	 * @param requestDto   리뷰 생성 요청 데이터
-	 * @return 생성된 리뷰 ID 및 생성 시간 정보가 담긴 응답
 	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<ReviewCreateResponseDto>> createReview(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long storeId,
-		@RequestBody @Valid ReviewCreateRequestDto requestDto
-	) {
-		ReviewCreateResponseDto responseDto = reviewService.createReview(storeId, authUser, requestDto);
+		@RequestBody @Valid ReviewCreateRequestDto requestDto) {
+		ReviewCreateResponseDto responseDto = reviewService.createReview(storeId, authUser.getUsername(), requestDto);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.CREATE_REVIEW_SUCCESS, responseDto));
 	}
 
 	/**
 	 * 리뷰를 수정합니다. 작성자 본인만 수정할 수 있습니다.
-	 *
-	 * @param authUser     인증된 사용자 정보
-	 * @param storeId      리뷰가 속한 가게의 ID
-	 * @param reviewId     수정할 리뷰의 ID
-	 * @param requestDto   리뷰 수정 요청 데이터
-	 * @return 수정된 리뷰 ID 및 수정 시간 정보가 담긴 응답
 	 */
 	@PutMapping("/{reviewId}")
 	public ResponseEntity<ApiResponse<ReviewUpdateResponseDto>> updateReview(
 		@AuthenticationPrincipal AuthUser authUser,
 		@PathVariable Long storeId,
 		@PathVariable Long reviewId,
-		@RequestBody ReviewUpdateRequestDto requestDto
-	) {
-		ReviewUpdateResponseDto responseDto = reviewService.updateReview(storeId, reviewId, authUser, requestDto);
+		@RequestBody @Valid ReviewUpdateRequestDto requestDto) {
+		ReviewUpdateResponseDto responseDto = reviewService.updateReview(storeId, reviewId, authUser.getUsername(),
+			requestDto);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.UPDATE_REVIEW_SUCCESS, responseDto));
 	}
 
 	/**
-	 * 특정 리뷰의 상세 정보를 조회합니다.
-	 *
-	 * @param storeId   리뷰가 속한 가게의 ID
-	 * @param reviewId  조회할 리뷰의 ID
-	 * @return 리뷰 상세 정보 및 해당 가게의 평균 평점 정보가 담긴 응답
-	 */
-	@GetMapping("/{reviewId}")
-	public ResponseEntity<ApiResponse<ReviewDetailResponseDto>> getReviewDetail(
-		@PathVariable Long storeId,
-		@PathVariable Long reviewId
-	) {
-		ReviewDetailResponseDto responseDto = reviewService.getReviewDetail(storeId, reviewId);
-		return ResponseEntity.ok(ApiResponse.of(SuccessCode.GET_REVIEW_SUCCESS, responseDto));
-	}
-
-	/**
 	 * 특정 가게에 작성된 모든 리뷰 목록을 페이징 및 정렬하여 조회합니다.
-	 * @param storeId 조회할 리뷰가 속한 가게의 ID
-	 * @param page 요청하는 페이지 번호 (사용자 기준 1부터 시작, 기본값: 1)
-	 * @param size 한 페이지에 보여줄 리뷰 개수 (기본값: 3)
-	 * @param sort 정렬 기준 필드명 (기본값: "creatTime")
-	 * @param direction 정렬 방향 (기본값: DESC 내림차순)
-	 * @return 페이지 정보와 함께 리뷰 목록, 성공 메시지를 포함한 ApiResponse를 ResponseEntity로 반환
 	 */
-	@GetMapping
-	public ResponseEntity<ApiResponse<Page<ReviewListResponseDto>>> getAllReviewsByStore(
+	@GetMapping("/reviews")
+	public ResponseEntity<ApiResponse<Slice<ReviewListResponseDto>>> getAllReviewsByStore(
 		@PathVariable Long storeId,
-		@RequestParam(defaultValue = "1") int page,
-		@RequestParam(defaultValue = "3") int size,
-		@RequestParam(defaultValue = "creatTime") String sort,
-		@RequestParam(defaultValue = "DESC") Sort.Direction direction
-	) {
-		// 사용자에게는 1부터 시작하게 하고, 내부적으로는 0부터 시작하도록
-		Pageable pageable = PageRequest.of(page - 1, size, Sort.by(direction, sort));
-		Page<ReviewListResponseDto> responseDto = reviewService.getAllReviewsByStore(storeId, pageable);
+		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
+		Slice<ReviewListResponseDto> responseDto = reviewService.getAllReviewsByStore(storeId, pageable);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.GET_ALL_REVIEWS_SUCCESS, responseDto));
 	}
 
 	/**
 	 * 특정 리뷰를 삭제합니다. 작성자 본인만 삭제할 수 있습니다.
-	 *
-	 * @param authUser  인증된 사용자 정보
-	 * @param storeId   리뷰가 속한 가게의 ID
-	 * @param reviewId  삭제할 리뷰의 ID
-	 * @return 삭제 성공 메시지를 담은 응답
 	 */
 	@DeleteMapping("/{reviewId}")
 	public ResponseEntity<ApiResponse<Void>> deleteReview(
@@ -128,7 +82,7 @@ public class ReviewController {
 		@PathVariable Long storeId,
 		@PathVariable Long reviewId
 	) {
-		reviewService.deleteReview(storeId, reviewId, authUser);
+		reviewService.deleteReview(storeId, reviewId, authUser.getUsername());
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.DELETE_REVIEW_SUCCESS, null));
 	}
 }

@@ -8,8 +8,8 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import com.example.luvisluvproject.domain.chat.common.MessageType;
-import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
 import com.example.luvisluvproject.domain.chat.dto.MessageDto;
+import com.example.luvisluvproject.domain.chat.dto.RequestMessageDto;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.Id;
@@ -44,6 +44,7 @@ public class Message {
 		this.fileUrl = messageDto.getFileUrl();
 		this.messageType = messageDto.getMessageType();
 		this.isRead = false;
+		this.creatTime = messageDto.getCreatTime();
 	}
 
 	public Message(String id, Long chatRoomId, Long senderId, String content, String fileUrl,

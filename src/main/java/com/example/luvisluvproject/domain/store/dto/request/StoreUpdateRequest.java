@@ -2,6 +2,7 @@ package com.example.luvisluvproject.domain.store.dto.request;
 
 import com.example.luvisluvproject.domain.store.enums.StoreStatus;
 import com.example.luvisluvproject.domain.store.enums.StoreType;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -14,17 +15,17 @@ import lombok.Getter;
 public class StoreUpdateRequest {
 
 	@NotBlank(message = "가게 이름은 필수입니다.")
-	private String name;
+	private final String name;
 
-	private String contactNumber;
+	private final String contactNumber;
 
-	private String address;
+	private final String address;
 
 	@NotNull(message = "가게 상태는 필수입니다.")
-	private StoreStatus status;
+	private final StoreStatus status;
 
 	@NotNull(message = "가게 유형은 필수입니다.")
-	private StoreType storeType;
+	private final StoreType storeType;
 
 	/**
 	 * 테스트용 생성자 (편의상 넣음)

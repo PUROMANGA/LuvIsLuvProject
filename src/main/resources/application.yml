@@ -5,6 +5,9 @@ server:
 spring:
   application:
     name: LuvIsLuvProject
+  batch:
+    job:
+      enabled: false
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -12,13 +15,21 @@ spring:
     username: ${MYSQL_USERNAME}
     password: ${MYSQL_PASSWORD}
 
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    locations: classpath:db/migration
+    schemas: ${MYSQL_DATABASE}
+    clean-disabled: true
+
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
-        show_sql: false
+        show_sql: true
         format_sql: true
         use_sql_comments: true
     open-in-view: false
@@ -32,10 +43,6 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/luvisluv
 
-  elasticsearch:
-    rest:
-      uris: http://localhost:9200
-
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
   accessToken:
@@ -48,6 +55,14 @@ logging:
     root: INFO
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql: TRACE
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, prometheus
+  server:
+    port: 9292
 
 # 카카오 API Key
 kakao:

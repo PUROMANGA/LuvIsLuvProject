@@ -2,20 +2,26 @@ package com.example.luvisluvproject.domain.review.dto;
 
 import java.time.LocalDateTime;
 
+import com.example.luvisluvproject.domain.review.entity.Review;
+
 import lombok.Getter;
 
 @Getter
 public class ReviewListResponseDto {
 
 	private final Long reviewId;
+	private final Long storeId;
+	private final Long memberId;
 	private final int rating;
 	private final String content;
-	private final LocalDateTime creatAt;
+	private final LocalDateTime createdAt;
 
-	public ReviewListResponseDto(Long reviewId, int rating, String content, LocalDateTime creatAt) {
-		this.reviewId = reviewId;
-		this.rating = rating;
-		this.content = content;
-		this.creatAt = creatAt;
+	public ReviewListResponseDto(Review review) {
+		this.reviewId = review.getId();
+		this.storeId = review.getStore().getId();
+		this.memberId = review.getMember().getId();
+		this.rating = review.getRating();
+		this.content = review.getContent();
+		this.createdAt = review.getCreatTime();
 	}
 }

@@ -3,7 +3,15 @@ package com.example.luvisluvproject.domain.store.entity;
 import com.example.luvisluvproject.domain.store.enums.StoreStatus;
 import com.example.luvisluvproject.domain.store.enums.StoreType;
 import com.example.luvisluvproject.global.common.BaseEntity;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;

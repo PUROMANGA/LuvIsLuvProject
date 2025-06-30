@@ -1,7 +1,7 @@
 package com.example.luvisluvproject.domain.report.dto;
 
 import com.example.luvisluvproject.domain.report.entity.ReportReason;
-import com.example.luvisluvproject.domain.report.entity.ReportTargetType;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,11 +14,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ReportRequestDto {
-
-	/**
-	 * 신고 대상의 타입 (예: USER, MESSAGE 등)
-	 */
-	private ReportTargetType targetType;
 
 	/**
 	 * 신고 대상의 고유 ID
