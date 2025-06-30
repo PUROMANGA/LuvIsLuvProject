@@ -71,70 +71,34 @@ public class Member extends BaseEntity {
 	@OneToMany(mappedBy = "member")
 	private List<MemberTag> memberTagList;
 
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-	}
-
-	// 일반 유저 생성시 사용하는 생성자
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, String content) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-		this.status = false;
-		this.likeCount = 0L;
-		this.reportCount = 0;
-		this.content = content;
-	}
-
-	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
-		boolean status,
-		Long likeCount) {
-		this.id = id;
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-		this.status = status;
-		this.likeCount = likeCount;
-	}
-
 	/**
 	 * 호감도 업!
 	 */
-
 	public void plusIsLike() {
 		this.likeCount++;
 	}
 
+	/**
+	 * 비밀번호 수정
+	 */
 	public void updatePassword(String password) {
 		this.password = password;
 	}
 
+	/**
+	 * 내용 수정
+	 */
 	public void updateContent(String content) {
 		this.content = content;
 	}
 
+	/**
+	 * 소프트 딜리트
+	 */
 	public void softDelete() {
 		this.status = true;
 	}
 
-	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
-		Long likeCount) {
-		this.name = name;
-		this.email = email;
-		this.password = password;
-		this.birthday = birthday;
-		this.userRole = userRole;
-		this.status = status;
-		this.likeCount = likeCount;
-	}
 
 	// 신고 횟수 증가 및 제한 설정
 	public void increaseReportCount() {
@@ -147,6 +111,46 @@ public class Member extends BaseEntity {
 	// 활동 제한 상태인지 확인
 	public boolean isRestricted() {
 		return this.restrictedUntil != null && this.restrictedUntil.isAfter(LocalDateTime.now());
+	}
+
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.likeCount = 0L;
+	}
+
+	/**
+	 * 테스트용 생성자
+	 */
+	public Member(String name, String email, String password, LocalDate birthday, UserRole userRole, boolean status,
+		Long likeCount) {
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = status;
+		this.likeCount = likeCount;
+	}
+
+	/**
+	 * 테스트용 생성자
+	 */
+
+	public Member(Long id, String name, String email, String password, LocalDate birthday, UserRole userRole,
+		boolean status,
+		Long likeCount) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.password = password;
+		this.birthday = birthday;
+		this.userRole = userRole;
+		this.status = status;
+		this.likeCount = likeCount;
 	}
 
 	/**

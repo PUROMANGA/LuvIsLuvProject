@@ -111,7 +111,7 @@ public class AuthService {
 	@Transactional
 	public String refreshService(String refreshToken) {
 		jwtUtil.validateToken(refreshToken);
-		String email = jwtUtil.getEmail(refreshToken);
+		String email = jwtUtil.extractClaims(refreshToken).getSubject();
 
 		Member member = memberRepository.findByEmail(email)
 			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MEMBER_NOT_FOUND));
