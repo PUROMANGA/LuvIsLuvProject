@@ -21,6 +21,7 @@ import com.example.luvisluvproject.domain.match.entity.MatchStatus;
 import com.example.luvisluvproject.domain.match.repository.MatchRepository;
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
+import com.example.luvisluvproject.domain.memberInteractionLog.event.MemberInteractionLogEvent;
 import com.example.luvisluvproject.domain.notify.NotifyCategory;
 import com.example.luvisluvproject.domain.notify.dto.NotifyDto;
 import com.example.luvisluvproject.domain.notify.event.NotifyChatEvent;
@@ -34,17 +35,31 @@ import com.example.luvisluvproject.global.redis.RedisPublisher;
 import lombok.RequiredArgsConstructor;
 
 @Service
-@RequiredArgsConstructor
 
 public class MatchService {
 
 	private final MatchRepository matchRepository;
 	private final MemberRepository memberRepository;
 	private final RedisTemplate<String, Object> matchRedisTemplate;
+	private final RedisTemplate<String, String> stringRedisTemplate;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final MemberTagRepository memberTagRepository;
 	private final RedisPublisher redisPublisher;
 	private final MatchHandler matchHandler;
+
+	public MatchService(MatchRepository matchRepository, MemberRepository memberRepository,
+		RedisTemplate<String, Object> matchRedisTemplate, RedisTemplate<String, String> stringRedisTemplate,
+		ApplicationEventPublisher applicationEventPublisher, MemberTagRepository memberTagRepository,
+		RedisPublisher redisPublisher, MatchHandler matchHandler) {
+		this.matchRepository = matchRepository;
+		this.memberRepository = memberRepository;
+		this.matchRedisTemplate = matchRedisTemplate;
+		this.stringRedisTemplate = stringRedisTemplate;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.memberTagRepository = memberTagRepository;
+		this.redisPublisher = redisPublisher;
+		this.matchHandler = matchHandler;
+	}
 
 	/**
 	 * 매칭 시스템
@@ -53,8 +68,11 @@ public class MatchService {
 	 */
 	@Transactional(readOnly = true)
 	public List<ResponseMatchMemberDto> getMatchMemberListService(String email) {
+		Member me = memberRepository.findByEmail(email)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
 		List<ResponseMatchMemberDto> matchMemberDtoList = memberTagRepository.findResponseMatchMemberDtoFindByEmail(
 			email);
+		stringRedisTemplate.opsForZSet().incrementScore(me.getId().toString(), "GetMatchCount", 1);
 		return matchMemberDtoList;
 	}
 
@@ -85,6 +103,9 @@ public class MatchService {
 
 		matchRedisTemplate.opsForSet().add(redisKey, match);
 		applicationEventPublisher.publishEvent(new NotifyMatchSubEvent(this, me, receiverMember));
+		applicationEventPublisher.publishEvent(new MemberInteractionLogEvent(this, me, receiverMember));
+		stringRedisTemplate.opsForZSet().incrementScore(me.getId().toString(), "MatchRequestCount", 1);
+		stringRedisTemplate.opsForZSet().incrementScore(receiverMember.getId().toString(), "MatchReceivedCount", 1);
 		return new MatchResponseDto(me, receiverMember, match);
 	}
 
@@ -108,11 +129,11 @@ public class MatchService {
 		if (acceptMatchDto.getMatchStatus().equals(MatchStatus.ACCEPTED)) {
 			Set<Object> matchCache = matchRedisTemplate.opsForSet().members(me.getId().toString());
 			Match newMatch = matchHandler.mapMatchForRedis(matchCache, acceptMatchDto, senderId);
-			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, sender.getId(), me.getId()));
-			applicationEventPublisher.publishEvent(new NotifyMatchEvent(this, me, sender));
-
 			matchRedisTemplate.delete(me.getId().toString());
 			matchRepository.save(newMatch);
+			applicationEventPublisher.publishEvent(new ChatCreateEvent(this, sender.getId(), me.getId()));
+			applicationEventPublisher.publishEvent(new NotifyMatchEvent(this, me, sender));
+			applicationEventPublisher.publishEvent(new MemberInteractionLogEvent(this, me, sender));
 			return new MatchResponseDto(sender, me, newMatch);
 		} else {
 			//나 들고오기

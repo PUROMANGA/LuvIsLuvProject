@@ -42,8 +42,7 @@ public class StoreController {
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<ApiResponse<StoreResponse>> saveStore(
 		@RequestPart("request") @Valid StoreSaveRequest request,
-		@RequestPart(value = "images", required = false) List<MultipartFile> images
-	) {
+		@RequestPart(value = "images", required = false) List<MultipartFile> images) {
 		StoreResponse response = storeService.saveStore(request, images);
 		return ResponseEntity.ok(ApiResponse.of(SuccessCode.STORE_CREATED, response));
 	}

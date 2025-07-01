@@ -23,7 +23,6 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -36,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	public JwtFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,
-		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate) {
+		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> redisTemplate) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsService;
 		this.redisTemplate = redisTemplate;

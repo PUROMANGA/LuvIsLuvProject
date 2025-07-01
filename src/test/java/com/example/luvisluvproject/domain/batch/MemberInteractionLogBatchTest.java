@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -19,42 +20,45 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
-import com.example.luvisluvproject.domain.tag.entity.Tag;
-import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
-import com.example.luvisluvproject.global.batch.TagBatchConfig;
-import com.example.luvisluvproject.global.batch.TagRedisReader;
-import com.example.luvisluvproject.global.batch.TagWriter;
+import com.example.luvisluvproject.domain.memberInteractionLog.repository.MemberInteractionLogRepository;
+import com.example.luvisluvproject.global.batch.memberInteractionLog.MemberInteractionLogConfig;
+import com.example.luvisluvproject.global.batch.memberInteractionLog.MemberInteractionLogReader;
+import com.example.luvisluvproject.global.batch.memberInteractionLog.MemberInteractionLogWriter;
 
 @ActiveProfiles("test")
 @SpringBatchTest
 @SpringBootTest
-public class batchTagTest {
+public class MemberInteractionLogBatchTest {
 
 	@Autowired
 	private JobLauncherTestUtils jobLauncherTestUtils;
 
 	@Autowired
-	private Job footballJob;
+	private Job memberInteractionLogSaveJob;
 
 	@Autowired
-	private RedisTemplate<String, Tag> tagRedisTemplate;
+	private RedisTemplate<String, String> stringStringRedisTemplate;
 
 	@Autowired
-	private TagJpaRepository tagJpaRepository;
+	private MemberInteractionLogRepository memberInteractionLogRepository;
 
 	@Autowired
-	private TagRedisReader tagRedisReader;
+	private MemberInteractionLogReader memberInteractionLogReader;
 
 	@Autowired
-	private TagWriter tagWriter;
+	private MemberInteractionLogWriter memberInteractionLogWriter;
 
 	@Autowired
-	private TagBatchConfig tagBatchConfig;
+	private MemberInteractionLogConfig memberInteractionLogConfig;
+
+	@BeforeEach
+	void setUp() {
+		jobLauncherTestUtils.setJob(memberInteractionLogSaveJob);
+	}
 
 	@Test
-	@DisplayName("태그 배치 전체 테스트")
-	void tagBatchTest() throws Exception {
-
+	@DisplayName("유저 정보 인터페이스 전체 테스트")
+	void memberInteractionLogTest() throws Exception {
 		//given
 		Map<String, JobParameter<?>> parameterMap = new HashMap<>();
 		parameterMap.put("time", new JobParameter<>(System.currentTimeMillis(), Long.class));

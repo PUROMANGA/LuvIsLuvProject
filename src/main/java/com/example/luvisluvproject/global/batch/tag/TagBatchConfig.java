@@ -1,4 +1,4 @@
-package com.example.luvisluvproject.global.batch;
+package com.example.luvisluvproject.global.batch.tag;
 
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -20,16 +20,16 @@ public class TagBatchConfig {
 	private final TagRedisReader tagRedisReader;
 	private final TagWriter tagWriter;
 
-	@Bean
-	public Job footballJob(JobRepository jobRepository, Step step) {
+	@Bean(name = "tagSaveJob")
+	public Job tagSaveJob(JobRepository jobRepository, Step tagStep) {
 		return new JobBuilder("tagSaveJob", jobRepository)
-			.start(step)
+			.start(tagStep)
 			.build();
 	}
 
-	@Bean
-	public Step step(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
-		return new StepBuilder("TagSaveJob", jobRepository)
+	@Bean(name = "tagStep")
+	public Step tagStep(JobRepository jobRepository, PlatformTransactionManager transactionManager) {
+		return new StepBuilder("tagStep", jobRepository)
 			.<Tag, Tag>chunk(100, transactionManager)
 			.reader(tagRedisReader)
 			.writer(tagWriter)

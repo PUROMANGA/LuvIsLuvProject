@@ -17,7 +17,7 @@ public class ForbiddenRedis implements CommandLineRunner {
 	private final RedisTemplate<String, String> redisTemplate;
 
 	//토큰템플릿이라 적혀있지만 스트링-스트링 구조의 레디스 템플릿임
-	public ForbiddenRedis(ForbiddenWordRepository forbiddenWordRepository, @Qualifier("tokenRedisTemplate")RedisTemplate<String, String> redisTemplate) {
+	public ForbiddenRedis(ForbiddenWordRepository forbiddenWordRepository, @Qualifier("stringRedisTemplate")RedisTemplate<String, String> redisTemplate) {
 		this.forbiddenWordRepository = forbiddenWordRepository;
 		this.redisTemplate = redisTemplate;
 	}

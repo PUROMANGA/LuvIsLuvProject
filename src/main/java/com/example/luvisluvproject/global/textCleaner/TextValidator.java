@@ -19,7 +19,7 @@ public class TextValidator {
 	private final Komoran komoran;
 
 	//토큰템플릿이라 적혀있지만 스트링-스트링 구조의 레디스 템플릿임
-	public TextValidator(TextValidatorHandler textValidatorHandler, @Qualifier("tokenRedisTemplate")RedisTemplate<String, String> redisTemplate,
+	public TextValidator(TextValidatorHandler textValidatorHandler, @Qualifier("stringRedisTemplate")RedisTemplate<String, String> redisTemplate,
 		Komoran komoran) {
 		this.textValidatorHandler = textValidatorHandler;
 		this.redisTemplate = redisTemplate;
