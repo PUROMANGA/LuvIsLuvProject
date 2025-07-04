@@ -41,7 +41,7 @@ public class MatchController {
 	private final RedisTemplate<String, Object> redisTemplate;
 
 	/**
-	 * 매칭을 해줍니다
+	 * 매칭 가져오기
 	 */
 	@GetMapping
 	public ResponseEntity<ApiResponse<List<ResponseMatchMemberDto>>> getMatchMemberList(

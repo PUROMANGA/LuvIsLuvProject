@@ -94,7 +94,7 @@ public class LogoutTest {
 			String accessToken = loginResponseDto.getAccessToken().substring(7);
 			String refreshToken = loginResponseDto.getRefreshToken().substring(7);
 			Thread.sleep(1100);
-			String newAccessToken = authService.refreshService(refreshToken);
+			String newAccessToken = authService.refreshService(refreshToken, "test@naver.com");
 
 			assertThat(newAccessToken.substring(7)).isNotEqualTo(accessToken);
 		}

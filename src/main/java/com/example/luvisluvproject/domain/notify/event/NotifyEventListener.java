@@ -6,10 +6,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
+import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.notify.NotifyCategory;
+import com.example.luvisluvproject.domain.notify.common.NotifyFactory;
 import com.example.luvisluvproject.domain.notify.dto.NotifyDto;
 import com.example.luvisluvproject.domain.notify.entity.Notify;
 import com.example.luvisluvproject.domain.notify.repository.NotifyRepository;
+import com.example.luvisluvproject.global.error.CustomRuntimeException;
+import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.example.luvisluvproject.global.redis.RedisPublisher;
 
 import lombok.RequiredArgsConstructor;
@@ -20,6 +24,8 @@ public class NotifyEventListener {
 
 	private final NotifyRepository notifyRepository;
 	private final RedisPublisher redisPublisher;
+	private final MemberRepository memberRepository;
+	private final NotifyFactory notifyFactory;
 
 	@Async
 	@EventListener
@@ -56,6 +62,25 @@ public class NotifyEventListener {
 
 		NotifyDto notifyDto = new NotifyDto(me, opponent, NotifyCategory.Message, false);
 		Notify notify = new Notify(notifyDto, opponent, me);
+		notifyRepository.save(notify);
+		redisPublisher.publishNotify(notifyDto);
+	}
+
+	@Async
+	@EventListener
+	@Transactional
+	public void handlerNotifyLogEventListener(NotifyLogEvent notifyLogEvent) {
+		System.out.println("====================================================");
+		System.out.println("📡 [이벤트 수신] LOG 알림 이벤트 수신");
+
+		Long memberId = notifyLogEvent.getMemberId();
+		Member me = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		System.out.println("📨 관리자 → 사용자 알림: " + me.getId());
+
+		NotifyDto notifyDto = notifyFactory.adminToMemberNotifyDto(me, NotifyCategory.LOG, false);
+		Notify notify = notifyFactory.adminToMemberNotify(notifyDto, me);
 		notifyRepository.save(notify);
 		redisPublisher.publishNotify(notifyDto);
 	}

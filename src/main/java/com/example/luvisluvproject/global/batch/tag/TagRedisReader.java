@@ -1,4 +1,4 @@
-package com.example.luvisluvproject.global.batch;
+package com.example.luvisluvproject.global.batch.tag;
 
 import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.NonTransientResourceException;

@@ -8,7 +8,7 @@ import lombok.Getter;
 
 public class AcceptMatchDto {
 
-	private final MatchStatus matchStatus;
+	private MatchStatus matchStatus;
 
 	public AcceptMatchDto(MatchStatus matchStatus) {
 		this.matchStatus = matchStatus;

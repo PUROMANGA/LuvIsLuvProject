@@ -15,4 +15,6 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, Cus
 	List<MemberTag> findAllByMemberId(Long memberId);
 
 	boolean existsByMemberIdAndTagNameIn(Long memberId, Set<String> tagName);
+
+	Optional<MemberTag> findByMemberIdAndTagName(Long memberId, String tagName);
 }

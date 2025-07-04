@@ -1,3 +1,8 @@
+ALTER TABLE forbidden_words
+    MODIFY word VARCHAR(255)
+        CHARACTER SET utf8mb4
+        COLLATE utf8mb4_bin;
+
 INSERT INTO forbidden_words (word)
 VALUES
 ('ng'),

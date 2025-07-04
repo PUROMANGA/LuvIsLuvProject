@@ -2,6 +2,9 @@ package com.example.luvisluvproject.domain.store.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.example.luvisluvproject.domain.image.service.ImageService;
 import com.example.luvisluvproject.domain.store.dto.request.StoreSaveRequest;
 import com.example.luvisluvproject.domain.store.dto.request.StoreUpdateRequest;
@@ -12,10 +15,8 @@ import com.example.luvisluvproject.domain.store.infra.dto.KakaoAddressResponse;
 import com.example.luvisluvproject.domain.store.repository.StoreRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
-import lombok.RequiredArgsConstructor;
 
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 /**
  * 가게 등록/수정/삭제 등 비즈니스 로직 처리 서비스
@@ -81,7 +82,6 @@ public class StoreService {
 			.longitude(saved.getLongitude())
 			.build();
 	}
-
 
 	/**
 	 * 가게 정보 및 이미지 수정

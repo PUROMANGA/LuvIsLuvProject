@@ -1,4 +1,4 @@
-package com.example.luvisluvproject.global.batch;
+package com.example.luvisluvproject.global.batch.tag;
 
 import java.util.List;
 

@@ -31,8 +31,8 @@ public class RedisConfig {
 		return template;
 	}
 
-	@Bean
-	public RedisTemplate<String, String> tokenRedisTemplate(RedisConnectionFactory connectionFactory) {
+	@Bean(name = "customStringRedisTemplate")
+	public RedisTemplate<String, String> customStringRedisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
@@ -40,7 +40,7 @@ public class RedisConfig {
 		return template;
 	}
 
-	@Bean
+	@Bean(name = "tagRedisTemplate")
 	public RedisTemplate<String, Tag> tagRedisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Tag> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);

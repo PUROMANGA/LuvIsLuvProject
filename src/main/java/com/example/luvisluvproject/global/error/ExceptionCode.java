@@ -15,6 +15,7 @@ public enum ExceptionCode implements ErrorCode {
 	// auth
 	EMAIL_ALREADY_EXIST(HttpStatus.CONFLICT, "중복된 이메일입니다."),
 	NAME_ALREADY_EXIST(HttpStatus.CONFLICT, "중복된 닉네임입니다."),
+	UNAUTHORIZED_ACCESS(HttpStatus.BAD_REQUEST, "허용되지 않은 접근입니다."),
 	USER_ROLE_NOT_FOUND(HttpStatus.NOT_FOUND, "지원하지 않는 사용자 역할입니다."),
 	LOGIN_FAILED(HttpStatus.UNAUTHORIZED, "이메일 혹은 비밀번호가 올바르지 않습니다."),
 	INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),

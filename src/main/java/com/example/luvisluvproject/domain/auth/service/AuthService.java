@@ -1,5 +1,6 @@
 package com.example.luvisluvproject.domain.auth.service;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -33,7 +34,7 @@ public class AuthService {
 	private final AuthServiceHelper authServiceHelper;
 
 	public AuthService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-		@Qualifier("tokenRedisTemplate") RedisTemplate<String, String> redisTemplate,
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> redisTemplate,
 		AuthServiceHelper authServiceHelper) {
 		this.memberRepository = memberRepository;
 		this.passwordEncoder = passwordEncoder;
@@ -73,6 +74,8 @@ public class AuthService {
 		long expiration = jwtUtil.getExpiration(refreshToken);
 
 		redisTemplate.opsForValue().set(member.getEmail(), refreshToken, expiration, TimeUnit.MILLISECONDS);
+		redisTemplate.opsForSet().add("MemberId", member.getId().toString());
+		redisTemplate.expire("MemberId", Duration.ofHours(25));
 		return new LoginResponseDto(member.getId(), "Bearer " + accessToken, "Bearer " + refreshToken);
 	}
 

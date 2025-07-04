@@ -1,7 +1,6 @@
 package com.example.luvisluvproject.domain.chat.service;
 
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -24,15 +23,11 @@ import com.example.luvisluvproject.domain.chat.repository.MemberChatRoomReposito
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.notify.event.NotifyChatEvent;
-import com.example.luvisluvproject.domain.notify.repository.NotifyRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 import com.example.luvisluvproject.global.redis.RedisPublisher;
 
-import lombok.RequiredArgsConstructor;
-
 @Service
-@RequiredArgsConstructor
 
 public class ChatService {
 
@@ -42,11 +37,28 @@ public class ChatService {
 	private final MessageRepository messageRepository;
 	private final MemberChatRoomRepository memberChatRoomRepository;
 	private final RedisPublisher redisPublisher;
-	private final Map<String, String> stompToWebSocketMap;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
 	private final RedisTemplate<String, Object> redisTemplate;
-	private final NotifyRepository notifyRepository;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final ChatHandler chatHandler;
+
+	public ChatService(SimpMessagingTemplate simpMessagingTemplate, ChatRoomRepository chatRoomRepository,
+		MemberRepository memberRepository, MessageRepository messageRepository,
+		MemberChatRoomRepository memberChatRoomRepository, RedisPublisher redisPublisher,
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> customStringRedisTemplate,
+		RedisTemplate<String, Object> redisTemplate,
+		ApplicationEventPublisher applicationEventPublisher, ChatHandler chatHandler) {
+		this.simpMessagingTemplate = simpMessagingTemplate;
+		this.chatRoomRepository = chatRoomRepository;
+		this.memberRepository = memberRepository;
+		this.messageRepository = messageRepository;
+		this.memberChatRoomRepository = memberChatRoomRepository;
+		this.redisPublisher = redisPublisher;
+		this.customStringRedisTemplate = customStringRedisTemplate;
+		this.redisTemplate = redisTemplate;
+		this.applicationEventPublisher = applicationEventPublisher;
+		this.chatHandler = chatHandler;
+	}
 
 	/**
 	 * chats/message에 프론트에서 입력된 메세지를 발행
@@ -64,7 +76,7 @@ public class ChatService {
 		Message message = new Message(messageDto);
 		messageRepository.save(message);
 
-		String webSocketSessionId = stompToWebSocketMap.get(email);
+		String webSocketSessionId = customStringRedisTemplate.opsForValue().get(email);
 
 		if (redisTemplate.opsForSet().members(webSocketSessionId) == null) {
 			applicationEventPublisher.publishEvent(new NotifyChatEvent(this, me, opponent));

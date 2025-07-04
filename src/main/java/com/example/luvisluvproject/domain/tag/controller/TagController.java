@@ -9,10 +9,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.luvisluvproject.domain.review.dto.ReviewCreateResponseDto;
 import com.example.luvisluvproject.domain.tag.dto.TagRequestDto;
 // import com.example.luvisluvproject.domain.tag.dto.TagResponseDto;
 import com.example.luvisluvproject.domain.tag.service.TagService;
 import com.example.luvisluvproject.global.common.AuthUser;
+import com.example.luvisluvproject.global.success.ApiResponse;
+import com.example.luvisluvproject.global.success.SuccessCode;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -31,15 +34,14 @@ public class TagController {
 	 * 유저가 직접 태그 생성
 	 */
 	@PostMapping("/tags")
-	public ResponseEntity<String> createTag(@RequestBody @Valid List<TagRequestDto> requestDto,
+	public ResponseEntity<ApiResponse<Void>> createTag(@RequestBody @Valid List<TagRequestDto> requestDto,
 		@AuthenticationPrincipal AuthUser user) {
 		if(requestDto.size() > 30) {
 			throw new RuntimeException("태그는 한 번에 30개까지 입력할 수 있습니다.");
 		}
 		tagService.syncTags(requestDto, user.getUsername());
-		return ResponseEntity.ok("태그가 저장되었습니다.");
+		return ResponseEntity.ok(ApiResponse.of(SuccessCode.CREATE_TAG_REQUEST_SUCCESS));
 	}
-
 
 	//
 	// /**

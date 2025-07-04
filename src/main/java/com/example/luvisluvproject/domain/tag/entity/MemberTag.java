@@ -4,6 +4,8 @@ import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.tag.enums.TagCategory;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -21,7 +23,7 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "member_tags",
 	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"member_id", "tag_id"})
+		@UniqueConstraint(columnNames = {"member_id", "tag_name"})
 	}
 )
 public class MemberTag {
@@ -34,6 +36,7 @@ public class MemberTag {
 
 	private String tagName;
 
+	@Enumerated(EnumType.STRING)
 	private TagCategory category;
 
 	public MemberTag(Long memberId, String tagName, TagCategory category) {

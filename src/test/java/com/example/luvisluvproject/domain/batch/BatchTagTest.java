@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.batch.core.BatchStatus;
@@ -21,20 +22,20 @@ import org.springframework.test.context.ActiveProfiles;
 
 import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
-import com.example.luvisluvproject.global.batch.TagBatchConfig;
-import com.example.luvisluvproject.global.batch.TagRedisReader;
-import com.example.luvisluvproject.global.batch.TagWriter;
+import com.example.luvisluvproject.global.batch.tag.TagBatchConfig;
+import com.example.luvisluvproject.global.batch.tag.TagRedisReader;
+import com.example.luvisluvproject.global.batch.tag.TagWriter;
 
 @ActiveProfiles("test")
 @SpringBatchTest
 @SpringBootTest
-public class batchTagTest {
+public class BatchTagTest {
 
 	@Autowired
 	private JobLauncherTestUtils jobLauncherTestUtils;
 
 	@Autowired
-	private Job footballJob;
+	private Job tagSaveJob;
 
 	@Autowired
 	private RedisTemplate<String, Tag> tagRedisTemplate;
@@ -50,6 +51,11 @@ public class batchTagTest {
 
 	@Autowired
 	private TagBatchConfig tagBatchConfig;
+
+	@BeforeEach
+	void setUp() {
+		jobLauncherTestUtils.setJob(tagSaveJob);
+	}
 
 	@Test
 	@DisplayName("태그 배치 전체 테스트")
