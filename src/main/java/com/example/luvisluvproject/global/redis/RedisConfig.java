@@ -31,8 +31,8 @@ public class RedisConfig {
 		return template;
 	}
 
-	@Bean(name = "stringRedisTemplate")
-	public RedisTemplate<String, String> stringRedisTemplate(RedisConnectionFactory connectionFactory) {
+	@Bean(name = "customStringRedisTemplate")
+	public RedisTemplate<String, String> customStringRedisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, String> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
@@ -43,15 +43,6 @@ public class RedisConfig {
 	@Bean(name = "tagRedisTemplate")
 	public RedisTemplate<String, Tag> tagRedisTemplate(RedisConnectionFactory connectionFactory) {
 		RedisTemplate<String, Tag> template = new RedisTemplate<>();
-		template.setConnectionFactory(connectionFactory);
-		template.setKeySerializer(new StringRedisSerializer());
-		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());
-		return template;
-	}
-
-	@Bean
-	public RedisTemplate<String, Long> idRedisTemplate(RedisConnectionFactory connectionFactory) {
-		RedisTemplate<String, Long> template = new RedisTemplate<>();
 		template.setConnectionFactory(connectionFactory);
 		template.setKeySerializer(new StringRedisSerializer());
 		template.setValueSerializer(new GenericJackson2JsonRedisSerializer());

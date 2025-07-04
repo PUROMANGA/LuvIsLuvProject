@@ -35,7 +35,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	private final AntPathMatcher pathMatcher = new AntPathMatcher();
 
 	public JwtFilter(JwtUtil jwtUtil, UserDetailsServiceImpl userDetailsService,
-		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> redisTemplate) {
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> redisTemplate) {
 		this.jwtUtil = jwtUtil;
 		this.userDetailsService = userDetailsService;
 		this.redisTemplate = redisTemplate;

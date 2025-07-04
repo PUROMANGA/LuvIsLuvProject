@@ -22,15 +22,15 @@ public class MemberInteractionLogEventListener {
 
 	private final MemberRepository memberRepository;
 	private final MemberTagRepository memberTagRepository;
-	private final RedisTemplate<String, String> stringRedisTemplate;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
 	private final MemberInteractionLogRepository memberInteractionLogRepository;
 
 	public MemberInteractionLogEventListener(MemberRepository memberRepository, MemberTagRepository memberTagRepository,
-		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> stringRedisTemplate,
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> customStringRedisTemplate,
 		MemberInteractionLogRepository memberInteractionLogRepository) {
 		this.memberRepository = memberRepository;
 		this.memberTagRepository = memberTagRepository;
-		this.stringRedisTemplate = stringRedisTemplate;
+		this.customStringRedisTemplate = customStringRedisTemplate;
 		this.memberInteractionLogRepository = memberInteractionLogRepository;
 	}
 
@@ -45,11 +45,12 @@ public class MemberInteractionLogEventListener {
 		List<MemberTag> memberTags = memberTagRepository.findAllByMemberId(opponent.getId());
 
 		List<MemberTag> filterTags = memberTags.stream()
-			.filter(t -> t.getCategory() == TagCategory.SEXUAL_ORIENTATION )
+			.filter(t -> t.getCategory() == TagCategory.SEXUAL_ORIENTATION)
 			.toList();
 
 		for (MemberTag memberTag : filterTags) {
-			stringRedisTemplate.opsForZSet().incrementScore(me.getId() + "forTag", memberTag.getTagName(), 1);
+			customStringRedisTemplate.opsForZSet()
+				.incrementScore(me.getId() + "forTag", memberTag.getTagName(), 1);
 		}
 	}
 }

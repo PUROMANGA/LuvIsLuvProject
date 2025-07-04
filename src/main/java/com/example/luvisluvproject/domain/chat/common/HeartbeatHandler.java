@@ -16,7 +16,7 @@ public class HeartbeatHandler {
 	private final RedisTemplate<String, String> stompRedistemplate;
 	Map<String, Long> lastHeartbeatMap = new ConcurrentHashMap<>();
 
-	public HeartbeatHandler(RedisTemplate<String, Object> redisTemplate, @Qualifier("stringRedisTemplate")RedisTemplate<String, String> stompRedistemplate) {
+	public HeartbeatHandler(RedisTemplate<String, Object> redisTemplate, @Qualifier("customStringRedisTemplate")RedisTemplate<String, String> stompRedistemplate) {
 		this.redisTemplate = redisTemplate;
 		this.stompRedistemplate = stompRedistemplate;
 	}

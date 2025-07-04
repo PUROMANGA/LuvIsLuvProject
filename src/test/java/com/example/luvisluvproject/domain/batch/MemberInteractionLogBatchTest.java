@@ -37,7 +37,7 @@ public class MemberInteractionLogBatchTest {
 	private Job memberInteractionLogSaveJob;
 
 	@Autowired
-	private RedisTemplate<String, String> stringStringRedisTemplate;
+	private RedisTemplate<String, String> stringcustomStringRedisTemplate;
 
 	@Autowired
 	private MemberInteractionLogRepository memberInteractionLogRepository;

@@ -32,7 +32,7 @@ public class StompHandler implements ChannelInterceptor {
 	private final JwtUtil jwtUtil;
 
 	public StompHandler(RedisTemplate<String, Object> redisTemplate,
-		@Qualifier("stringRedisTemplate")RedisTemplate<String, String> stompRedistemplate,
+		@Qualifier("customStringRedisTemplate")RedisTemplate<String, String> stompRedistemplate,
 		JwtUtil jwtUtil) {
 		this.redisTemplate = redisTemplate;
 		this.stompRedistemplate = stompRedistemplate;

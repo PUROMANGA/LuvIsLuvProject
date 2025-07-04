@@ -1,14 +1,12 @@
 package com.example.luvisluvproject.domain.memberInteractionLog.common;
 
-import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.List;
 
 import org.springframework.stereotype.Component;
 
 import com.example.luvisluvproject.domain.memberInteractionLog.dto.MemberInteractionLogDto;
 import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberInteractionLog;
 import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberTagLikeCount;
-import com.example.luvisluvproject.domain.memberInteractionLog.repository.MemberTagLikeCountRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,17 +14,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberInteractionLogDtoFactory {
 
-	private final MemberTagLikeCountRepository memberTagLikeCountRepository;
-
-	public MemberInteractionLogDto memberInteractionLogDtoOf(MemberInteractionLog memberInteractionLog) {
-
-		Map<String, Double> tags = memberTagLikeCountRepository.findAllByMemberId(
-			memberInteractionLog.getMemberId()).stream().collect(Collectors.toMap(MemberTagLikeCount::getTagName, MemberTagLikeCount::getTagCount));
+	public MemberInteractionLogDto memberInteractionLogDtoOf(MemberInteractionLog memberInteractionLog, List<MemberTagLikeCount> memberTagLikeCount) {
 
 		Double matchScore = matchScoreFunction(memberInteractionLog.getMatchReceivedCount(),
 			memberInteractionLog.getMatchRequestCount());
 
-		return new MemberInteractionLogDto(memberInteractionLog, matchScore, tags);
+		return new MemberInteractionLogDto(memberInteractionLog, matchScore, memberTagLikeCount);
 	}
 
 	public Double matchScoreFunction(Double received, Double requested) {

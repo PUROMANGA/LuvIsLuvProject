@@ -34,7 +34,7 @@ public class AuthService {
 	private final AuthServiceHelper authServiceHelper;
 
 	public AuthService(MemberRepository memberRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil,
-		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> redisTemplate,
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> redisTemplate,
 		AuthServiceHelper authServiceHelper) {
 		this.memberRepository = memberRepository;
 		this.passwordEncoder = passwordEncoder;

@@ -17,7 +17,7 @@ public class ForbiddenRedis implements CommandLineRunner {
 	private final RedisTemplate<String, String> redisTemplate;
 
 	//토큰템플릿이라 적혀있지만 스트링-스트링 구조의 레디스 템플릿임
-	public ForbiddenRedis(ForbiddenWordRepository forbiddenWordRepository, @Qualifier("stringRedisTemplate")RedisTemplate<String, String> redisTemplate) {
+	public ForbiddenRedis(ForbiddenWordRepository forbiddenWordRepository, @Qualifier("customStringRedisTemplate")RedisTemplate<String, String> redisTemplate) {
 		this.forbiddenWordRepository = forbiddenWordRepository;
 		this.redisTemplate = redisTemplate;
 	}
@@ -38,5 +38,8 @@ public class ForbiddenRedis implements CommandLineRunner {
 				redisTemplate.opsForSet().add("banwords", batch.toArray(new String[0]));
 			}
 		}
+
+		Set<String> banwords = redisTemplate.opsForSet().members("banwords");
+		log.info("금칙어 {}개가 Redis에 로드되었습니다.", banwords.size());
 	}
 }

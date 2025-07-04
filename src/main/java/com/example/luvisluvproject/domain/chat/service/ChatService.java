@@ -37,7 +37,7 @@ public class ChatService {
 	private final MessageRepository messageRepository;
 	private final MemberChatRoomRepository memberChatRoomRepository;
 	private final RedisPublisher redisPublisher;
-	private final RedisTemplate<String, String> stringRedisTemplate;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
 	private final RedisTemplate<String, Object> redisTemplate;
 	private final ApplicationEventPublisher applicationEventPublisher;
 	private final ChatHandler chatHandler;
@@ -45,7 +45,7 @@ public class ChatService {
 	public ChatService(SimpMessagingTemplate simpMessagingTemplate, ChatRoomRepository chatRoomRepository,
 		MemberRepository memberRepository, MessageRepository messageRepository,
 		MemberChatRoomRepository memberChatRoomRepository, RedisPublisher redisPublisher,
-		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> stringRedisTemplate,
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> customStringRedisTemplate,
 		RedisTemplate<String, Object> redisTemplate,
 		ApplicationEventPublisher applicationEventPublisher, ChatHandler chatHandler) {
 		this.simpMessagingTemplate = simpMessagingTemplate;
@@ -54,7 +54,7 @@ public class ChatService {
 		this.messageRepository = messageRepository;
 		this.memberChatRoomRepository = memberChatRoomRepository;
 		this.redisPublisher = redisPublisher;
-		this.stringRedisTemplate = stringRedisTemplate;
+		this.customStringRedisTemplate = customStringRedisTemplate;
 		this.redisTemplate = redisTemplate;
 		this.applicationEventPublisher = applicationEventPublisher;
 		this.chatHandler = chatHandler;
@@ -76,7 +76,7 @@ public class ChatService {
 		Message message = new Message(messageDto);
 		messageRepository.save(message);
 
-		String webSocketSessionId = stringRedisTemplate.opsForValue().get(email);
+		String webSocketSessionId = customStringRedisTemplate.opsForValue().get(email);
 
 		if (redisTemplate.opsForSet().members(webSocketSessionId) == null) {
 			applicationEventPublisher.publishEvent(new NotifyChatEvent(this, me, opponent));

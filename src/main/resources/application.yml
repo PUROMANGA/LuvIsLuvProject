@@ -43,6 +43,15 @@ spring:
     mongodb:
       uri: mongodb://localhost:27017/luvisluv
 
+  ai:
+    openai:
+      api-key: ${OPEN_AI_KEY}
+      chat:
+        options:
+          model: gpt-3.5-turbo
+          temperature: 0.7
+          max-tokens: 500
+
 jwt:
   secretKey: HK6CKboFMIKurRejEK46GaVX9ev+F4v1tagcz64wOvlE/YJWy0KGu/87w4zQizP39muqL9UcYqdYH6Y268A+IQ==
   accessToken:

@@ -20,7 +20,6 @@ import lombok.RequiredArgsConstructor;
 public class MemberTagLikeCountWriter implements ItemWriter<MemberTagLikeCount> {
 
 	private final MemberTagLikeCountRepository memberTagLikeCountRepository;
-	private final ApplicationEventPublisher applicationEventPublisher;
 
 	@Override
 	public void write(Chunk<? extends MemberTagLikeCount> chunk) throws Exception {

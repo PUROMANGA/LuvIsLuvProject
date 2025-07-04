@@ -23,14 +23,31 @@ import lombok.RequiredArgsConstructor;
 public class MatchHandler {
 
 	private final MemberRepository memberRepository;
+	private final MemberTagRepository memberTagRepository;
 
-	public Match mapMatchForRedis(Set<Object> matchCache, AcceptMatchDto acceptMatchDto, Long senderId) {
-		return matchCache.stream()
-			.map(obj -> (Match)obj)
-			.peek(match -> match.updateMatchingStatus(acceptMatchDto))
-			.filter(match -> match.getSenderId().equals(senderId))
-			.findFirst()
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.MATCH_NOT_FOUND));
+	@Transactional
+	public List<ResponseMatchMemberDto> getMatchMemberDto(String email, List<ResponseMatchMemberDto> matchMemberDtoList) {
+		System.out.println("====================================================");
+		System.out.println("🧮 [getMatchMemberDto] 2차 추천 로직 실행 시작");
+
+		List<ResponseMatchMemberDto> forReturnResponseMatchMemberDto = new ArrayList<>();
+
+		List<Long> ids = matchMemberDtoList.stream().map(ResponseMatchMemberDto::getId).toList();
+		List<String> matchMember = memberRepository.findAllById(ids).stream().map(Member::getEmail).toList();
+
+		System.out.println("📨 각 사용자에 대해 2차 추천 수행 중...");
+		System.out.println("====================================================");
+
+		for (String matchMemberEmail : matchMember) {
+			forReturnResponseMatchMemberDto.addAll(
+				memberTagRepository.findCoRecommendedMembersByMeEmailAndEmail(email, matchMemberEmail)
+			);
+		}
+
+		System.out.println("✅ [getMatchMemberDto] 2차 추천 완료. 총 추천 수: " + forReturnResponseMatchMemberDto.size());
+		System.out.println("====================================================");
+
+		return forReturnResponseMatchMemberDto;
 	}
 
 	public List<MatchResponseDto> matchResponseDtoList(Set<Object> matchCache) {

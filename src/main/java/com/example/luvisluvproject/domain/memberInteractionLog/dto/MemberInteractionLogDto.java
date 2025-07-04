@@ -1,9 +1,12 @@
 package com.example.luvisluvproject.domain.memberInteractionLog.dto;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberInteractionLog;
+import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberTagLikeCount;
 
 import lombok.Getter;
 
@@ -26,9 +29,11 @@ public class MemberInteractionLogDto {
 	//메세지를 보낸 횟수
 	private final Double messageCount;
 
-	private final Map<String, Double> tags;
+	private final List<MemberTagLikeCount> tags;
 
-	public MemberInteractionLogDto(MemberInteractionLog memberInteractionLog, Double matchScore, Map<String, Double> tags) {
+	private final LocalDateTime creatTime;
+
+	public MemberInteractionLogDto(MemberInteractionLog memberInteractionLog, Double matchScore, List<MemberTagLikeCount> tags) {
 		this.memberId = memberInteractionLog.getMemberId();
 		this.getMatchCount = memberInteractionLog.getGetMatchCount();
 		this.matchReceivedCount = memberInteractionLog.getMatchReceivedCount();
@@ -36,5 +41,6 @@ public class MemberInteractionLogDto {
 		this.messageCount = memberInteractionLog.getMessageCount();
 		this.matchScore = matchScore;
 		this.tags = tags;
+		this.creatTime = memberInteractionLog.getCreatTime();
 	}
 }

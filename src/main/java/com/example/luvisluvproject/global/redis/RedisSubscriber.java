@@ -24,7 +24,6 @@ public class RedisSubscriber {
 		try {
 			MessageDto messageDto = objectMapper.readValue(publishMessage, MessageDto.class);
 			messagingTemplate.convertAndSend("/sub/chats/" + messageDto.getRoomId(), messageDto);
-			System.out.println("Redis 받은 메시지: " + messageDto.getContent());
 		} catch (Exception e) {
 			System.out.println("RedisSubscriber 메시지 처리 실패: " + e.getMessage());
 		}

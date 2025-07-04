@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor
 @Getter
-@Table(name = "MemberInteractionLogs")
-public class MemberInteractionLog {
+@Table(name = "member_interaction_logs")
+public class MemberInteractionLog extends BaseEntity {
 
 	@Id
 	private Long memberId;

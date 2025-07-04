@@ -70,8 +70,14 @@ public class NotifyEventListener {
 	@EventListener
 	@Transactional
 	public void handlerNotifyLogEventListener(NotifyLogEvent notifyLogEvent) {
-		Member me = memberRepository.findById(notifyLogEvent.getMemberId()).orElseThrow(() -> new CustomRuntimeException(
-			ExceptionCode.USER_CANT_FIND));
+		System.out.println("====================================================");
+		System.out.println("📡 [이벤트 수신] LOG 알림 이벤트 수신");
+
+		Long memberId = notifyLogEvent.getMemberId();
+		Member me = memberRepository.findById(memberId)
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		System.out.println("📨 관리자 → 사용자 알림: " + me.getId());
 
 		NotifyDto notifyDto = notifyFactory.adminToMemberNotifyDto(me, NotifyCategory.LOG, false);
 		Notify notify = notifyFactory.adminToMemberNotify(notifyDto, me);

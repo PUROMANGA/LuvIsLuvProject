@@ -69,7 +69,7 @@ public class BlockController {
 	public ResponseEntity<ApiResponse<Slice<BlockUserDto>>> getBlockedUsers(
 		@AuthenticationPrincipal AuthUser member,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {
-		ApiResponse<Slice<BlockUserDto>> apiResponse = ApiResponse.of(SuccessCode.UNBLOCK_USER_SUCCESS,
+		ApiResponse<Slice<BlockUserDto>> apiResponse = ApiResponse.of(SuccessCode.GET_BLOCKED_USERS_SUCCESS,
 			blockService.getBlockedUsers(member.getUsername(), pageable));
 		return ResponseEntity.ok(apiResponse);
 	}

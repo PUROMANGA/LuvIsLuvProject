@@ -12,7 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Component;
 
-import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberInteractionLog;
+import com.example.luvisluvproject.domain.memberInteractionLog.common.MemberTagLikeCountFactory;
 import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberTagLikeCount;
 
 import jakarta.annotation.PostConstruct;
@@ -22,7 +22,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberTagLikeCountReader implements ItemReader<MemberTagLikeCount> {
 
-	private final RedisTemplate<String, String> stringRedisTemplate;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
+	private final MemberTagLikeCountFactory memberTagLikeCountFactory;
+
 	Map<String, Double> savedTupleForTag = new HashMap<>();
 	List<MemberTagLikeCount> memberInteractionLogList = new ArrayList<>();
 
@@ -30,11 +32,11 @@ public class MemberTagLikeCountReader implements ItemReader<MemberTagLikeCount> 
 
 	@PostConstruct
 	public void setUp() {
-		Set<String> membersId = stringRedisTemplate.opsForSet().members("MemberId");
+		Set<String> membersId = customStringRedisTemplate.opsForSet().members("MemberId");
 
 		for (String id : Objects.requireNonNull(membersId)) {
 			while (true) {
-				ZSetOperations.TypedTuple<String> tuple = stringRedisTemplate.opsForZSet()
+				ZSetOperations.TypedTuple<String> tuple = customStringRedisTemplate.opsForZSet()
 					.popMax(id.toString() + "forTag");
 				if (tuple == null) {
 					break;
@@ -42,7 +44,10 @@ public class MemberTagLikeCountReader implements ItemReader<MemberTagLikeCount> 
 				savedTupleForTag.put(tuple.getValue(), tuple.getScore());
 			}
 
-			memberInteractionLogList.add(new MemberTagLikeCount(Long.parseLong(id), savedTupleForTag));
+			//한 개인의
+			List<MemberTagLikeCount> memberTagLikeCountList = memberTagLikeCountFactory.createMemberTagLikeCount(
+				savedTupleForTag);
+			memberInteractionLogList.addAll(memberTagLikeCountList);
 		}
 	}
 

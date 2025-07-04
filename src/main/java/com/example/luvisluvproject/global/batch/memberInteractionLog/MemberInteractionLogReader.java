@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MemberInteractionLogReader implements ItemReader<MemberInteractionLog> {
 
-	private final RedisTemplate<String, String> stringRedisTemplate;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
 	Map<String, Double> savedTuple = new HashMap<>();
 	List<MemberInteractionLog> memberInteractionLogList = new ArrayList<>();
 
@@ -30,11 +30,11 @@ public class MemberInteractionLogReader implements ItemReader<MemberInteractionL
 
 	@PostConstruct
 	public void setUp() {
-		Set<String> membersId = stringRedisTemplate.opsForSet().members("MemberId");
+		Set<String> membersId = customStringRedisTemplate.opsForSet().members("MemberId");
 
 		for (String id : Objects.requireNonNull(membersId)) {
 			while (true) {
-				ZSetOperations.TypedTuple<String> tuple = stringRedisTemplate.opsForZSet().popMax(id.toString());
+				ZSetOperations.TypedTuple<String> tuple = customStringRedisTemplate.opsForZSet().popMax(id.toString());
 				if (tuple == null) {
 					break;
 				}

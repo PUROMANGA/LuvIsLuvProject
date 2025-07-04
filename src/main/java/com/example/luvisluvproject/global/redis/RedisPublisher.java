@@ -20,26 +20,24 @@ public class RedisPublisher {
 	private final ChannelTopic channelTopic;
 	private final ChannelTopic notifyChannelTopic;
 	private final RedisTemplate<String, Object> redisTemplate;
-	private final RedisTemplate<String, String> stringRedisTemplate;
+	private final RedisTemplate<String, String> customStringRedisTemplate;
 	private final MemberRepository memberRepository;
-	// private final MemberInteractionLogRepository memberInteractionLogRepository;
 
 	public RedisPublisher(ChannelTopic channelTopic, ChannelTopic notifyChannelTopic,
 		RedisTemplate<String, Object> redisTemplate,
-		@Qualifier("stringRedisTemplate") RedisTemplate<String, String> stringRedisTemplate,
-		MemberRepository memberRepository, MemberInteractionLogRepository memberInteractionLogRepository) {
+		@Qualifier("customStringRedisTemplate") RedisTemplate<String, String> customStringRedisTemplate,
+		MemberRepository memberRepository) {
 		this.channelTopic = channelTopic;
 		this.notifyChannelTopic = notifyChannelTopic;
 		this.redisTemplate = redisTemplate;
-		this.stringRedisTemplate = stringRedisTemplate;
+		this.customStringRedisTemplate = customStringRedisTemplate;
 		this.memberRepository = memberRepository;
-		this.memberInteractionLogRepository = memberInteractionLogRepository;
 	}
 
 	public void publish(MessageDto messageDto) {
 		Member member = memberRepository.findById(messageDto.getUserId()).orElseThrow(() -> new CustomRuntimeException(
 			ExceptionCode.USER_CANT_FIND));
-		String webSocketSessionId = stringRedisTemplate.opsForValue().get(member.getEmail());
+		String webSocketSessionId = customStringRedisTemplate.opsForValue().get(member.getEmail());
 		String value = "유저 : " + member.getName() + " : " + "방 아이디 : " + messageDto.getRoomId();
 
 		if (redisTemplate.opsForSet().members(webSocketSessionId) == null) {
@@ -49,7 +47,7 @@ public class RedisPublisher {
 		}
 
 		redisTemplate.convertAndSend(channelTopic.getTopic(), messageDto);
-		stringRedisTemplate.opsForZSet().incrementScore(member.getId().toString(), "MessageCount", 1);
+		customStringRedisTemplate.opsForZSet().incrementScore(member.getId().toString(), "MessageCount", 1);
 	}
 
 	public void publishNotify(NotifyDto notifyDto) {

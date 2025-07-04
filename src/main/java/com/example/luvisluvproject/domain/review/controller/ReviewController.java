@@ -65,7 +65,7 @@ public class ReviewController {
 	/**
 	 * 특정 가게에 작성된 모든 리뷰 목록을 페이징 및 정렬하여 조회합니다.
 	 */
-	@GetMapping("/reviews")
+	@GetMapping
 	public ResponseEntity<ApiResponse<Slice<ReviewListResponseDto>>> getAllReviewsByStore(
 		@PathVariable Long storeId,
 		@PageableDefault(size = 10, sort = "creatTime", direction = DESC) Pageable pageable) {

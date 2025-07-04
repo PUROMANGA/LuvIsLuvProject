@@ -28,12 +28,12 @@ public class MemberTagDeleteEventListener {
 
 		Set<MemberTag> tagSet = memberTagDeleteEvent.getDeleteTags().stream().map(t -> new MemberTag(memberId, t.getName(), t.getCategory())).collect(
 			Collectors.toSet());
-
-		Set<String> tagNames = tagSet.stream().map(MemberTag::getTagName).collect(Collectors.toSet());
-
-		if(memberTagRepository.existsByMemberIdAndTagNameIn(memberId, tagNames)) {
-			throw new CustomRuntimeException(ExceptionCode.MEMBER_TAG_ALREADY_EXISTS);
-		}
+		//
+		// Set<String> tagNames = tagSet.stream().map(MemberTag::getTagName).collect(Collectors.toSet());
+		//
+		// if(memberTagRepository.existsByMemberIdAndTagNameIn(memberId, tagNames)) {
+		// 	throw new CustomRuntimeException(ExceptionCode.MEMBER_TAG_ALREADY_EXISTS);
+		// }
 
 		memberTagRepository.deleteAll(tagSet);
 
