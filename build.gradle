@@ -108,16 +108,3 @@ dependencies {
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-test {
-    environment "KAKAO_API_KEY", "f4dd8f03d858d6575d9fc68a6756e349"
-    environment "MYSQL_DATABASE", "luvisluvprojectdb"
-    environment "MYSQL_PASSWORD", "1111"
-    environment "MYSQL_USERNAME", "root"
-    environment "REDIS_PASSWORD", "1234"
-
-    systemProperty "spring.datasource.name", "luvisluvprojectdb"
-    systemProperty "spring.datasource.username", "root"
-    systemProperty "spring.datasource.password", "1111"
-    systemProperty "spring.redis.password", "1234"
-}
