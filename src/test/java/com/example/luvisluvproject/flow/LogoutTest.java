@@ -1,4 +1,4 @@
-package com.example.luvisluvproject.domain.auth;
+package com.example.luvisluvproject.flow;
 
 import static org.assertj.core.api.AssertionsForClassTypes.*;
 
@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -34,6 +35,7 @@ public class LogoutTest {
 	private JwtUtil jwtUtil;
 
 	@Autowired
+	@Qualifier("customStringRedisTemplate")
 	private RedisTemplate<String, String> tokenRedisTemplate;
 
 	@Autowired
@@ -63,11 +65,11 @@ public class LogoutTest {
 
 	}
 
-	@AfterEach
-	void cleanup() {
-		memberRepository.deleteAll();
-		tokenRedisTemplate.delete(loginResponseDto.getAccessToken().substring(7));
-	}
+	// @AfterEach
+	// void cleanup() {
+	// 	memberRepository.deleteAll();
+	// 	tokenRedisTemplate.delete(loginResponseDto.getAccessToken().substring(7));
+	// }
 
 	@Nested
 	@DisplayName("토큰 테스트")
@@ -95,7 +97,6 @@ public class LogoutTest {
 			String refreshToken = loginResponseDto.getRefreshToken().substring(7);
 			Thread.sleep(1100);
 			String newAccessToken = authService.refreshService(refreshToken, "test@naver.com");
-
 			assertThat(newAccessToken.substring(7)).isNotEqualTo(accessToken);
 		}
 	}

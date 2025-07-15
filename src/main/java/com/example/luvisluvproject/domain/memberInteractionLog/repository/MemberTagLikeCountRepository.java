@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.Query;
 import com.example.luvisluvproject.domain.memberInteractionLog.entity.MemberTagLikeCount;
 
 public interface MemberTagLikeCountRepository extends JpaRepository<MemberTagLikeCount, Long> {
-	List<MemberTagLikeCount> findAllByMemberId(Long memberId);
 	@Query(value = "select * "
 		+ "from member_tag_like_counts m "
 		+ "where m.member_id = :memberId "

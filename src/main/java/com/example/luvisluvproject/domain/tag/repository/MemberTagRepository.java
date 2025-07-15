@@ -1,6 +1,7 @@
 package com.example.luvisluvproject.domain.tag.repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -16,5 +17,5 @@ public interface MemberTagRepository extends JpaRepository<MemberTag, Long>, Cus
 
 	boolean existsByMemberIdAndTagNameIn(Long memberId, Set<String> tagName);
 
-	Optional<MemberTag> findByMemberIdAndTagName(Long memberId, String tagName);
+	List<MemberTag> findByMemberIdAndTagIdIn(Long memberId, List<Long> tagIds);
 }

@@ -1,9 +1,9 @@
 package com.example.luvisluvproject.domain.member.repository;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -17,9 +17,7 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
 	boolean existsByName(String name);
 
-	@Query("SELECT m.tagCount FROM Member m WHERE m.id = :id")
-	int findTagCountById(Long id);
-
-	List<Member> findAllByNameIn(Set<String> matchMemberName);
+	@Query("select m from Member m where m.reportCount > 0 and m.status = false ")
+	Page<Member> findAllReportedInactiveMembers(Pageable pageable);
 
 }

@@ -9,7 +9,6 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import lombok.AllArgsConstructor;
@@ -23,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Table(
 	name = "member_tags",
 	uniqueConstraints = {
-		@UniqueConstraint(columnNames = {"member_id", "tag_name"})
+		@UniqueConstraint(columnNames = {"member_id", "tag_id"})
 	}
 )
 public class MemberTag {
@@ -34,14 +33,25 @@ public class MemberTag {
 
 	private Long memberId;
 
+	private String memberName;
+
+	private Long tagId;
+
 	private String tagName;
 
 	@Enumerated(EnumType.STRING)
 	private TagCategory category;
 
-	public MemberTag(Long memberId, String tagName, TagCategory category) {
+	public MemberTag(Member member, Tag tag) {
+		this.memberId = member.getId();
+		this.memberName = member.getName();
+		this.tagId = tag.getId();
+		this.tagName = tag.getName();
+		this.category = tag.getCategory();
+	}
+
+	public MemberTag(Long memberId, Long tagId) {
 		this.memberId = memberId;
-		this.tagName = tagName;
-		this.category = category;
+		this.tagId = tagId;
 	}
 }

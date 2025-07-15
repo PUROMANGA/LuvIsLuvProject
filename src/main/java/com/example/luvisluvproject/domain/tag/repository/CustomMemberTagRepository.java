@@ -6,6 +6,6 @@ import com.example.luvisluvproject.domain.match.dto.ResponseMatchMemberDto;
 
 public interface CustomMemberTagRepository {
 
-	List<ResponseMatchMemberDto> findResponseMatchMemberDtoFindByEmail(String email);
-	List<ResponseMatchMemberDto> findCoRecommendedMembersByMeEmailAndEmail(String meEmail, String email);
+	List<ResponseMatchMemberDto> findResponseMatchMemberDtoFindById(Long id);
+	List<ResponseMatchMemberDto> findRecommendedMembersByMeIdAndMemberIds(Long meId, List<Long> ids);
 }

@@ -1,18 +1,20 @@
 package com.example.luvisluvproject.domain.tag.event;
 
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.luvisluvproject.domain.member.entity.Member;
 import com.example.luvisluvproject.domain.member.repository.MemberRepository;
 import com.example.luvisluvproject.domain.tag.entity.MemberTag;
+import com.example.luvisluvproject.domain.tag.entity.Tag;
 import com.example.luvisluvproject.domain.tag.repository.MemberTagRepository;
+import com.example.luvisluvproject.domain.tag.repository.TagJpaRepository;
 import com.example.luvisluvproject.global.error.CustomRuntimeException;
 import com.example.luvisluvproject.global.error.ExceptionCode;
 
@@ -24,35 +26,32 @@ public class MemberTagCreateEventListener {
 
 	private final MemberTagRepository memberTagRepository;
 	private final MemberRepository memberRepository;
+	private final TagJpaRepository tagJpaRepository;
 
+	@Async
 	@EventListener
 	@Transactional
 	public void handlerMemberTagCreate(MemberTagCreateEvent memberTagCreateEvent) {
-		Long memberId = memberTagCreateEvent.getMemberId();
 
-		Set<MemberTag> tagSet = memberTagCreateEvent.getSavedTags()
+		Member member = memberRepository.findById(memberTagCreateEvent.getMemberId())
+			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
+
+		Set<String> tagNameSet = memberTagCreateEvent.getSavedTags()
 			.stream()
-			.map(t -> new MemberTag(memberId, t.getName(), t.getCategory()))
+			.map(Tag::getName)
 			.collect(
 				Collectors.toSet());
 
-		Iterator<MemberTag> iterator = tagSet.iterator();
+		Set<Tag> tags = tagJpaRepository.findByNameIn(tagNameSet);
 
-		while (iterator.hasNext()) {
-			MemberTag memberTag = iterator.next();
-			Optional<MemberTag> foundMemberTag = memberTagRepository.findByMemberIdAndTagName(memberId, memberTag.getTagName());
+		Set<MemberTag> savedMemberTag = new HashSet<>();
 
-			if (foundMemberTag.isPresent()) {
-				iterator.remove(); // 안전하게 삭제
-			}
+		for (Tag tag : tags) {
+			MemberTag memberTag = new MemberTag(member, tag);
+			savedMemberTag.add(memberTag);
 		}
 
-		memberTagRepository.saveAll(tagSet);
-
-		Member member = memberRepository.findById(memberId)
-			.orElseThrow(() -> new CustomRuntimeException(ExceptionCode.USER_CANT_FIND));
-		member.plusTagCount(tagSet.size());
-		memberRepository.save(member);
+		memberTagRepository.saveAll(savedMemberTag);
 	}
 }
 

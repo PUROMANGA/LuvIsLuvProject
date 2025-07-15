@@ -35,13 +35,6 @@ public class Match extends BaseEntity {
 		this.receiverId = receiverId;
 	}
 
-	public Match(Long id, Long senderId, Long receiverId, MatchStatus matchStatus) {
-		this.id = id;
-		this.senderId = senderId;
-		this.receiverId = receiverId;
-		this.matchStatus = matchStatus;
-	}
-
 	public void updateMatchingStatus(AcceptMatchDto acceptMatchDto) {
 		this.matchStatus = acceptMatchDto.getMatchStatus();
 	}
